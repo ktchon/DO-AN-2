@@ -58,7 +58,20 @@ class ProductAttributes extends StatelessWidget {
                             children: [
                               BrandTitleText(title: 'Trạng thái: '),
                               SizedBox(width: 2),
-                              Text(controller.variationStockStatus.value),
+                              Obx(() {
+                                final status = controller.variationStockStatus.value;
+                                return Text(
+                                  status.isEmpty ? 'Chưa chọn mẫu' : status,
+                                  style: TextStyle(
+                                    color: status.contains('Còn hàng')
+                                        ? Colors.green
+                                        : status.contains('Hết hàng')
+                                        ? Colors.red
+                                        : Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              }),
                             ],
                           ),
                         ],

@@ -33,6 +33,8 @@ class VariationController extends GetxController {
 
     // Gán biến thể đã chọn
     this.selectedVariation.value = selectedVariation;
+
+    getProductVariationStockStatus();
   }
 
   /// -- Kiểm tra xem các thuộc tính đã chọn có khớp với thuộc tính của bất kỳ biến thể nào không

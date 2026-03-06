@@ -1,4 +1,5 @@
-import 'package:firebase_app_check/firebase_app_check.dart';
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -10,23 +11,34 @@ import 'package:shop_app/data/repositories/authentication/authentication_reposit
 
 import 'package:shop_app/firebase_options.dart';
 import 'package:shop_app/utils/app.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 Future<void> main() async {
   GoogleFonts.config.allowRuntimeFetching = false;
+
   // Liên kết Widget
   final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
   // GetX Local Storage
   await GetStorage.init();
-  // Màn hình chờ hiển thị cho đến khi các mục khác laod xong
+
+  // Màn hình chờ hiển thị cho đến khi các mục khác load xong
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
   // Khởi tạo Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  ).then((_) => Get.put(AuthenticationRepository()));
-  // Activate App Check
-  await FirebaseAppCheck.instance.activate(
-    // Cho Android: dùng debug provider khi dev/emulator
-    androidProvider: AndroidProvider.debug, // <-- Đây là key để emulator hoạt động
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform).then((_) {
+    // Xác định host cho emulator (rất quan trọng!)
+    final String emulatorHost = Platform.isAndroid ? '10.0.2.2' : 'localhost';
+    // Kết nối với Firebase Emulator
+    FirebaseFirestore.instance.useFirestoreEmulator(emulatorHost, 8080);
+    FirebaseAuth.instance.useAuthEmulator(emulatorHost, 9099);
+    FirebaseStorage.instance.useStorageEmulator(emulatorHost, 9199);
+
+    // Đăng ký repository
+    Get.put(AuthenticationRepository());
+  });
+
   runApp(const MyApp());
 }

@@ -8,6 +8,7 @@ import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
 import 'package:shop_app/utils/constants/sizes.dart';
+import 'package:shop_app/utils/helpers/emulator_helper.dart';
 
 class ImagesController extends GetxController {
   static ImagesController get instance => Get.find();
@@ -41,6 +42,7 @@ class ImagesController extends GetxController {
 
   /// -- Hiển thị Popup ảnh phóng to (toàn màn hình)
   void showEnlargedImage(String image) {
+    final fixedImageUrl = fixEmulatorImageUrl(image);
     Get.to(
       fullscreenDialog: true,
       transition: Transition.zoom, // (có thể bạn chưa viết, nhưng thường dùng zoom cho ảnh)
@@ -56,7 +58,7 @@ class ImagesController extends GetxController {
                 vertical: TSizes.defaultSpace * 2,
                 horizontal: TSizes.defaultSpace,
               ),
-              child: CachedNetworkImage(imageUrl: image),
+              child: CachedNetworkImage(imageUrl: fixedImageUrl),
             ), // Padding
             /// Khoảng trống giữa ảnh và nút đóng
             const SizedBox(height: TSizes.spaceBtwSections),

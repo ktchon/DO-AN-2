@@ -13,6 +13,7 @@ import 'package:shop_app/features/shop/controllers/products/product_controller.d
 import 'package:shop_app/features/shop/models/product_model.dart';
 import 'package:shop_app/features/shop/screens/product-details/product_detail.dart';
 import 'package:shop_app/utils/constants/enums.dart';
+import 'package:shop_app/utils/helpers/emulator_helper.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/constants/sizes.dart';
@@ -25,6 +26,7 @@ class ProductCardVartical extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = ProductController.instance;
     final salePercentage = controller.calculateSalePercentage(product.price, product.salePrice);
+    final fixedImageUrl = fixEmulatorImageUrl(product.thumbnail);
     final dark = THelperFunctions.isDarkMode(context);
     return GestureDetector(
       onTap: () => Get.to(ProductDetail(product: product)),
@@ -51,7 +53,7 @@ class ProductCardVartical extends StatelessWidget {
                   // Thumbnail
                   Center(
                     child: RoundedImage(
-                      imageUrl: product.thumbnail,
+                      imageUrl: fixedImageUrl,
                       applyImageRadius: true,
                       isNetworkImage: true,
                     ),

@@ -6,6 +6,7 @@ import 'package:shop_app/common/images/banner_images.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/circular_container.dart';
 import 'package:shop_app/common/widgets/shimmer/shimmer.dart';
 import 'package:shop_app/features/shop/controllers/banner_controller.dart';
+import 'package:shop_app/utils/helpers/emulator_helper.dart';
 
 class PromoSlider extends StatelessWidget {
   const PromoSlider({super.key});
@@ -26,18 +27,18 @@ class PromoSlider extends StatelessWidget {
                 viewportFraction: 1,
                 onPageChanged: (index, _) => controller.carousalCurrentIndex.value = index,
               ),
-              items: controller.banners
-                  .map(
-                    (banner) => BannerImage(
-                      fit: BoxFit.cover,
-                      imageUrl: banner.imageUrl,
-                      backgroundColor: Colors.white,
-                      borderRadius: 16,
-                      isNetworkImage: true,
-                      onPressed: () => Get.toNamed(banner.targetScreen),
-                    ),
-                  )
-                  .toList(),
+              items: controller.banners.map((banner) {
+                // Fix URL trước khi truyền vào BannerImage
+                final fixedImageUrl = fixEmulatorImageUrl(banner.imageUrl);
+                return BannerImage(
+                  fit: BoxFit.cover,
+                  imageUrl: fixedImageUrl,
+                  backgroundColor: Colors.white,
+                  borderRadius: 16,
+                  isNetworkImage: true,
+                  onPressed: () => Get.toNamed(banner.targetScreen),
+                );
+              }).toList(),
             ),
             SizedBox(height: 8),
             Center(

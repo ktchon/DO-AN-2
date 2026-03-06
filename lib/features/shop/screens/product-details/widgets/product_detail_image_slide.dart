@@ -10,6 +10,7 @@ import 'package:shop_app/common/widgets/custom_shapes/curved_edges/curved_edges_
 import 'package:shop_app/common/widgets/icons/circular_icon.dart';
 import 'package:shop_app/features/shop/controllers/products/image_controller.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
+import 'package:shop_app/utils/helpers/emulator_helper.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 
@@ -46,13 +47,14 @@ class ProductImageSilder extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 65, left: 50, right: 50, bottom: 50),
                         child: Obx(() {
                           final image = controller.selectedProductImage.value;
+                          final fixedImageUrl = fixEmulatorImageUrl(image);
                           return GestureDetector(
                             onTap: () => controller.showEnlargedImage(image),
                             child: CachedNetworkImage(
                               height: 250,
                               width: 200,
                               fit: BoxFit.contain,
-                              imageUrl: image,
+                              imageUrl: fixedImageUrl,
                               progressIndicatorBuilder: (_, __, downloadProgress) =>
                                   CircularProgressIndicator(
                                     value: downloadProgress.progress,
@@ -99,13 +101,14 @@ class ProductImageSilder extends StatelessWidget {
                   physics: AlwaysScrollableScrollPhysics(),
                   itemBuilder: (_, index) => Obx(() {
                     final imageSelected = controller.selectedProductImage.value == images[index];
+                    final fixedImageUrl = fixEmulatorImageUrl(images[index]);
                     return RoundedImage(
                       isNetworkImage: true,
                       padding: EdgeInsets.all(0),
                       width: 60,
                       backgroundColor: isDark ? Colors.black : Colors.white,
                       border: Border.all(color: imageSelected ? TColors.primary : Colors.black),
-                      imageUrl: images[index],
+                      imageUrl: fixedImageUrl,
                       onPressed: () => controller.selectedProductImage.value = images[index],
                     );
                   }),

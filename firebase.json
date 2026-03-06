@@ -1,1 +1,66 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"shopapp-e5f12","appId":"1:144205958158:android:e080438ee1ff7d1a98805f","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"shopapp-e5f12","appId":"1:144205958158:ios:0172a414677c526298805f","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"shopapp-e5f12","appId":"1:144205958158:ios:0172a414677c526298805f","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"shopapp-e5f12","configurations":{"android":"1:144205958158:android:e080438ee1ff7d1a98805f","ios":"1:144205958158:ios:0172a414677c526298805f","macos":"1:144205958158:ios:0172a414677c526298805f","web":"1:144205958158:web:c1b8048c4e3187e698805f","windows":"1:144205958158:web:3b8a66241685652698805f"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "shopapp-e5f12",
+          "appId": "1:144205958158:android:e080438ee1ff7d1a98805f",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "shopapp-e5f12",
+          "appId": "1:144205958158:ios:0172a414677c526298805f",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "shopapp-e5f12",
+          "appId": "1:144205958158:ios:0172a414677c526298805f",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "shopapp-e5f12",
+          "configurations": {
+            "android": "1:144205958158:android:e080438ee1ff7d1a98805f",
+            "ios": "1:144205958158:ios:0172a414677c526298805f",
+            "macos": "1:144205958158:ios:0172a414677c526298805f",
+            "web": "1:144205958158:web:c1b8048c4e3187e698805f",
+            "windows": "1:144205958158:web:3b8a66241685652698805f"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "singleProjectMode": true,
+    "auth": {
+      "host": "0.0.0.0",
+      "port": 9099
+    },
+    "firestore": {
+      "host": "0.0.0.0",
+      "port": 8080
+    },
+    "database": {
+      "host": "0.0.0.0",
+      "port": 9000
+    },
+    "storage": {
+      "host": "0.0.0.0",
+      "port": 9199,
+      "rules": "storage.rules"
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    }
+  }
+}
+

@@ -7,6 +7,7 @@ import 'package:shop_app/common/widgets/image_text_widget/vertical_image_text.da
 import 'package:shop_app/common/widgets/shimmer/category_shimmer.dart';
 import 'package:shop_app/features/shop/controllers/category_controller.dart';
 import 'package:shop_app/features/shop/screens/sub_category/sub_categoryes.dart';
+import 'package:shop_app/utils/helpers/emulator_helper.dart';
 
 class HomeCategories extends StatelessWidget {
   const HomeCategories({super.key});
@@ -32,8 +33,10 @@ class HomeCategories extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           itemBuilder: (_, index) {
             final category = controllerCategory.featuredCategories[index];
+            // Fix URL ảnh category trước khi truyền vào VerticalImageText
+            final fixedImageUrl = fixEmulatorImageUrl(category.image);
             return VerticalImageText(
-              image: category.image,
+              image: fixedImageUrl,
               title: category.name,
               onTap: () => Get.to(() => SubCategoryScreen()),
             );

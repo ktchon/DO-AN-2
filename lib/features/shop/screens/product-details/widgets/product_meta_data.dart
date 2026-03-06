@@ -49,7 +49,11 @@ class ProductMetaData extends StatelessWidget {
             BrandTitleText(title: 'Trạng thái: '),
             Text(
               controller.getProductStockStatus(product.stock),
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleMedium!.apply(
+                color: controller.getProductStockStatus(product.stock).contains('Còn hàng')
+                    ? Colors.green
+                    : Colors.red,
+              ),
             ),
           ],
         ),

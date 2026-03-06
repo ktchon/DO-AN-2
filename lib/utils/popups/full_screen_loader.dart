@@ -1,40 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shop_app/common/widgets/loaders/animation_loader.dart';
-
+import 'package:shop_app/common/widgets/loaders/circular_loader.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
-import 'package:shop_app/common/widgets/loaders/circular_loader.dart';
 
 /// A utility class for managing a full-screen loading dialog.
 class CFullScreenLoader {
-  /// Open a full-screen loading dialog with a given text and animation.
-  /// This method doesn't return anything.
-  ///
-  /// Parameters:
-  ///   - text: The text to be displayed in the loading dialog.
-  ///   - animation: The Lottie animation to be shown.
+  /// Open a full-screen loading dialog with text and animation
   static void openLoadingDialog(String text, String animation) {
     showDialog(
-      context: Get.overlayContext!, // Use Get.overlayContext for overlay dialogs
-      barrierDismissible: false, // The dialog can't be dismissed by tapping outside it
+      context: Get.overlayContext!,
+      barrierDismissible: false,
       builder: (_) => PopScope(
-        canPop: false, // Disable popping with the back button
+        canPop: false,
         child: Container(
-          color: THelperFunctions.isDarkMode(Get.context!) ? TColors.darkContainer : TColors.white,
           width: double.infinity,
           height: double.infinity,
-          child: Column(
-            children: [
-              const SizedBox(height: 250), // Adjust the spacing as needed
-              CAnimationLoaderWidget(text: text, animation: animation),
-            ],
+          color: THelperFunctions.isDarkMode(Get.context!) ? TColors.darkContainer : TColors.white,
+
+          /// Center giúp tránh overflow và luôn căn giữa loader
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [CAnimationLoaderWidget(text: text, animation: animation)],
+            ),
           ),
         ),
       ),
     );
   }
 
+  /// Popup circular loader (small loader)
   static void popUpCircular() {
     Get.defaultDialog(
       title: '',
@@ -44,9 +41,10 @@ class CFullScreenLoader {
     );
   }
 
-  /// Stop the currently open loading dialog.
-  /// This method doesn't return anything.
-  static stopLoading() {
-    Navigator.of(Get.overlayContext!).pop(); // Close the dialog using the Navigator
+  /// Close the currently opened loading dialog safely
+  static void stopLoading() {
+    if (Get.overlayContext != null && Navigator.canPop(Get.overlayContext!)) {
+      Navigator.of(Get.overlayContext!).pop();
+    }
   }
 }
