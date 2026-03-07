@@ -1,0 +1,19 @@
+{
+  "name": "Banners/banner_1.png",
+  "bucket": "shopapp-e5f12.firebasestorage.app",
+  "metageneration": 1,
+  "generation": 1772902353090,
+  "contentType": "image/png",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "downloadTokens": [
+    "328387d5-9280-4dfe-86b7-7837091fa110"
+  ],
+  "etag": "GtQ1p/7s90t7/9fx740jX5FsMeU",
+  "customMetadata": {},
+  "timeCreated": "2026-03-07T16:52:33.090Z",
+  "updated": "2026-03-07T16:52:33.090Z",
+  "size": 331330,
+  "md5Hash": "POVEgNTkLQvkQK5vhGJnhA==",
+  "crc32c": "1139455171"
+}

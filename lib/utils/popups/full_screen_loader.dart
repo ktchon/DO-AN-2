@@ -21,9 +21,11 @@ class CFullScreenLoader {
 
           /// Center giúp tránh overflow và luôn căn giữa loader
           child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [CAnimationLoaderWidget(text: text, animation: animation)],
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [CAnimationLoaderWidget(text: text, animation: animation)],
+              ),
             ),
           ),
         ),

@@ -38,6 +38,17 @@ class ProductController extends GetxController {
     }
   }
 
+  Future<List<ProductModel>> getAllFeaturedProducts() async {
+    try {
+      // Fetch Products
+      final products = await productRepository.getFeaturedProducts();
+      return products;
+    } catch (e) {
+      CLoaders.errorSnackBar(title: 'Có gì đó không ổn!', message: e.toString());
+      return [];
+    }
+  }
+
   /// Lấy giá sản phẩm hoặc khoảng giá (nếu có nhiều biến thể)
   num getProductPrice(ProductModel product) {
     // Sản phẩm đơn

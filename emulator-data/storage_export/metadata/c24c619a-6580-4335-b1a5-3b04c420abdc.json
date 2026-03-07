@@ -1,0 +1,19 @@
+{
+  "name": "Users/Images/Profile/scaled_33.jpg",
+  "bucket": "shopapp-e5f12.firebasestorage.app",
+  "metageneration": 1,
+  "generation": 1772903285545,
+  "contentType": "application/octet-stream",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "downloadTokens": [
+    "39051da2-d04c-4846-9744-50b3fe1fcac2"
+  ],
+  "etag": "P8BgKwv6QS7NXisozhYxJm2oDi0",
+  "customMetadata": {},
+  "timeCreated": "2026-03-07T17:08:05.545Z",
+  "updated": "2026-03-07T17:08:05.545Z",
+  "size": 11804,
+  "md5Hash": "vqcV7ThJHUFLDwBMUvqCjA==",
+  "crc32c": "2585828439"
+}

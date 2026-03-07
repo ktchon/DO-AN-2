@@ -61,7 +61,12 @@ class HomeScreen extends StatelessWidget {
                   SectionHeading(
                     textTitle: 'Sản phẩm nổi bật',
                     showActionButton: true,
-                    onPressed: () => Get.to(() => AllProductsScreen()),
+                    onPressed: () => Get.to(
+                      () => AllProductsScreen(
+                        title: 'Tất cả sản phẩm',
+                        futureMethod: controller.getAllFeaturedProducts(),
+                      ),
+                    ),
                   ),
                   SizedBox(height: 20),
                   // ProductsCard

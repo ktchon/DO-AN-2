@@ -9,6 +9,7 @@ class ProductModel {
   String title;
   int stock;
   double price;
+  final DateTime? date;
   double salePrice;
   bool isFeatured;
   String thumbnail;
@@ -36,6 +37,7 @@ class ProductModel {
     this.images = const [],
     this.productAttributes,
     this.productVariations,
+    this.date,
   });
 
   /// Json Format
@@ -44,6 +46,7 @@ class ProductModel {
       'SKU': sku,
       'Title': title,
       'Stock': stock,
+      'Date': date,
       'Price': price,
       'SalePrice': salePrice,
       'IsFeatured': isFeatured,
@@ -63,12 +66,12 @@ class ProductModel {
   }
 
   /// Create Empty func for clean code
-  static ProductModel empty() => ProductModel(id: '', title: '', stock: 0, price: 0, thumbnail: '', productType: '');
-
+  static ProductModel empty() =>
+      ProductModel(id: '', title: '', stock: 0, price: 0, thumbnail: '', productType: '');
 
   /// Map Json oriented document snapshot from Firebase to Model
   factory ProductModel.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> document) {
-    if(document.data() == null) return ProductModel.empty();
+    if (document.data() == null) return ProductModel.empty();
     final data = document.data()!;
 
     return ProductModel(
@@ -76,6 +79,7 @@ class ProductModel {
       sku: data['SKU'] ?? '',
       title: data['Title'] ?? '',
       stock: data['Stock'] ?? 0,
+      date: data['Date'] != null ? (data['Date'] as Timestamp).toDate() : null,
       isFeatured: data['IsFeatured'] ?? false,
       price: double.tryParse((data['Price'] ?? 0.0).toString()) ?? 0.0,
       salePrice: double.tryParse((data['SalePrice'] ?? 0.0).toString()) ?? 0.0,

@@ -1,0 +1,19 @@
+{
+  "name": "Products/tshirt_yellow_collar.png",
+  "bucket": "shopapp-e5f12.firebasestorage.app",
+  "metageneration": 1,
+  "generation": 1772902800051,
+  "contentType": "image/png",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "downloadTokens": [
+    "3784f240-c215-48b1-b182-f25b57e14943"
+  ],
+  "etag": "P3wZh9WVf0+VSevvu5yveG5bQfw",
+  "customMetadata": {},
+  "timeCreated": "2026-03-07T17:00:00.051Z",
+  "updated": "2026-03-07T17:00:00.051Z",
+  "size": 79125,
+  "md5Hash": "WxKqlCC8dxaeon6/lzeWtg==",
+  "crc32c": "4256743832"
+}

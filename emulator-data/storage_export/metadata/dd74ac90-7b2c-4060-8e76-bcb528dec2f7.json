@@ -1,0 +1,19 @@
+{
+  "name": "Categorys/image-adidas.png",
+  "bucket": "shopapp-e5f12.firebasestorage.app",
+  "metageneration": 1,
+  "generation": 1772902335504,
+  "contentType": "image/png",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "downloadTokens": [
+    "308f4676-2265-44a6-9a84-393ac2b7045f"
+  ],
+  "etag": "qOQi2bhigozUTfVI9Yz5/zsUS58",
+  "customMetadata": {},
+  "timeCreated": "2026-03-07T16:52:15.505Z",
+  "updated": "2026-03-07T16:52:15.505Z",
+  "size": 49364,
+  "md5Hash": "XL34aQHoSWajucYsRe0mdQ==",
+  "crc32c": "2945717106"
+}

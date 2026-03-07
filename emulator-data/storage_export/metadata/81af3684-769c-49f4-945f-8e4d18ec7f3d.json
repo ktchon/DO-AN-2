@@ -1,0 +1,19 @@
+{
+  "name": "Products/tshirt_blue_collar.png",
+  "bucket": "shopapp-e5f12.firebasestorage.app",
+  "metageneration": 1,
+  "generation": 1772902799960,
+  "contentType": "image/png",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "downloadTokens": [
+    "58525d01-9928-426e-82db-25381baba7cc"
+  ],
+  "etag": "Pnp5h1dgCXQjYpEnqp5fYxD1CjU",
+  "customMetadata": {},
+  "timeCreated": "2026-03-07T16:59:59.961Z",
+  "updated": "2026-03-07T16:59:59.961Z",
+  "size": 633803,
+  "md5Hash": "vQEmmXsZ6OEn/MkVVA6NNA==",
+  "crc32c": "987770281"
+}

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shop_app/common/widgets/brands/brand_card.dart';
-import 'package:shop_app/common/widgets/sortable/sortable.dart';
+import 'package:shop_app/common/widgets/sortable/sortable_product.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 
 class ProductBrandScreen extends StatelessWidget {
@@ -22,7 +22,9 @@ class ProductBrandScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(20),
-          child: Column(children: [BrandCard(showBorder: true), SizedBox(height: 28), Sortable()]),
+          child: Column(
+            children: [BrandCard(showBorder: true), SizedBox(height: 28), SortableProducts(products: [],)],
+          ),
         ),
       ),
     );

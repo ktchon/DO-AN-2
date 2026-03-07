@@ -1,0 +1,19 @@
+{
+  "name": "Products/tshirt_green_collar.png",
+  "bucket": "shopapp-e5f12.firebasestorage.app",
+  "metageneration": 1,
+  "generation": 1772902800014,
+  "contentType": "image/png",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "downloadTokens": [
+    "887dedd1-9aba-4357-a766-f7cdeee0293d"
+  ],
+  "etag": "zkei6a1NzbL4mk6AwTS7KZeGnYE",
+  "customMetadata": {},
+  "timeCreated": "2026-03-07T17:00:00.014Z",
+  "updated": "2026-03-07T17:00:00.014Z",
+  "size": 482295,
+  "md5Hash": "aAnePyEoQSSzeaRTIqYYdg==",
+  "crc32c": "4188888999"
+}
