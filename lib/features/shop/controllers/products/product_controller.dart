@@ -49,18 +49,16 @@ class ProductController extends GetxController {
     }
   }
 
-  /// Lấy giá sản phẩm hoặc khoảng giá (nếu có nhiều biến thể)
+  /// Lấy giá sản phẩm hoặc giá thấp nhất
   num getProductPrice(ProductModel product) {
-    // Sản phẩm đơn
     if (product.productType == ProductType.single.toString()) {
       return product.salePrice > 0 ? product.salePrice : product.price;
     }
 
-    // Sản phẩm có biến thể
     double smallestPrice = double.infinity;
     double largestPrice = 0.0;
 
-    for (var variation in product.productVariations!) {
+    for (var variation in product.productVariations ?? []) {
       double priceToConsider = variation.salePrice > 0 ? variation.salePrice : variation.price;
 
       if (priceToConsider < smallestPrice) {
@@ -72,13 +70,30 @@ class ProductController extends GetxController {
       }
     }
 
-    // Nếu bằng nhau → trả 1 giá
     if (smallestPrice == largestPrice) {
       return smallestPrice;
     }
 
-    // Nếu là khoảng giá → trả giá nhỏ nhất (UI xử lý tiếp nếu muốn)
     return smallestPrice;
+  }
+
+  /// Lấy giá cao nhất của product
+  num getHighestPrice(ProductModel product) {
+    if (product.productType == ProductType.single.toString()) {
+      return product.salePrice > 0 ? product.salePrice : product.price;
+    }
+
+    double largestPrice = 0.0;
+
+    for (var variation in product.productVariations ?? []) {
+      double priceToConsider = variation.salePrice > 0 ? variation.salePrice : variation.price;
+
+      if (priceToConsider > largestPrice) {
+        largestPrice = priceToConsider;
+      }
+    }
+
+    return largestPrice;
   }
 
   /// Tính phần trăm giảm giá

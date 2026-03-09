@@ -14,14 +14,18 @@ import 'package:shop_app/utils/app.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:shop_app/utils/storage/storage_utility.dart';
 
 Future<void> main() async {
   GoogleFonts.config.allowRuntimeFetching = false;
 
   final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
-  // Local storage
-  await GetStorage.init();
+  // Local
+  await CLocalStorage.init('shop_storage');
+
+  // // Local storage
+  // await GetStorage.init();
 
   // Splash
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);

@@ -17,6 +17,7 @@ import 'package:shop_app/utils/exceptions/firebase_auth_exceptions.dart';
 import 'package:shop_app/utils/exceptions/firebase_exceptions.dart';
 import 'package:shop_app/utils/exceptions/format_exceptions.dart';
 import 'package:shop_app/utils/exceptions/platform_exceptions.dart';
+import 'package:shop_app/utils/storage/storage_utility.dart';
 
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();
@@ -39,9 +40,13 @@ class AuthenticationRepository extends GetxController {
     final user = _auth.currentUser;
     if (user != null) {
       if (user.emailVerified) {
+        // Khởi tạo Storage dành riêng cho từng người dùng
+        // (sử dụng uid của user làm tên bucket để dữ liệu được tách biệt giữa các tài khoản)
+        await CLocalStorage.init(user.uid);
+        // Chuyển hướng đến trang chủ
         Get.offAll(NavigationMenu());
       } else {
-        Get.offAll(NavigationMenu());
+        Get.offAll(NavigationMenu()); // VeryfyEmaillScreen
       }
     } else {
       deviceStorage.writeIfNull('isFirstTime', true);

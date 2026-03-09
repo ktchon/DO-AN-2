@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:shop_app/common/widgets/appbar/tabbar.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/search_container.dart';
 import 'package:shop_app/common/widgets/icons/cart_counter_icon.dart';
 import 'package:shop_app/common/widgets/layouts/grid_layout.dart';
+import 'package:shop_app/common/widgets/shimmer/brand_shimmer.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
 import 'package:shop_app/common/widgets/brands/brand_card.dart';
+import 'package:shop_app/features/shop/controllers/brand_controller.dart';
 import 'package:shop_app/features/shop/controllers/category_controller.dart';
 import 'package:shop_app/features/shop/screens/brands/all_brands.dart';
+import 'package:shop_app/features/shop/screens/brands/product_brand.dart';
 import 'package:shop_app/features/shop/screens/store/widgets/category_tab.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 import 'package:shop_app/utils/constants/colors.dart';
@@ -19,6 +24,7 @@ class StoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final category = CategoryController.instance.featuredCategories;
+    final brandController = Get.put(BrandController());
     return DefaultTabController(
       length: category.length,
       child: Scaffold(
@@ -67,13 +73,32 @@ class StoreScreen extends StatelessWidget {
                       // Thương hiệu
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: GridLayout(
-                          mainAxisExtent: 80,
-                          itemCount: 4,
-                          itemBuilder: (_, index) {
-                            return BrandCard(showBorder: true);
-                          },
-                        ),
+                        child: Obx(() {
+                          if (brandController.isLoading.value) return CBrandsShimmer();
+
+                          if (brandController.featuredBrands.isEmpty) {
+                            return Center(
+                              child: Text(
+                                "Không tìm thấy dữ liệu",
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium!.apply(color: Colors.black),
+                              ),
+                            );
+                          }
+                          return GridLayout(
+                            mainAxisExtent: 80,
+                            itemCount: brandController.featuredBrands.length,
+                            itemBuilder: (_, index) {
+                              final brand = brandController.featuredBrands[index];
+                              return BrandCard(
+                                showBorder: true,
+                                brand: brand,
+                                onTap: () => Get.to(ProductBrandScreen(brand: brand)),
+                              );
+                            },
+                          );
+                        }),
                       ),
                     ],
                   ),

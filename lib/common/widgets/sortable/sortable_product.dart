@@ -13,7 +13,7 @@ class SortableProducts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<AllProductsController>();
+    final controller = Get.put(AllProductsController());
     controller.assignProducts(products);
     return Column(
       children: [

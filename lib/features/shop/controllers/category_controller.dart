@@ -1,8 +1,9 @@
 import 'package:get/get.dart';
+import 'package:shop_app/data/products/product_repository.dart';
 import 'package:shop_app/data/repositories/categories/category_repository.dart';
 import 'package:shop_app/features/shop/models/category_model.dart';
+import 'package:shop_app/features/shop/models/product_model.dart';
 import 'package:shop_app/utils/popups/loaders.dart';
-
 
 class CategoryController extends GetxController {
   static CategoryController get instance => Get.find();
@@ -31,11 +32,12 @@ class CategoryController extends GetxController {
       allCategories.assignAll(categories);
 
       // Lọc các danh mục nổi bật (featured)
-      featuredCategories.assignAll(allCategories
-          .where((category) =>
-              category.isFeatured && category.parentId.isEmpty)
-          .take(8)
-          .toList());
+      featuredCategories.assignAll(
+        allCategories
+            .where((category) => category.isFeatured && category.parentId.isEmpty)
+            .take(8)
+            .toList(),
+      );
     } catch (e) {
       CLoaders.errorSnackBar(title: 'Có gì đó không ổn!', message: e.toString());
     } finally {
@@ -47,4 +49,18 @@ class CategoryController extends GetxController {
   /// -- Tải dữ liệu danh mục đã chọn
 
   /// Lấy sản phẩm của Danh mục hoặc Danh mục con.
+  Future<List<ProductModel>> getCategoryProducts({
+    required String categoryId,
+    int limit = 4,
+  }) async {
+    // Ghi chú: Lấy giới hạn (ở đây mặc định 4) sản phẩm
+    // tương ứng với mỗi danh mục con (subCategory) hoặc danh mục chính
+
+    final products = await ProductRepository.instance.getProductsForCategory(
+      categoryId: categoryId,
+      limit: limit,
+    );
+
+    return products;
+  }
 }

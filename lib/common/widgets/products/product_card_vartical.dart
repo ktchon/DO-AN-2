@@ -6,6 +6,7 @@ import 'package:shop_app/common/styles/shadows.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/circular_container.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_image.dart';
 import 'package:shop_app/common/widgets/icons/circular_icon.dart';
+import 'package:shop_app/common/widgets/products/favourite_icon/favourite_icon.dart';
 import 'package:shop_app/common/widgets/text/brand_title_text_with_verified_icon.dart';
 import 'package:shop_app/common/widgets/text/product_price_text.dart';
 import 'package:shop_app/common/widgets/text/product_title_text.dart';
@@ -59,25 +60,22 @@ class ProductCardVartical extends StatelessWidget {
                     ),
                   ),
                   // Giảm giá
-                  Positioned(
-                    top: 12,
-                    child: CircularContainer(
-                      height: 28,
-                      width: 50,
-                      radius: 10,
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      backgroundColor: Colors.yellowAccent.withOpacity(0.8),
-                      child: Text(
-                        '$salePercentage%',
-                        style: Theme.of(context).textTheme.labelLarge!.apply(color: Colors.black),
+                  if (salePercentage != null)
+                    Positioned(
+                      top: 12,
+                      child: CircularContainer(
+                        height: 28,
+                        width: 50,
+                        radius: 10,
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        backgroundColor: Colors.yellowAccent.withOpacity(0.8),
+                        child: Text(
+                          '$salePercentage%',
+                          style: Theme.of(context).textTheme.labelLarge!.apply(color: Colors.black),
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: CircularIcon(icon: Iconsax.heart, size: 20, color: Colors.red),
-                  ),
+                  Positioned(top: 0, right: 0, child: CFavouriteIcon(productId: product.id)),
                 ],
               ),
             ),

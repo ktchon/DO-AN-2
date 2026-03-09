@@ -22,27 +22,45 @@ class ProductMetaData extends StatelessWidget {
       children: [
         Row(
           children: [
-            CircularContainer(
-              height: 28,
-              width: 50,
-              radius: 10,
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              backgroundColor: Colors.yellowAccent.withOpacity(0.8),
-              child: Text(
-                '$salePercentage%',
-                style: Theme.of(context).textTheme.labelLarge!.apply(color: Colors.black),
+            if (salePercentage != null)
+              CircularContainer(
+                height: 28,
+                width: 50,
+                radius: 10,
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                backgroundColor: Colors.yellowAccent.withOpacity(0.8),
+                child: Text(
+                  '$salePercentage%',
+                  style: Theme.of(context).textTheme.labelLarge!.apply(color: Colors.black),
+                ),
               ),
-            ),
             SizedBox(width: 5),
+            // Single
+            if (product.productType == ProductType.single.toString() && product.salePrice <= 0)
+              ProductPriceText(price: product.price),
             if (product.productType == ProductType.single.toString() && product.salePrice > 0)
               ProductPriceText(price: product.price, lineThrough: true, isLarge: false),
             SizedBox(width: 5),
             if (product.productType == ProductType.single.toString() && product.salePrice > 0)
               ProductPriceText(price: controller.getProductPrice(product)),
+            // Variable
+            if (product.productType == ProductType.variable.toString() && product.salePrice > 0)
+              ProductPriceText(price: controller.getProductPrice(product)),
+            product.productType == ProductType.variable.toString() && product.salePrice > 0
+                ? Row(
+                    children: const [
+                      SizedBox(width: 5),
+                      Text('-', style: TextStyle(fontSize: 32, color: Colors.red)),
+                      SizedBox(width: 4),
+                    ],
+                  )
+                : const SizedBox(),
+            if (product.productType == ProductType.variable.toString() && product.salePrice > 0)
+              ProductPriceText(price: controller.getHighestPrice(product)),
           ],
         ),
         SizedBox(height: 10),
-        Row(children: [ProductTitleText(text: product.title)]),
+        Row(children: [ProductTitleText(text: product.title, smallSize: false)]),
         SizedBox(height: 10),
         Row(
           children: [

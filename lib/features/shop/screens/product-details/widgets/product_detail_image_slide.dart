@@ -8,6 +8,7 @@ import 'package:shop_app/common/widgets/appbar/appbar.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_image.dart';
 import 'package:shop_app/common/widgets/custom_shapes/curved_edges/curved_edges_widget.dart';
 import 'package:shop_app/common/widgets/icons/circular_icon.dart';
+import 'package:shop_app/common/widgets/products/favourite_icon/favourite_icon.dart';
 import 'package:shop_app/features/shop/controllers/products/image_controller.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
 import 'package:shop_app/utils/helpers/emulator_helper.dart';
@@ -126,7 +127,7 @@ class ProductImageSilder extends StatelessWidget {
                   context,
                 ).textTheme.headlineMedium!.apply(color: isDark ? Colors.white : Colors.black),
               ),
-              actions: [CircularIcon(icon: Iconsax.heart, color: Colors.red)],
+              actions: [CFavouriteIcon(productId: product.id)],
             ),
           ],
         ),
