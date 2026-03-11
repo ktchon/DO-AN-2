@@ -6,6 +6,7 @@ import 'package:readmore/readmore.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/circular_container.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
+import 'package:shop_app/features/shop/models/share_product_model.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_attributes.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_detail_image_slide.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_meta_data.dart';
@@ -67,7 +68,16 @@ class ProductDetail extends StatelessWidget {
               child: Column(
                 children: [
                   // Đánh giá và chia sẻ
-                  RatingAndShare(),
+                  RatingAndShare(
+                    product: ShareProductModel(
+                      id: product.id,
+                      title: product.title,
+                      price: product.price,
+                      salePrice: product.salePrice,
+                      imageUrl: product.thumbnail,
+                      productUrl: "https://shopapp.com/product/${product.id}",
+                    ),
+                  ),
                   // Giá, giảm giá, tên, trạng thái, thương hiệu
                   ProductMetaData(product: product),
                   // Các thuộc tính

@@ -12,7 +12,7 @@ class CategoryModel {
     required this.name,
     required this.image,
     required this.isFeatured,
-    this.parentId = '', // Mặc định là chuỗi rỗng nếu không có danh mục cha
+    this.parentId = '',
   });
 
   /// Hàm helper tạo đối tượng rỗng
@@ -20,13 +20,7 @@ class CategoryModel {
 
   /// Chuyển đổi model thành cấu trúc JSON (Map) để lưu vào Firestore
   Map<String, dynamic> toJson() {
-    return {
-      'Name': name,
-      'Image': image,
-      'ParentId': parentId,
-      'IsFeatured': isFeatured,
-      // Không lưu 'id' vào document vì Firestore tự động sử dụng document ID
-    };
+    return {'Name': name, 'Image': image, 'ParentId': parentId, 'IsFeatured': isFeatured};
   }
 
   /// Factory để chuyển từ DocumentSnapshot của Firestore sang đối tượng model

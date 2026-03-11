@@ -27,6 +27,26 @@ class CategoryRepository extends GetxController {
   }
 
   /// Lấy danh mục con
+  Future<List<CategoryModel>> getSubCategories(String categoryId) async {
+    try {
+      final snapshot = await _db
+          .collection("Categories")
+          .where('ParentId', isEqualTo: categoryId)
+          .get();
+
+      final result = snapshot.docs.map((e) => CategoryModel.fromSnapshot(e)).toList();
+
+      return result;
+    } on FirebaseException catch (e) {
+      throw CFirebaseException(e.code).message;
+    } on PlatformException catch (e) {
+      throw CPlatformException(e.code).message;
+    } catch (e) {
+      throw 'Có lỗi xảy ra. Vui lòng thử lại';
+    }
+  }
+
+  /// Lấy danh mục con
 
   // /// Upload danh mục giả lập (dummy data) lên Cloud Firebase
   // Future<void> uploadDummyData(List<CategoryModel> categories) async {

@@ -46,7 +46,16 @@ class CategoryController extends GetxController {
     }
   }
 
-  /// -- Tải dữ liệu danh mục đã chọn
+  // Hàm bất đồng bộ, trả về một Future chứa danh sách các CategoryModel
+  Future<List<CategoryModel>> getSubCategories(String categoryId) async {
+    try {
+      final subCategories = await _categoryRepository.getSubCategories(categoryId);
+      return subCategories;
+    } catch (e) {
+      CLoaders.errorSnackBar(title: 'Đã có lỗi xảy ra!', message: e.toString());
+      return [];
+    }
+  }
 
   /// Lấy sản phẩm của Danh mục hoặc Danh mục con.
   Future<List<ProductModel>> getCategoryProducts({

@@ -40,7 +40,7 @@ class CloudHelperFunctions {
 
     if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
       if (nothingFound != null) return nothingFound;
-      return const Center(child: Text('No Data Found!'));
+      return const Center(child: Text('Không tìm thấy dữ liệu'));
     }
 
     if (snapshot.hasError) {

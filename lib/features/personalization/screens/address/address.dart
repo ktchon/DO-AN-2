@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:shop_app/features/personalization/controllers/address_controller.dart';
 import 'package:shop_app/features/personalization/screens/address/add_new_address.dart';
 import 'package:shop_app/features/personalization/screens/address/widgets/single_address.dart';
 import 'package:shop_app/utils/constants/colors.dart';
+import 'package:shop_app/utils/helpers/cloud_helper_functions.dart';
 
 class AddressScreen extends StatelessWidget {
   const AddressScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(AddressController());
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: TColors.primary,
@@ -29,15 +33,29 @@ class AddressScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(20),
-          child: Column(
-            children: [
-              SingleAddress(selectedAddress: true,),
-              SingleAddress(selectedAddress: false,),
-            ],
+          child: Obx(
+            () => FutureBuilder(
+              key: Key(controller.refreshData.toString()),
+              future: controller.getAllUserAddresses(),
+              builder: (context, snapshot) {
+                final response = CloudHelperFunctions.checkMultiRecordState(snapshot: snapshot);
+                if (response != null) return response;
+
+                final address = snapshot.data!;
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: address.length,
+                  itemBuilder: (_, index) => SingleAddress(
+                    address: address[index],
+                    onTap: () => controller.selectAddress(address[index]),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),
     );
   }
 }
-

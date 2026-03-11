@@ -118,6 +118,7 @@ class ProductCardVartical extends StatelessWidget {
                     ],
                   ),
                 ),
+                // Add to cart
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.black,

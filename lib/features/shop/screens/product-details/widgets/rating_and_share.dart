@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app/data/products/share_product_repository.dart';
+import 'package:shop_app/features/shop/controllers/products/share_product_controller.dart';
+import 'package:shop_app/features/shop/models/share_product_model.dart';
 
 class RatingAndShare extends StatelessWidget {
-  const RatingAndShare({super.key});
+  const RatingAndShare({super.key, required this.product});
+
+  final ShareProductModel product;
 
   @override
   Widget build(BuildContext context) {
+    final controller = ShareProductController(ShareProductRepository());
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -22,7 +28,12 @@ class RatingAndShare extends StatelessWidget {
             ),
           ],
         ),
-        IconButton(onPressed: () {}, icon: Icon(Icons.share)),
+        IconButton(
+          onPressed: () async {
+            await controller.share(product);
+          },
+          icon: Icon(Icons.share),
+        ),
       ],
     );
   }

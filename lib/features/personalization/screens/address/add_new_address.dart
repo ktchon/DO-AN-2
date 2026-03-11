@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:shop_app/features/personalization/controllers/address_controller.dart';
 import 'package:shop_app/utils/constants/colors.dart';
+import 'package:shop_app/utils/validators/validator.dart';
 
 class AddNewAddress extends StatelessWidget {
   const AddNewAddress({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = AddressController.instance;
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
@@ -22,13 +25,18 @@ class AddNewAddress extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(20),
           child: Form(
+            key: controller.addressFormKey,
             child: Column(
               children: [
                 TextFormField(
+                  controller: controller.name,
+                  validator: (value) => CValidator.validateEmptyText('Tên', value),
                   decoration: InputDecoration(labelText: 'Tên', prefixIcon: Icon(Icons.person)),
                 ),
                 SizedBox(height: 16),
                 TextFormField(
+                  controller: controller.phoneNumber,
+                  validator: CValidator.validatePhoneNumber,
                   decoration: InputDecoration(
                     labelText: 'Số điện thoại',
                     prefixIcon: Icon(Icons.phone),
@@ -39,6 +47,8 @@ class AddNewAddress extends StatelessWidget {
                   children: [
                     Expanded(
                       child: TextFormField(
+                        controller: controller.street,
+                        validator: (value) => CValidator.validateEmptyText('Đường', value),
                         decoration: InputDecoration(
                           labelText: 'Đường',
                           prefixIcon: Icon(Icons.streetview),
@@ -48,6 +58,8 @@ class AddNewAddress extends StatelessWidget {
                     SizedBox(width: 16),
                     Expanded(
                       child: TextFormField(
+                        controller: controller.postalCode,
+                        validator: (value) => CValidator.validateEmptyText('Mã bưu chính', value),
                         decoration: InputDecoration(
                           labelText: 'Mã bưu chính',
                           prefixIcon: Icon(Icons.local_post_office),
@@ -61,6 +73,8 @@ class AddNewAddress extends StatelessWidget {
                   children: [
                     Expanded(
                       child: TextFormField(
+                        controller: controller.city,
+                        validator: (value) => CValidator.validateEmptyText('Thành phố', value),
                         decoration: InputDecoration(
                           labelText: 'Thành Phố',
                           prefixIcon: Icon(Icons.location_city),
@@ -70,6 +84,8 @@ class AddNewAddress extends StatelessWidget {
                     SizedBox(width: 16),
                     Expanded(
                       child: TextFormField(
+                        controller: controller.state,
+                        validator: (value) => CValidator.validateEmptyText('State', value),
                         decoration: InputDecoration(
                           labelText: 'State',
                           prefixIcon: Icon(Iconsax.activity),
@@ -80,6 +96,8 @@ class AddNewAddress extends StatelessWidget {
                 ),
                 SizedBox(height: 16),
                 TextFormField(
+                  controller: controller.country,
+                  validator: (value) => CValidator.validateEmptyText('Quốc gia', value),
                   decoration: InputDecoration(
                     labelText: 'Quốc gia',
                     prefixIcon: Icon(Icons.public),
@@ -88,7 +106,10 @@ class AddNewAddress extends StatelessWidget {
                 SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(onPressed: () {}, child: Text('Lưu')),
+                  child: ElevatedButton(
+                    onPressed: () => controller.addNewAddress(),
+                    child: Text('Lưu'),
+                  ),
                 ),
               ],
             ),

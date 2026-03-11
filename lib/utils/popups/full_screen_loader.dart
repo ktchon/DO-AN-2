@@ -38,7 +38,7 @@ class CFullScreenLoader {
     Get.defaultDialog(
       title: '',
       onWillPop: () async => false,
-      content: const TCircularLoader(),
+      content: const CCircularLoader(),
       backgroundColor: Colors.transparent,
     );
   }
