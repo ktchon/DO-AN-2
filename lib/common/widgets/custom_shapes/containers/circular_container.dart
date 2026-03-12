@@ -14,6 +14,7 @@ class CircularContainer extends StatelessWidget {
     this.borderColor = TColors.borderPrimary,
     this.radius = 350,
     this.backgroundColor = TColors.white,
+    this.onPressed,
   });
 
   final double? width;
@@ -25,20 +26,24 @@ class CircularContainer extends StatelessWidget {
   final Color backgroundColor;
   final Color borderColor;
   final bool showBorder;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      padding: padding,
-      margin: margin,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(radius),
-        border: showBorder ? Border.all(color: borderColor) : null,
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: width,
+        height: height,
+        padding: padding,
+        margin: margin,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(radius),
+          border: showBorder ? Border.all(color: borderColor) : null,
+        ),
+        child: child,
       ),
-      child: child,
     );
   }
 }

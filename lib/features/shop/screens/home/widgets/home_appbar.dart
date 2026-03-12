@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:shop_app/common/widgets/appbar/appbar.dart';
 import 'package:shop_app/common/widgets/icons/cart_counter_icon.dart';
 import 'package:shop_app/common/widgets/shimmer/shimmer.dart';

@@ -6,6 +6,7 @@ import 'package:shop_app/common/styles/shadows.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/circular_container.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_image.dart';
 import 'package:shop_app/common/widgets/icons/circular_icon.dart';
+import 'package:shop_app/common/widgets/products/cart/add_to_cart_button.dart';
 import 'package:shop_app/common/widgets/products/favourite_icon/favourite_icon.dart';
 import 'package:shop_app/common/widgets/text/brand_title_text_with_verified_icon.dart';
 import 'package:shop_app/common/widgets/text/product_price_text.dart';
@@ -119,20 +120,7 @@ class ProductCardVartical extends StatelessWidget {
                   ),
                 ),
                 // Add to cart
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomRight: Radius.circular(12),
-                    ),
-                  ),
-                  child: SizedBox(
-                    height: 32,
-                    width: 32,
-                    child: Icon(Icons.add, color: Colors.white),
-                  ),
-                ),
+                AddToCartButton(product: product)
               ],
             ),
           ],

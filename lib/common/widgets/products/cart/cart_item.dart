@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/circular_image.dart';
 import 'package:shop_app/common/widgets/text/brand_title_text_with_verified_icon.dart';
 import 'package:shop_app/common/widgets/text/product_title_text.dart';
+import 'package:shop_app/features/shop/models/cart_item_model.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 
 class CartItem extends StatelessWidget {
-  const CartItem({super.key});
-
+  const CartItem({super.key, required this.cartItem});
+  final CartItemModel cartItem;
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         // Hình ảnh
         CircularImage(
-          image: 'assets/products/product-2.png',
+          isNetworkImage: true,
+          image: cartItem.image ?? '',
           borderRadius: 12,
           backgroundColor: THelperFunctions.isDarkMode(context)
               ? Colors.black
@@ -26,47 +28,37 @@ class CartItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              BrandTitleWithVerifiedIcon(title: 'Nike'),
-              Flexible(child: ProductTitleText(text: 'Giày Nike cao cấp mới nhất 2026')),
+              BrandTitleWithVerifiedIcon(title: cartItem.brandName ?? ''),
+              Flexible(child: ProductTitleText(text: cartItem.title)),
               Row(
                 children: [
                   Text.rich(
                     TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Màu sắc: ',
-                          style: TextStyle(fontSize: 10, color: Colors.black),
-                        ),
-                        TextSpan(
-                          text: 'Xanh',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
+                      children: (cartItem.selectedVariation ?? {}).entries
+                          .map(
+                            (e) => TextSpan(
+                              children: [
+                                // Tên thuộc tính (key) - chữ nhỏ, thường
+                                TextSpan(
+                                  text: '${e.key}: ',
+                                  style: TextStyle(fontSize: 10, color: Colors.black),
+                                ),
+                                // Giá trị thuộc tính (value) - chữ đậm/lớn hơn
+                                TextSpan(
+                                  text: '${e.value}  ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                          .toList(),
                     ),
                   ),
                   SizedBox(width: 5),
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Size: ',
-                          style: TextStyle(fontSize: 10, color: Colors.black),
-                        ),
-                        TextSpan(
-                          text: 'M',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
               SizedBox(height: 10),

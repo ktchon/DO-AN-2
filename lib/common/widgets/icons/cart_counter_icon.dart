@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 
 class CartCounterIcon extends StatelessWidget {
   const CartCounterIcon({super.key, this.onPressed});
@@ -7,6 +11,7 @@ class CartCounterIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // final dark = THelperFunctions.isDarkMode(context);
+    final controller = Get.put(CartController());
     return Stack(
       children: [
         IconButton(
@@ -21,11 +26,13 @@ class CartCounterIcon extends StatelessWidget {
             width: 16,
             decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(100)),
             child: Center(
-              child: Text(
-                '3',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge!.apply(color: Colors.white, fontSizeFactor: 0.8),
+              child: Obx(
+                () => Text(
+                  controller.noOfCartItems.toString(),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge!.apply(color: Colors.white, fontSizeFactor: 0.8),
+                ),
               ),
             ),
           ),

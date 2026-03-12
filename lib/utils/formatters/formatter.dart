@@ -1,8 +1,6 @@
 import 'package:intl/intl.dart';
 
 class TFormatter {
-
-
   static String formatDateAndTime(DateTime? date, {bool use24HourFormat = false}) {
     date ??= DateTime.now();
     final onlyDate = DateFormat('dd/MM/yyyy').format(date);
@@ -18,7 +16,10 @@ class TFormatter {
   }
 
   static String formatCurrency(double amount) {
-    return NumberFormat.currency(locale: 'en_US', symbol: '\$').format(amount); // Customize the currency locale and symbol as needed
+    return NumberFormat.currency(
+      locale: 'en_US',
+      symbol: '\$',
+    ).format(amount); // Customize the currency locale and symbol as needed
   }
 
   static String formatPhoneNumber(String phoneNumber) {
@@ -73,5 +74,10 @@ class TFormatter {
 
     // Combine country code and phone number
     return '$countryCode$phoneNumber';
+  }
+
+  static String formatVND(num amount) {
+    final formatter = NumberFormat('#,###', 'vi_VN');
+    return formatter.format(amount).replaceAll(',', '.') + 'đ';
   }
 }

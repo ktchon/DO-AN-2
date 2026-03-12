@@ -14,6 +14,7 @@ import 'package:shop_app/features/shop/controllers/brand_controller.dart';
 import 'package:shop_app/features/shop/controllers/category_controller.dart';
 import 'package:shop_app/features/shop/screens/brands/all_brands.dart';
 import 'package:shop_app/features/shop/screens/brands/product_brand.dart';
+import 'package:shop_app/features/shop/screens/cart/cart.dart';
 import 'package:shop_app/features/shop/screens/store/widgets/category_tab.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 import 'package:shop_app/utils/constants/colors.dart';
@@ -31,11 +32,14 @@ class StoreScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: TColors.primary,
           automaticallyImplyLeading: false,
-          title: Text('Cửa hàng', style: Theme.of(context).textTheme.headlineMedium),
+          title: Text(
+            'Cửa hàng',
+            style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
+          ),
           actions: [
             Padding(
               padding: EdgeInsetsGeometry.only(right: 10),
-              child: CartCounterIcon(onPressed: () {}),
+              child: CartCounterIcon(onPressed: () => Get.to(() => CartItemScreen())),
             ),
           ],
         ),
