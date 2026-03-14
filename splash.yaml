@@ -11,3 +11,6 @@ flutter_native_splash:
     image_dark: assets/logo/logo-app.png
 
   web: false
+  android: true
+  ios: true
+

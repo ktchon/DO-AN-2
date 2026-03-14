@@ -30,7 +30,7 @@ class CartItemScreen extends StatelessWidget {
         // Widget hiển thị khi không tìm thấy sản phẩm (giỏ hàng trống)
         final emptyWidget = CAnimationLoaderWidget(
           text: 'Giỏ hàng đang TRỐNG.',
-          animation: 'assets/logo/Loading.json',
+          animation: 'assets/logo/shopping-cart.json',
           showAction: true,
           actionText: 'Đi mua sắm ngay nào!',
           onActionPressed: () => Get.off(() => const NavigationMenu()),
@@ -51,13 +51,15 @@ class CartItemScreen extends StatelessWidget {
       }),
       bottomNavigationBar: Padding(
         padding: EdgeInsets.all(20),
-        child: ElevatedButton(
-          onPressed: () => Get.to(() => CheckoutScreen()),
-          child: Obx(() {
-            final formattedTotal = TFormatter.formatVND(cartController.totalCartPrice.value);
-            return Text('Thanh Toán $formattedTotal');
-          }),
-        ),
+        child: cartController.cartItems.isEmpty
+            ? null
+            : ElevatedButton(
+                onPressed: () => Get.to(() => CheckoutScreen()),
+                child: Obx(() {
+                  final formattedTotal = TFormatter.formatVND(cartController.totalCartPrice.value);
+                  return Text('Thanh Toán $formattedTotal');
+                }),
+              ),
       ),
     );
   }

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
+import 'package:shop_app/utils/helpers/pricing_calculator.dart';
 
 class BillingAmountSection extends StatelessWidget {
   const BillingAmountSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cartController = CartController.instance;
+    final subTotal = cartController.totalCartPrice.value;
     return Column(
       children: [
         Row(
@@ -19,7 +23,7 @@ class BillingAmountSection extends StatelessWidget {
               ),
             ),
             Text(
-              '500.000đ',
+              '${subTotal}',
               style: Theme.of(context).textTheme.bodyMedium!.apply(
                 color: THelperFunctions.isDarkMode(context) ? Colors.white : Colors.black,
               ),
@@ -38,7 +42,7 @@ class BillingAmountSection extends StatelessWidget {
               ),
             ),
             Text(
-              '30.000đ',
+              '${CPricingCalculator.calculateShippingCost(subTotal, 'Hồ Chí Minh')}',
               style: Theme.of(context).textTheme.labelMedium!.apply(
                 color: THelperFunctions.isDarkMode(context) ? Colors.white : Colors.black,
               ),
@@ -57,7 +61,7 @@ class BillingAmountSection extends StatelessWidget {
               ),
             ),
             Text(
-              '50.000đ',
+              '${CPricingCalculator.calculateTax(subTotal, 'VN')}',
               style: Theme.of(context).textTheme.labelMedium!.apply(
                 color: THelperFunctions.isDarkMode(context) ? Colors.white : Colors.black,
               ),

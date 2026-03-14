@@ -7,10 +7,14 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shop_app/common/widgets/appbar/appbar.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_image.dart';
 import 'package:shop_app/common/widgets/custom_shapes/curved_edges/curved_edges_widget.dart';
+import 'package:shop_app/common/widgets/icons/cart_counter_icon.dart';
 import 'package:shop_app/common/widgets/icons/circular_icon.dart';
+import 'package:shop_app/common/widgets/icons/order_icon.dart';
 import 'package:shop_app/common/widgets/products/favourite_icon/favourite_icon.dart';
 import 'package:shop_app/features/shop/controllers/products/image_controller.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
+import 'package:shop_app/features/shop/screens/cart/cart.dart';
+import 'package:shop_app/features/shop/screens/order/order.dart';
 import 'package:shop_app/utils/helpers/emulator_helper.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 import 'package:shop_app/utils/constants/colors.dart';
@@ -127,7 +131,10 @@ class ProductImageSilder extends StatelessWidget {
                   context,
                 ).textTheme.headlineMedium!.apply(color: isDark ? Colors.white : Colors.black),
               ),
-              actions: [CFavouriteIcon(productId: product.id)],
+              actions: [
+                CartCounterIcon(colorCart: true ,onPressed: () => Get.to(() => CartItemScreen())),
+                CFavouriteIcon(productId: product.id),
+              ],
             ),
           ],
         ),

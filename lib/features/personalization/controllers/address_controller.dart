@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shop_app/common/widgets/loaders/circular_loader.dart';
+import 'package:shop_app/common/widgets/text/section_heading.dart';
 import 'package:shop_app/data/address/address_repository.dart';
 import 'package:shop_app/features/personalization/models/address_model.dart';
+import 'package:shop_app/features/personalization/screens/address/add_new_address.dart';
+import 'package:shop_app/features/personalization/screens/address/widgets/single_address.dart';
+import 'package:shop_app/utils/helpers/cloud_helper_functions.dart';
 import 'package:shop_app/utils/helpers/network_manager.dart';
 import 'package:shop_app/utils/popups/full_screen_loader.dart';
 import 'package:shop_app/utils/popups/loaders.dart';
@@ -165,5 +169,68 @@ class AddressController extends GetxController {
 
     // Reset trạng thái validate của Form (xóa lỗi đỏ, đưa form về trạng thái ban đầu)
     addressFormKey.currentState?.reset();
+  }
+
+  /// Hiển thị BottomSheet chọn địa chỉ mới tại màn hình Checkout
+  Future<dynamic> selectNewAddressPopup(BuildContext context) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        builder: (_, scrollController) {
+          return Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Tiêu đề phần
+                SizedBox(height: 32),
+                const SectionHeading(textTitle: 'Chọn địa chỉ', showActionButton: false),
+                SizedBox(height: 20),
+
+                // Tải danh sách địa chỉ của người dùng
+                Expanded(
+                  child: FutureBuilder(
+                    future: getAllUserAddresses(),
+                    builder: (_, snapshot) {
+                      // Xử lý các trạng thái: đang tải, không có dữ liệu, hoặc lỗi
+                      final response = CloudHelperFunctions.checkMultiRecordState(snapshot: snapshot);
+                      if (response != null) return response;
+                  
+                      // Khi đã có dữ liệu → hiển thị danh sách
+                      return ListView.builder(
+                        physics: BouncingScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (_, index) => SingleAddress(
+                          address: snapshot.data![index],
+                          onTap: () async {
+                            await selectAddress(snapshot.data![index]);
+                            Get.back();
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 40),
+                // Nút thêm địa chỉ mới (kéo sang màn hình thêm địa chỉ)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Get.to(() => AddNewAddress()),
+                    child: Text('Thêm địa chỉ'),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }

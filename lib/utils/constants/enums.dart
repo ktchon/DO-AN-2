@@ -16,7 +16,7 @@ enum ChatType { support }
 
 enum ChatMessageStatus { sending, sent, delivered, read, failed }
 
-enum VerificationStatus { unknown, pending, submitted, underReview, approved, rejected }
+enum OrderStatus { processing, shipped, cancelled, delivered }
 
 enum TextSizes { small, medium, large }
 

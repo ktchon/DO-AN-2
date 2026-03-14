@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
+import 'package:shop_app/features/shop/screens/product-details/product_detail.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/constants/enums.dart';
 import 'package:shop_app/utils/constants/sizes.dart';
@@ -26,7 +29,7 @@ class AddToCartButton extends StatelessWidget {
           ); // Sử dụng addToCart để xử lý kiểm tra tồn kho, biến thể, v.v.
         } else {
           // Chuyển sang màn chi tiết sản phẩm để chọn biến thể
-          // (thường là Get.to(() => ProductDetailScreen(product: product)));
+          Get.to(() => ProductDetail(product: product));
           // Hoặc hiển thị bottom sheet chọn variation
         }
       },

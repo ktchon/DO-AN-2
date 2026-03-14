@@ -44,12 +44,12 @@ class CartController extends GetxController {
     // Kiểm tra tình trạng tồn kho
     if (product.productType == ProductType.variable.toString()) {
       if (variationController.selectedVariation.value.stock < 1) {
-        CLoaders.warningSnackBar(message: 'Biến thể bạn chọn đã hết hàng.', title: 'Ối!');
+        CLoaders.warningSnackBar(message: 'Biến thể bạn chọn đã hết hàng.', title: 'Lỗi!');
         return;
       }
     } else {
       if (product.stock < 1) {
-        CLoaders.warningSnackBar(message: 'Sản phẩm này đã hết hàng.', title: 'Ối!');
+        CLoaders.warningSnackBar(message: 'Sản phẩm này đã hết hàng.', title: 'Lỗi!');
         return;
       }
     }
@@ -216,5 +216,50 @@ class CartController extends GetxController {
     productQuantityInCart.value = 0;
     cartItems.clear();
     updateCart();
+  }
+
+  /// Cập nhật số lượng sản phẩm đã được thêm vào giỏ hàng.
+  void updateAlreadyAddedProductCount(ProductModel product) {
+    // Nếu sản phẩm KHÔNG có biến thể (single product) → lấy tổng số lượng trong giỏ
+    // Nếu có biến thể → chỉ hiển thị số lượng khi người dùng đã chọn 1 biến thể cụ thể,
+    // còn chưa chọn thì mặc định là 0.
+    if (product.productType == ProductType.single.toString()) {
+      productQuantityInCart.value = getProductQuantityInCart(product.id);
+    } else {
+      // Lấy ID của biến thể đang được chọn (nếu có)
+      final variationId = variationController.selectedVariation.value.id;
+
+      if (variationId.isNotEmpty) {
+        // Đã chọn biến thể → lấy số lượng của biến thể đó trong giỏ
+        productQuantityInCart.value = getVariationQuantityInCart(product.id, variationId);
+      } else {
+        // Chưa chọn biến thể nào → hiển thị 0
+        productQuantityInCart.value = 0;
+      }
+    }
+  }
+
+  void addOrderItemsToCart(List<CartItemModel> items) {
+    for (var item in items) {
+      int index = cartItems.indexWhere(
+        (cartItem) =>
+            cartItem.productId == item.productId && cartItem.variationId == item.variationId,
+      );
+
+      if (index >= 0) {
+        /// Nếu đã có trong giỏ → cộng thêm số lượng
+        cartItems[index].quantity += item.quantity;
+      } else {
+        /// Nếu chưa có → thêm mới
+        cartItems.add(item);
+      }
+    }
+
+    updateCart();
+
+    CLoaders.successSnackBar(
+      title: "Thành công",
+      message: "Sản phẩm đã được thêm lại vào giỏ hàng",
+    );
   }
 }

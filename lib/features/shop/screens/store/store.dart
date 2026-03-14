@@ -6,6 +6,7 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:shop_app/common/widgets/appbar/tabbar.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/search_container.dart';
 import 'package:shop_app/common/widgets/icons/cart_counter_icon.dart';
+import 'package:shop_app/common/widgets/icons/order_icon.dart';
 import 'package:shop_app/common/widgets/layouts/grid_layout.dart';
 import 'package:shop_app/common/widgets/shimmer/brand_shimmer.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
@@ -15,6 +16,7 @@ import 'package:shop_app/features/shop/controllers/category_controller.dart';
 import 'package:shop_app/features/shop/screens/brands/all_brands.dart';
 import 'package:shop_app/features/shop/screens/brands/product_brand.dart';
 import 'package:shop_app/features/shop/screens/cart/cart.dart';
+import 'package:shop_app/features/shop/screens/order/order.dart';
 import 'package:shop_app/features/shop/screens/store/widgets/category_tab.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 import 'package:shop_app/utils/constants/colors.dart';
@@ -37,6 +39,7 @@ class StoreScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
           ),
           actions: [
+            OrderCounterIcon(onPressed: () => Get.to(OrderScreen())),
             Padding(
               padding: EdgeInsetsGeometry.only(right: 10),
               child: CartCounterIcon(onPressed: () => Get.to(() => CartItemScreen())),

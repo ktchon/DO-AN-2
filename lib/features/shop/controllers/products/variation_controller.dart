@@ -2,6 +2,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/controllers/products/image_controller.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
 import 'package:shop_app/features/shop/models/product_variation_model.dart';
@@ -31,9 +32,18 @@ class VariationController extends GetxController {
       ImagesController.instance.selectedProductImage.value = selectedVariation.image;
     }
 
+    /// Hiển thị số lượng của biến thể đã chọn (nếu có) trong giỏ hàng.
+    /// Nếu chưa chọn biến thể → thường đặt về 0 (hoặc không hiển thị badge).
+    if (selectedVariation.id.isNotEmpty) {
+      final cartController = CartController.instance; // Hoặc Get.find<CartController>()
+      // Cập nhật số lượng của biến thể cụ thể này trong giỏ
+      cartController.productQuantityInCart.value = cartController.getVariationQuantityInCart(
+        product.id,
+        selectedVariation.id,
+      );
+    }
     // Gán biến thể đã chọn
     this.selectedVariation.value = selectedVariation;
-
     getProductVariationStockStatus();
   }
 

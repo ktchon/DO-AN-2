@@ -5,8 +5,9 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 
 class CartCounterIcon extends StatelessWidget {
-  const CartCounterIcon({super.key, this.onPressed});
+  const CartCounterIcon({super.key, this.onPressed, this.colorCart = false});
   final void Function()? onPressed;
+  final bool colorCart;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,11 @@ class CartCounterIcon extends StatelessWidget {
       children: [
         IconButton(
           onPressed: onPressed,
-          icon: Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 28),
+          icon: Icon(
+            Icons.shopping_cart_outlined,
+            color: colorCart ? Colors.green : Colors.white,
+            size: 28,
+          ),
         ),
         Positioned(
           right: 2,

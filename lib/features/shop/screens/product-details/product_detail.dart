@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:readmore/readmore.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/circular_container.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
+import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
 import 'package:shop_app/features/shop/models/share_product_model.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_attributes.dart';
@@ -12,6 +14,7 @@ import 'package:shop_app/features/shop/screens/product-details/widgets/product_d
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_meta_data.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/rating_and_share.dart';
 import 'package:shop_app/features/shop/screens/product_reviews/product_reviews_rating.dart';
+import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/constants/enums.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 
@@ -20,42 +23,72 @@ class ProductDetail extends StatelessWidget {
   final ProductModel product;
   @override
   Widget build(BuildContext context) {
+    final controller = CartController.instance;
     return Scaffold(
       bottomNavigationBar: Container(
         padding: EdgeInsets.symmetric(horizontal: 20),
-        height: 60,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                CircularContainer(
-                  width: 25,
-                  height: 25,
-                  child: Icon(Icons.remove),
-                  backgroundColor: Colors.grey,
-                  padding: EdgeInsets.all(0),
-                ),
-                SizedBox(width: 6),
-                Text('2', style: TextStyle(fontSize: 16)),
-                SizedBox(width: 6),
-                CircularContainer(
-                  width: 25,
-                  height: 25,
-                  child: Icon(Icons.add),
-                  backgroundColor: Colors.grey,
-                  padding: EdgeInsets.all(0),
-                ),
-              ],
-            ),
-            SizedBox(
-              width: 140,
-              child: ElevatedButton(
-                onPressed: () {},
-                child: Text('Thêm vào giỏ hàng', style: TextStyle(fontSize: 13)),
+        height: 120,
+        child: Obx(
+          () => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  CircularContainer(
+                    width: 25,
+                    height: 25,
+                    onPressed: () => controller.productQuantityInCart.value < 1
+                        ? null
+                        : controller.productQuantityInCart.value -= 1,
+                    backgroundColor: Colors.grey,
+                    padding: EdgeInsets.all(0),
+                    child: Icon(Icons.remove),
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    controller.productQuantityInCart.value.toString(),
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  SizedBox(width: 6),
+                  CircularContainer(
+                    width: 25,
+                    height: 25,
+                    onPressed: () => controller.productQuantityInCart.value += 1,
+                    backgroundColor: Colors.grey,
+                    padding: EdgeInsets.all(0),
+                    child: Icon(Icons.add),
+                  ),
+                ],
               ),
-            ),
-          ],
+              Row(
+                children: [
+                  Container(
+                    width: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: const Color.fromARGB(255, 244, 252, 245)),
+                    child: SizedBox(
+                      width: 30,
+                      child: IconButton(
+                        onPressed: controller.productQuantityInCart.value < 1
+                            ? null
+                            : () => controller.addToCart(product),
+                        icon: Icon(Icons.add_shopping_cart, size: 30, color: TColors.buttonPrimary),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 20),
+                  SizedBox(
+                    width: 160,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      child: Text('Mua ngay', style: TextStyle(fontSize: 13)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       body: SingleChildScrollView(

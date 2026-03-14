@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shop_app/common/widgets/appbar/appbar.dart';
 import 'package:shop_app/common/widgets/icons/cart_counter_icon.dart';
+import 'package:shop_app/common/widgets/icons/order_icon.dart';
 import 'package:shop_app/common/widgets/shimmer/shimmer.dart';
 import 'package:shop_app/features/personalization/controllers/user/user_controller.dart';
 import 'package:shop_app/features/shop/screens/cart/cart.dart';
+import 'package:shop_app/features/shop/screens/order/order.dart';
 
 class HomeAppbar extends StatelessWidget {
   const HomeAppbar({super.key});
@@ -32,7 +34,10 @@ class HomeAppbar extends StatelessWidget {
           }),
         ],
       ),
-      actions: [CartCounterIcon(onPressed: () => Get.to(() => CartItemScreen()))],
+      actions: [
+        OrderCounterIcon(onPressed: () => Get.to(OrderScreen())),
+        CartCounterIcon(onPressed: () => Get.to(() => CartItemScreen())),
+      ],
     );
   }
 }

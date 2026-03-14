@@ -6,10 +6,12 @@ import 'package:shop_app/common/widgets/appbar/appbar.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/primary_header_container.dart';
 import 'package:shop_app/common/widgets/list_titles/settings_menu_tile.dart';
 import 'package:shop_app/common/widgets/list_titles/user_profile_tile.dart';
+import 'package:shop_app/common/widgets/products/cart/cart_item.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
 import 'package:shop_app/data/repositories/authentication/authentication_repository.dart';
 import 'package:shop_app/features/personalization/screens/address/address.dart';
 import 'package:shop_app/features/personalization/screens/settings/test_upload/test_upload.dart';
+import 'package:shop_app/features/shop/screens/cart/cart.dart';
 import 'package:shop_app/features/shop/screens/order/order.dart';
 
 class SettingScreen extends StatelessWidget {
@@ -56,7 +58,7 @@ class SettingScreen extends StatelessWidget {
                 title: 'Giỏ hàng của tôi',
                 subTitle: 'Thêm, xóa sản phẩm và chuyển sang thanh toán',
                 icon: Iconsax.shopping_bag_copy,
-                onTap: () {},
+                onTap: () => Get.to(() => CartItemScreen()),
               ),
               SettingMenuTile(
                 title: 'Đơn hàng của tôi',
