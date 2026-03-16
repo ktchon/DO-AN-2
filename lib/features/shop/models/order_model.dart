@@ -15,6 +15,7 @@ class OrderModel {
   final DateTime? deliveryDate;
   final String? cancelReason;
   final List<CartItemModel> items;
+  final String paymentNote;
 
   OrderModel({
     required this.id,
@@ -27,6 +28,7 @@ class OrderModel {
     this.deliveryDate,
     required this.items,
     this.cancelReason,
+    required this.paymentNote,
   });
 
   // Getter formatted date
@@ -58,6 +60,7 @@ class OrderModel {
       'totalAmount': totalAmount,
       'orderDate': Timestamp.fromDate(orderDate),
       'paymentMethod': paymentMethod,
+      "paymentNote": paymentNote,
       'address': address?.toJson(),
       'deliveryDate': deliveryDate != null ? Timestamp.fromDate(deliveryDate!) : null,
       'cancelReason': cancelReason,
@@ -79,6 +82,7 @@ class OrderModel {
       totalAmount: (data['totalAmount'] as num?)?.toDouble() ?? 0.0,
       orderDate: (data['orderDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
       paymentMethod: data['paymentMethod'] as String? ?? 'COD',
+      paymentNote: data['paymentNote'] as String,
       cancelReason: data['cancelReason'] as String?,
       address: data['address'] != null
           ? AddressModel.fromMap(data['address'] as Map<String, dynamic>)
@@ -105,6 +109,7 @@ class OrderModel {
       deliveryDate: deliveryDate,
       cancelReason: cancelReason ?? this.cancelReason,
       items: items,
+      paymentNote: paymentNote,
     );
   }
 }

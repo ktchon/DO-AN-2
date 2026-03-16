@@ -33,7 +33,7 @@ class OrderDetailScreen extends StatelessWidget {
                     children: [
                       const Icon(Iconsax.receipt_2),
                       const SizedBox(width: 10),
-                      Text("Mã đơn: ${order.id}"),
+                      Text("Mã đơn: ${order.id}"), 
                     ],
                   ),
 

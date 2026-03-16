@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -28,7 +29,7 @@ class OrderController extends GetxController {
   final orderRepository = Get.put(OrderRepository());
 
   // Danh sách đơn hàng (observable để UI tự update)
-  final RxInt noOfOrderItems = 0.obs; 
+  final RxInt noOfOrderItems = 0.obs;
   RxList<OrderModel> userOrders = <OrderModel>[].obs;
 
   /// Lấy lịch sử đơn hàng của người dùng hiện tại
@@ -36,6 +37,8 @@ class OrderController extends GetxController {
     try {
       final orders = await orderRepository.fetchUserOrders();
       userOrders.assignAll(orders); // cập nhật RxList để UI reactive
+      /// cập nhật số đơn hàng
+      noOfOrderItems.value = orders.length;
       return orders;
     } catch (e) {
       CLoaders.warningSnackBar(title: 'Có lỗi xảy ra!', message: e.toString());
@@ -74,11 +77,11 @@ class OrderController extends GetxController {
         address: addressController.selectedAddress.value,
         deliveryDate: DateTime.now().add(const Duration(days: 3)),
         items: cartController.cartItems.toList(),
+        paymentNote: '',
       );
 
       // Lưu đơn hàng vào Firestore
       await orderRepository.saveOrder(order, userId);
-
       // Xóa giỏ hàng sau khi đặt thành công
       cartController.clearCart();
 
@@ -91,7 +94,7 @@ class OrderController extends GetxController {
           onPressed: () => Get.offAll(() => NavigationMenu()),
           width: 150,
           height: 150,
-          title: 'Thanh Toán Thành Công',
+          title: 'Đặt hàng Thành Công',
           subTitle: 'Sản phẩm của bạn sẽ được giao đến nơi từ 3-5 ngày',
           animationJson: 'assets/logo/Success.json',
           check: false,
@@ -216,5 +219,65 @@ class OrderController extends GetxController {
     }
 
     return {'totalPrice': calculatedTotalPrice, 'totalItems': calculatedNoOfItems};
+  }
+
+  Future<void> createPendingOrder(double amount, String paymentNote) async {
+    final userId = AuthenticationRepository.instance.authUser!.uid;
+
+    final order = OrderModel(
+      id: paymentNote,
+      userId: userId,
+      status: OrderStatus.pending,
+      totalAmount: amount,
+      orderDate: DateTime.now(),
+      paymentMethod: "bank_transfer",
+      paymentNote: paymentNote,
+      address: addressController.selectedAddress.value,
+      deliveryDate: DateTime.now().add(const Duration(days: 3)),
+      items: cartController.cartItems.toList(),
+    );
+
+    try {
+      // 1. Lưu order chính vào subcollection
+      await orderRepository.saveOrder(order, userId);
+
+      // 2. Lưu mapping root-level để webhook query nhanh
+      await FirebaseFirestore.instance
+          .collection(
+            "OrderIds",
+          ) // tên collection root-level, bạn có thể đổi thành "PaymentMappings" nếu thích
+          .doc(paymentNote) // doc ID chính là ORDERxxxx (unique)
+          .set({
+            'userId': userId,
+            'orderId': paymentNote,
+            'createdAt': FieldValue.serverTimestamp(),
+            'totalAmount': amount, // optional, để webhook check nhanh nếu cần
+            'status': 'pending', // optional, để dễ quản lý sau này
+          });
+
+      print("Đã lưu mapping OrderIds cho: $paymentNote");
+    } catch (e) {
+      print("Lỗi khi tạo pending order hoặc mapping: $e");
+      // Nếu muốn, bạn có thể throw hoặc xử lý lỗi ở đây
+      // Ví dụ: throw Exception("Không thể tạo đơn hàng");
+    }
+  }
+
+  Future<void> cancelPendingOrder(String paymentNote) async {
+    final userId = AuthenticationRepository.instance.authUser?.uid;
+    if (userId == null) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(userId)
+          .collection("Orders")
+          .doc(paymentNote)
+          .delete();
+      userOrders.removeWhere((o) => o.id == paymentNote);
+      userOrders.refresh();
+    } catch (e) {
+      CLoaders.errorSnackBar(title: "Lỗi", message: e.toString());
+    }
   }
 }

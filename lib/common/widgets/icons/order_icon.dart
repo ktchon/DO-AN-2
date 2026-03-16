@@ -13,34 +13,37 @@ class OrderCounterIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     // final dark = THelperFunctions.isDarkMode(context);
     final controller = Get.put(OrderController());
-    return Stack(
-      children: [
-        IconButton(
-          onPressed: onPressed,
-          icon: Icon(Iconsax.receipt_2_copy, color: Colors.white, size: 28),
-        ),
-        Positioned(
-          right: 8,
-          top: 5,
-          child: Container(
-            height: 8,
-            width: 8,
-            decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(100)),
-            child: Center(
-              child: Obx(
-                () => controller.noOfOrderItems.toString() != null
-                    ? Text(
-                        '.',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.labelLarge!.apply(color: Colors.white, fontSizeFactor: 0.8),
-                      )
-                    : Text(''),
+    return Obx(
+      () => Stack(
+        children: [
+          IconButton(
+            onPressed: onPressed,
+            icon: Icon(Iconsax.receipt_2_copy, color: Colors.white, size: 28),
+          ),
+          if (controller.noOfOrderItems.value > 0)
+            Positioned(
+              right: 8,
+              top: 5,
+              child: Container(
+                height: 8,
+                width: 8,
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Center(
+                  child: Text(
+                    '.',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelLarge!.apply(color: Colors.white, fontSizeFactor: 0.8),
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ],
+          SizedBox(),
+        ],
+      ),
     );
   }
 }

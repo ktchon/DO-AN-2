@@ -16,10 +16,7 @@ class CheckoutController extends GetxController {
   @override
   void onInit() {
     // Giá trị mặc định khi khởi tạo
-    selectedPaymentMethod.value = PaymentMethodModel(
-      name: 'COD',
-      image: 'assets/logo/google-logo.png',
-    );
+    selectedPaymentMethod.value = PaymentMethodModel(name: 'COD', image: 'assets/logo/cod.png');
     super.onInit();
   }
 
@@ -40,30 +37,27 @@ class CheckoutController extends GetxController {
 
               // Danh sách phương thức
               CPaymentTile(
-                paymentMethod: PaymentMethodModel(
-                  name: 'Paypal',
-                  image: 'assets/logo/logo-paypal.png',
-                ),
+                paymentMethod: PaymentMethodModel(name: 'COD', image: 'assets/logo/cod.png'),
               ),
               SizedBox(height: 20),
               CPaymentTile(
                 paymentMethod: PaymentMethodModel(
                   name: 'Chuyển khoản ngân hàng',
-                  image: 'assets/logo/logo-paypal.png',
+                  image: 'assets/logo/qr-code.png',
                 ),
               ),
               SizedBox(height: 20),
               CPaymentTile(
                 paymentMethod: PaymentMethodModel(
                   name: 'MoMo',
-                  image: 'assets/logo/logo-paypal.png',
+                  image: 'assets/logo/MOMO-Logo-App.png',
                 ),
               ),
               SizedBox(height: 20),
               CPaymentTile(
                 paymentMethod: PaymentMethodModel(
                   name: 'Thẻ thanh toán',
-                  image: 'assets/logo/logo-paypal.png',
+                  image: 'assets/logo/logo-atm.png',
                 ),
               ),
               SizedBox(height: 20),

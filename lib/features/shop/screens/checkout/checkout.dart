@@ -4,13 +4,13 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_container.dart';
 import 'package:shop_app/common/widgets/products/cart/coupon_widget.dart';
-import 'package:shop_app/common/widgets/success_screen/success_screen.dart';
 import 'package:shop_app/features/shop/controllers/order_controller.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/screens/cart/widgets/cart_items.dart';
 import 'package:shop_app/features/shop/screens/checkout/widgets/billing_amount_section.dart';
 import 'package:shop_app/features/shop/screens/checkout/widgets/billing_payment_section.dart';
 import 'package:shop_app/features/shop/screens/checkout/widgets/billinng_address_section.dart';
+import 'package:shop_app/features/shop/screens/payment/qr_payment.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/helpers/pricing_calculator.dart';
@@ -73,7 +73,18 @@ class CheckoutScreen extends StatelessWidget {
         padding: EdgeInsets.all(20),
         child: ElevatedButton(
           onPressed: subTotal > 0
-              ? () => orderController.processOrder(totalAmount)
+              ? () async {
+                  final paymentMethod =
+                      orderController.checkoutController.selectedPaymentMethod.value.name;
+
+                  if (paymentMethod == "Chuyển khoản ngân hàng") {
+                    Get.to(() => QRPaymentScreen(amount: totalAmount));
+                  }
+                  /// COD
+                  else {
+                    await orderController.processOrder(totalAmount);
+                  }
+                }
               : () => CLoaders.errorSnackBar(
                   title: 'Giỏ hàng trống',
                   message: 'Vui lòng thêm sản phẩm vào giỏ hàng để tiếp tục thanh toán.',

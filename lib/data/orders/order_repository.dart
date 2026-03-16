@@ -34,9 +34,12 @@ class OrderRepository extends GetxController {
       if (userId.isEmpty) {
         throw 'User ID không hợp lệ.';
       }
-
-      await _db.collection('Users').doc(userId).collection('Orders').add(order.toJson());
-      // Nếu muốn tự set document ID thì dùng .doc(order.id).set(order.toJson());
+      await _db
+          .collection('Users')
+          .doc(userId)
+          .collection('Orders')
+          .doc(order.id)
+          .set(order.toJson());
     } catch (e) {
       // Có thể log lỗi
       throw 'Có lỗi xảy ra khi lưu đơn hàng. Vui lòng thử lại sau.';
