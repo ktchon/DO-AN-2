@@ -31,29 +31,52 @@ class SuccessScreen extends StatelessWidget {
           padding: padding,
           child: Column(
             children: [
-              // hình ảnh (Image hoặc Lottie)
-              check
-                  ? Image(image: AssetImage(image!), width: width, height: height)
-                  : Lottie.asset(animationJson!, width: width, height: height, repeat: false),
+              // Hình ảnh hoặc Animation - check null an toàn
+              if (check)
+                // Nếu check = true → ưu tiên hiển thị image nếu có, fallback animation nếu không
+                (image != null
+                    ? Image(
+                        image: AssetImage(image!),
+                        width: width,
+                        height: height,
+                        fit: BoxFit.contain,
+                      )
+                    : (animationJson != null
+                          ? Lottie.asset(
+                              animationJson!,
+                              width: width,
+                              height: height,
+                              repeat: false,
+                            )
+                          : const Icon(Icons.check_circle, size: 150, color: Colors.green)))
+              else
+                // Nếu check = false → chỉ hiển thị animation nếu có
+                (animationJson != null
+                    ? Lottie.asset(animationJson!, width: width, height: height, repeat: false)
+                    : const Icon(Icons.check_circle, size: 150, color: Colors.green)),
 
-              // văn bản
-              
+              const SizedBox(height: 32),
+
+              // Tiêu đề
               Text(
                 title,
                 style: Theme.of(context).textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
+
+              // Phụ đề
               Text(
                 subTitle,
                 style: Theme.of(context).textTheme.labelMedium,
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 32),
-              //nút
+              const SizedBox(height: 32),
+
+              // Nút
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(onPressed: onPressed, child: Text("Tiếp theo")),
+                child: ElevatedButton(onPressed: onPressed, child: const Text("Tiếp theo")),
               ),
             ],
           ),

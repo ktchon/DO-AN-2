@@ -12,36 +12,44 @@ class CartItems extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cartController = CartController.instance;
-    return ListView.separated(
-      shrinkWrap: true,
-      separatorBuilder: (_, __) => SizedBox(height: 12),
-      itemCount: cartController.cartItems.length,
-      itemBuilder: (_, index) => Obx(() {
-        final item = cartController.cartItems[index];
-        return Column(
-          children: [
-            CartItem(cartItem: item),
-            if (showAddRemoveButton)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      SizedBox(width: 66),
-                      ProductQuantityWithAddRemoveButton(
-                        quantity: item.quantity,
-                        remove: () => cartController.removeOneFromCart(item),
-                        add: () => cartController.addOneToCart(item),
-                      ),
-                    ],
-                  ),
-                  ProductPriceText(price: (item.price * item.quantity), isLarge: false),
-                ],
-              ),
-            Divider(),
-          ],
-        );
-      }),
-    );
+
+    return Obx(() {
+      if (cartController.cartItems.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      return ListView.separated(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemCount: cartController.cartItems.length,
+        itemBuilder: (_, index) {
+          final item = cartController.cartItems[index];
+          return Column(
+            children: [
+              CartItem(cartItem: item),
+              if (showAddRemoveButton)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const SizedBox(width: 66),
+                        ProductQuantityWithAddRemoveButton(
+                          quantity: item.quantity,
+                          remove: () => cartController.removeOneFromCart(item),
+                          add: () => cartController.addOneToCart(item),
+                        ),
+                      ],
+                    ),
+                    ProductPriceText(price: (item.price * item.quantity), isLarge: false),
+                  ],
+                ),
+              const Divider(),
+            ],
+          );
+        },
+      );
+    });
   }
 }

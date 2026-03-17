@@ -1,9 +1,10 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 
 admin.initializeApp();
 const db = admin.firestore();
-
+// 1. Webhook Sepay
 exports.sepayWebhook = functions.https.onRequest(async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
@@ -80,4 +81,58 @@ exports.sepayWebhook = functions.https.onRequest(async (req, res) => {
     console.error("Lỗi webhook:", error.stack || error.message);
     return res.status(500).send("Internal Server Error: " + (error.message || 'Unknown error'));
   }
-});
+}
+);
+// 2. Tự động huỷ đơn hàng pending sau expireAt (trigger khi tạo order)
+exports.autoCancelExpiredOrders = onDocumentCreated(
+  'Users/{userId}/Orders/{orderId}',
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+
+    const data = snap.data();
+
+    // Chỉ xử lý nếu là pending và có expireAt
+    if (data.status !== 'pending' || !data.expireAt) {
+      return;
+    }
+
+    const expireAt = data.expireAt.toDate();
+    const now = new Date();
+    const delayMs = expireAt.getTime() - now.getTime();
+
+    if (delayMs <= 0) {
+      // Đã hết hạn ngay khi tạo
+      await snap.ref.update({
+        status: 'cancelled',
+        cancelReason: 'Hết thời gian thanh toán',
+        cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      await db.collection('OrderIds').doc(event.params.orderId).delete();
+
+      console.log(`Đơn hàng ${event.params.orderId} đã huỷ ngay khi tạo (hết hạn)`);
+      return;
+    }
+
+    // Lên lịch huỷ (setTimeout)
+    setTimeout(async () => {
+      try {
+        const currentSnap = await snap.ref.get();
+        if (currentSnap.exists && currentSnap.data().status === 'pending') {
+          await snap.ref.update({
+            status: 'cancelled',
+            cancelReason: 'Hết thời gian thanh toán (server)',
+            cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+
+          await db.collection('OrderIds').doc(event.params.orderId).delete();
+
+          console.log(`Đơn hàng ${event.params.orderId} đã tự động huỷ do hết hạn`);
+        }
+      } catch (err) {
+        console.error("Lỗi khi huỷ đơn hết hạn:", err);
+      }
+    }, delayMs);
+  }
+);

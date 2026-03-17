@@ -6,7 +6,6 @@ import 'package:shop_app/common/widgets/appbar/appbar.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/primary_header_container.dart';
 import 'package:shop_app/common/widgets/list_titles/settings_menu_tile.dart';
 import 'package:shop_app/common/widgets/list_titles/user_profile_tile.dart';
-import 'package:shop_app/common/widgets/products/cart/cart_item.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
 import 'package:shop_app/data/repositories/authentication/authentication_repository.dart';
 import 'package:shop_app/features/personalization/screens/address/address.dart';
@@ -29,7 +28,7 @@ class SettingScreen extends StatelessWidget {
                 // appbar
                 Appbar(
                   title: Text(
-                    'Account',
+                    'Tài khoản',
                     style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
                   ),
                 ),
@@ -45,7 +44,7 @@ class SettingScreen extends StatelessWidget {
               // Account settings
               Padding(
                 padding: EdgeInsets.all(20),
-                child: SectionHeading(textTitle: 'Account Settings', showActionButton: false),
+                child: SectionHeading(textTitle: 'Cài đặt tài khoản', showActionButton: false),
               ),
               // List title
               SettingMenuTile(
@@ -94,7 +93,7 @@ class SettingScreen extends StatelessWidget {
               // App settings
               Padding(
                 padding: EdgeInsets.all(20),
-                child: SectionHeading(textTitle: 'App Settings', showActionButton: false),
+                child: SectionHeading(textTitle: 'Cài đặt ứng dụng', showActionButton: false),
               ),
               // List title
               SettingMenuTile(

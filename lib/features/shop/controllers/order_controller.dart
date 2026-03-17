@@ -224,43 +224,33 @@ class OrderController extends GetxController {
   Future<void> createPendingOrder(double amount, String paymentNote) async {
     final userId = AuthenticationRepository.instance.authUser!.uid;
 
+    final now = DateTime.now();
+    final expireAt = now.add(const Duration(minutes: 1)); // 10 phút
+
     final order = OrderModel(
       id: paymentNote,
       userId: userId,
       status: OrderStatus.pending,
       totalAmount: amount,
-      orderDate: DateTime.now(),
+      orderDate: now,
       paymentMethod: "bank_transfer",
       paymentNote: paymentNote,
       address: addressController.selectedAddress.value,
-      deliveryDate: DateTime.now().add(const Duration(days: 3)),
+      deliveryDate: now.add(const Duration(days: 3)),
       items: cartController.cartItems.toList(),
+      expireAt: expireAt,
     );
 
-    try {
-      // 1. Lưu order chính vào subcollection
-      await orderRepository.saveOrder(order, userId);
+    await orderRepository.saveOrder(order, userId);
 
-      // 2. Lưu mapping root-level để webhook query nhanh
-      await FirebaseFirestore.instance
-          .collection(
-            "OrderIds",
-          ) // tên collection root-level, bạn có thể đổi thành "PaymentMappings" nếu thích
-          .doc(paymentNote) // doc ID chính là ORDERxxxx (unique)
-          .set({
-            'userId': userId,
-            'orderId': paymentNote,
-            'createdAt': FieldValue.serverTimestamp(),
-            'totalAmount': amount, // optional, để webhook check nhanh nếu cần
-            'status': 'pending', // optional, để dễ quản lý sau này
-          });
-
-      print("Đã lưu mapping OrderIds cho: $paymentNote");
-    } catch (e) {
-      print("Lỗi khi tạo pending order hoặc mapping: $e");
-      // Nếu muốn, bạn có thể throw hoặc xử lý lỗi ở đây
-      // Ví dụ: throw Exception("Không thể tạo đơn hàng");
-    }
+    // Lưu mapping OrderIds
+    await FirebaseFirestore.instance.collection("OrderIds").doc(paymentNote).set({
+      'userId': userId,
+      'orderId': paymentNote,
+      'createdAt': FieldValue.serverTimestamp(),
+      'totalAmount': amount,
+      'expireAt': Timestamp.fromDate(expireAt),
+    });
   }
 
   Future<void> cancelPendingOrder(String paymentNote) async {

@@ -13,7 +13,7 @@ class BrandCard extends StatelessWidget {
   final void Function()? onTap;
   @override
   Widget build(BuildContext context) {
-    final fixedImageUrl = fixEmulatorImageUrl(brand.image);
+    // final fixedImageUrl = fixEmulatorImageUrl(brand.image);
     return GestureDetector(
       onTap: onTap,
       child: RoundedContainer(
@@ -27,7 +27,7 @@ class BrandCard extends StatelessWidget {
             Flexible(
               child: CircularImage(
                 isNetworkImage: true,
-                image: fixedImageUrl,
+                image: brand.image,
                 overlayColor: THelperFunctions.isDarkMode(context) ? Colors.white : Colors.black,
               ),
             ),

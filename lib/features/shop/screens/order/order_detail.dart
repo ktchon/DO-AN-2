@@ -17,7 +17,16 @@ class OrderDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(OrderController());
     return Scaffold(
-      appBar: AppBar(title: const Text("Chi tiết đơn hàng")),
+      appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white, // màu icon back
+        ),
+        title: Text(
+          'Chi tiết đơn hàng',
+          style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
+        ),
+        backgroundColor: TColors.primary,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -33,7 +42,7 @@ class OrderDetailScreen extends StatelessWidget {
                     children: [
                       const Icon(Iconsax.receipt_2),
                       const SizedBox(width: 10),
-                      Text("Mã đơn: ${order.id}"), 
+                      Text("Mã đơn: ${order.id}"),
                     ],
                   ),
 
@@ -206,7 +215,7 @@ class OrderDetailScreen extends StatelessWidget {
                 ),
               ),
             SizedBox(height: 20),
-            if (order.status != OrderStatus.cancelled) 
+            if (order.status != OrderStatus.cancelled)
               SizedBox(
                 width: 200,
                 child: OutlinedButton(

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:shop_app/common/widgets/icons/cart_counter_icon.dart';
 import 'package:shop_app/common/widgets/icons/circular_icon.dart';
 import 'package:shop_app/common/widgets/layouts/grid_layout.dart';
 import 'package:shop_app/common/widgets/loaders/animation_loader.dart';
 import 'package:shop_app/common/widgets/products/product_card_vartical.dart';
 import 'package:shop_app/common/widgets/shimmer/vertical_product_shimmer.dart';
 import 'package:shop_app/features/shop/controllers/products/favourites_controller.dart';
-import 'package:shop_app/features/shop/models/product_model.dart';
-import 'package:shop_app/features/shop/screens/home/home.dart';
+import 'package:shop_app/features/shop/screens/cart/cart.dart';
 import 'package:shop_app/navigation_menu.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/helpers/cloud_helper_functions.dart';
@@ -29,6 +28,7 @@ class FavouriteScrenn extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
         ),
         actions: [
+          CartCounterIcon(onPressed: () => Get.to(() => CartItemScreen())),
           CircularIcon(
             backgroundColor: TColors.primary,
             icon: Icons.add,

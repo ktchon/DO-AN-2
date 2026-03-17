@@ -14,51 +14,55 @@ class CartItemScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cartController = CartController.instance;
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: IconThemeData(
-          color: Colors.white, // màu icon back
+    return Obx(
+      () => Scaffold(
+        appBar: AppBar(
+          iconTheme: IconThemeData(
+            color: Colors.white, // màu icon back
+          ),
+          title: Text(
+            'Giỏ hàng',
+            style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
+          ),
+          backgroundColor: TColors.primary,
         ),
-        title: Text(
-          'Giỏ hàng',
-          style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
-        ),
-        backgroundColor: TColors.primary,
-      ),
-      body: Obx(() {
-        // Widget hiển thị khi không tìm thấy sản phẩm (giỏ hàng trống)
-        final emptyWidget = CAnimationLoaderWidget(
-          text: 'Giỏ hàng đang TRỐNG.',
-          animation: 'assets/logo/shopping-cart.json',
-          showAction: true,
-          actionText: 'Đi mua sắm ngay nào!',
-          onActionPressed: () => Get.off(() => const NavigationMenu()),
-        );
-
-        if (cartController.cartItems.isEmpty) {
-          return emptyWidget;
-        } else {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-
-              /// --- Danh sách sản phẩm trong giỏ hàng ---
-              child: CartItems(),
-            ),
+        body: Obx(() {
+          // Widget hiển thị khi không tìm thấy sản phẩm (giỏ hàng trống)
+          final emptyWidget = CAnimationLoaderWidget(
+            text: 'Giỏ hàng đang TRỐNG.',
+            animation: 'assets/logo/shopping-cart.json',
+            showAction: true,
+            actionText: 'Đi mua sắm ngay nào!',
+            onActionPressed: () => Get.off(() => const NavigationMenu()),
           );
-        }
-      }),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.all(20),
-        child: cartController.cartItems.isEmpty
-            ? null
-            : ElevatedButton(
-                onPressed: () => Get.to(() => CheckoutScreen()),
-                child: Obx(() {
-                  final formattedTotal = TFormatter.formatVND(cartController.totalCartPrice.value);
-                  return Text('Thanh Toán $formattedTotal');
-                }),
+
+          if (cartController.cartItems.isEmpty) {
+            return emptyWidget;
+          } else {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+
+                /// --- Danh sách sản phẩm trong giỏ hàng ---
+                child: CartItems(),
               ),
+            );
+          }
+        }),
+        bottomNavigationBar: Padding(
+          padding: EdgeInsets.all(20),
+          child: cartController.cartItems.isEmpty
+              ? null
+              : ElevatedButton(
+                  onPressed: () => Get.to(() => CheckoutScreen()),
+                  child: Obx(() {
+                    final formattedTotal = TFormatter.formatVND(
+                      cartController.totalCartPrice.value,
+                    );
+                    return Text('Thanh Toán $formattedTotal');
+                  }),
+                ),
+        ),
       ),
     );
   }

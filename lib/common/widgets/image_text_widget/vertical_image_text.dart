@@ -30,6 +30,7 @@ class VerticalImageText extends StatelessWidget {
           mainAxisSize: MainAxisSize.min, 
           children: [
             CircularImage(
+              borderRadius: 16,
               image: image,
               fit: BoxFit.fitWidth,
               padding: 0,

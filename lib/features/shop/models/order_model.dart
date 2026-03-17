@@ -16,6 +16,7 @@ class OrderModel {
   final String? cancelReason;
   final List<CartItemModel> items;
   final String paymentNote;
+  final DateTime? expireAt;
 
   OrderModel({
     required this.id,
@@ -29,6 +30,7 @@ class OrderModel {
     required this.items,
     this.cancelReason,
     required this.paymentNote,
+    this.expireAt,
   });
 
   // Getter formatted date
@@ -65,6 +67,7 @@ class OrderModel {
       'deliveryDate': deliveryDate != null ? Timestamp.fromDate(deliveryDate!) : null,
       'cancelReason': cancelReason,
       'items': items.map((item) => item.toJson()).toList(),
+      'expireAt': expireAt != null ? Timestamp.fromDate(expireAt!) : null,
     };
   }
 
@@ -95,9 +98,10 @@ class OrderModel {
               ?.map((itemData) => CartItemModel.fromJson(itemData as Map<String, dynamic>))
               .toList() ??
           [],
+      expireAt: data['expireAt'] != null ? (data['expireAt'] as Timestamp).toDate() : null,
     );
   }
-  OrderModel copyWith({OrderStatus? status, String? cancelReason}) {
+  OrderModel copyWith({OrderStatus? status, String? cancelReason, DateTime? expireAt}) {
     return OrderModel(
       id: id,
       userId: userId,
@@ -110,6 +114,7 @@ class OrderModel {
       cancelReason: cancelReason ?? this.cancelReason,
       items: items,
       paymentNote: paymentNote,
+      expireAt: expireAt ?? this.expireAt,
     );
   }
 }

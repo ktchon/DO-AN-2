@@ -83,7 +83,7 @@ class CheckoutScreen extends StatelessWidget {
                   /// COD
                   else {
                     await orderController.processOrder(totalAmount);
-                  }
+                  } 
                 }
               : () => CLoaders.errorSnackBar(
                   title: 'Giỏ hàng trống',
@@ -92,6 +92,6 @@ class CheckoutScreen extends StatelessWidget {
           child: Text('Thanh Toán ${totalAmount}'),
         ),
       ),
-    );
+    ); 
   }
 }
