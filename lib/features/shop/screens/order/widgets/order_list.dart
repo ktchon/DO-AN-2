@@ -69,6 +69,9 @@ class OrderListItem extends StatelessWidget {
               case OrderStatus.paid:
                 statusColor = Colors.green;
                 break;
+              case OrderStatus.confirmed:
+                statusColor = Colors.green;
+                break;
               case OrderStatus.cancelled:
                 statusColor = Colors.red;
                 break;

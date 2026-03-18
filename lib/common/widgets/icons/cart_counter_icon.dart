@@ -17,15 +17,21 @@ class CartCounterIcon extends StatelessWidget {
       children: [
         IconButton(
           onPressed: onPressed,
-          icon: Icon(
-            Icons.shopping_cart_outlined,
+          icon: Image.asset(
+            'assets/logo/icon-cart.png',
+            width: 32,
+            height: 32,
             color: colorCart ? Colors.green : Colors.white,
-            size: 28,
           ),
+          //Icon(
+          //   Icons.shopping_cart_outlined,
+          //   color: colorCart ? Colors.green : Colors.white,
+          //   size: 28,
+          // ),
         ),
         Positioned(
-          right: 2,
-          top: 2,
+          right: 3,
+          top: 5,
           child: Container(
             height: 16,
             width: 16,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:shop_app/bindings/general_bindings.dart';
-import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/theme/theme.dart';
 
 class MyApp extends StatelessWidget {
@@ -17,8 +16,7 @@ class MyApp extends StatelessWidget {
       theme: TAppTheme.lightTheme,
       darkTheme: TAppTheme.darkTheme,
       home: Scaffold(
-        backgroundColor: TColors.primary,
-        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+        body: Center(child: CircularProgressIndicator(color: Colors.green)),
       ),
     );
   }

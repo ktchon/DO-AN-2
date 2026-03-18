@@ -108,7 +108,6 @@ class OrderController extends GetxController {
 
   Future<void> cancelOrder(OrderModel order, String reason) async {
     try {
-      /// Lấy userId
       final userId = AuthenticationRepository.instance.authUser?.uid;
 
       if (userId == null) {
@@ -116,16 +115,22 @@ class OrderController extends GetxController {
         return;
       }
 
-      /// Không cho huỷ nếu đã ship
-      if (order.status != OrderStatus.processing) {
-        CLoaders.warningSnackBar(title: "Không thể huỷ", message: "Đơn hàng đã được xử lý");
+      /// ✅ CHECK TRẠNG THÁI CHUẨN
+      final canCancel =
+          order.status == OrderStatus.pending || order.status == OrderStatus.confirmed;
+
+      if (!canCancel) {
+        CLoaders.warningSnackBar(
+          title: "Không thể huỷ",
+          message: "Đơn hàng đã được xử lý hoặc đang giao",
+        );
         return;
       }
 
       /// Loading
       CFullScreenLoader.openLoadingDialog("Đang huỷ đơn hàng...", "assets/logo/Loading.json");
 
-      /// Update Firestore
+      /// 🔥 CALL REPO (NÊN HANDLE HOÀN KHO Ở ĐÂY)
       await orderRepository.cancelOrder(userId: userId, orderId: order.id, reason: reason);
 
       /// Update local state
@@ -133,7 +138,6 @@ class OrderController extends GetxController {
 
       if (index != -1) {
         userOrders[index] = order.copyWith(status: OrderStatus.cancelled, cancelReason: reason);
-
         userOrders.refresh();
       }
 

@@ -35,7 +35,9 @@ class HomeAppbar extends StatelessWidget {
         ],
       ),
       actions: [
-        OrderCounterIcon(onPressed: () => Get.to(OrderScreen())),
+        Padding(
+          padding: EdgeInsets.only(top: 6),
+          child: OrderCounterIcon(onPressed: () => Get.to(OrderScreen()))),
         CartCounterIcon(onPressed: () => Get.to(() => CartItemScreen())),
       ],
     );

@@ -40,7 +40,12 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         //heading
-                        SectionHeading(textTitle: 'Danh mục', showActionButton: false),
+                        SectionHeading(
+                          textTitle: 'Danh mục',
+                          style: true,
+                          textColor: Colors.white,
+                          showActionButton: false,
+                        ),
                         SizedBox(height: 2),
                         // Danh mục
                         HomeCategories(),

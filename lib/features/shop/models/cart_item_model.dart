@@ -4,7 +4,7 @@ class CartItemModel {
   double price; // Giá của sản phẩm (sau khi áp dụng biến thể nếu có)
   String? image; // Link ảnh sản phẩm (có thể null)
   int quantity; // Số lượng trong giỏ hàng
-  String variationId; // ID của biến thể (màu sắc, kích cỡ,...) - mặc định rỗng nếu không có
+  String? variationId; // ID của biến thể (màu sắc, kích cỡ,...) - mặc định rỗng nếu không có
   String brandName; // Tên thương hiệu
   Map<String, String>?
   selectedVariation; // Các lựa chọn biến thể đã chọn (ví dụ: {'Màu': 'Đen', 'Size': 'M'})

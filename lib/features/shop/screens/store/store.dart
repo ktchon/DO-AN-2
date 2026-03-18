@@ -39,7 +39,6 @@ class StoreScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
           ),
           actions: [
-            OrderCounterIcon(onPressed: () => Get.to(OrderScreen())),
             Padding(
               padding: EdgeInsetsGeometry.only(right: 10),
               child: CartCounterIcon(onPressed: () => Get.to(() => CartItemScreen())),

@@ -18,7 +18,12 @@ class OrderCounterIcon extends StatelessWidget {
         children: [
           IconButton(
             onPressed: onPressed,
-            icon: Icon(Iconsax.receipt_2_copy, color: Colors.white, size: 28),
+            icon: Image.asset(
+              'assets/logo/order-logo.png',
+              width: 26,
+              height: 26,
+              color: Colors.white,
+            ),
           ),
           if (controller.noOfOrderItems.value > 0)
             Positioned(
