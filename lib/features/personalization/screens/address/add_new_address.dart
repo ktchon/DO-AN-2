@@ -29,6 +29,8 @@ class AddNewAddress extends StatelessWidget {
             child: Column(
               children: [
                 TextFormField(
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
                   controller: controller.name,
                   validator: (value) => CValidator.validateEmptyText('Tên', value),
                   decoration: InputDecoration(labelText: 'Tên', prefixIcon: Icon(Icons.person)),

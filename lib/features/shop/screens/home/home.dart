@@ -14,6 +14,7 @@ import 'package:shop_app/features/shop/screens/all_products/all_products.dart';
 import 'package:shop_app/features/shop/screens/home/widgets/home_appbar.dart';
 import 'package:shop_app/features/shop/screens/home/widgets/home_categories.dart';
 import 'package:shop_app/features/shop/screens/home/widgets/promo_slider.dart';
+import 'package:shop_app/features/shop/screens/search/search_page.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -32,7 +33,10 @@ class HomeScreen extends StatelessWidget {
                   HomeAppbar(),
                   SizedBox(height: 16),
                   // Thanh tìm kiếm
-                  SearchContainer(text: 'Tìm kiếm sản phẩm...'),
+                  GestureDetector(
+                    onTap: () => Get.to(() => SearchPage()),
+                    child: SearchContainer(text: 'Tìm kiếm sản phẩm...'),
+                  ),
                   SizedBox(height: 16),
                   // Danh mục
                   Padding(

@@ -32,33 +32,38 @@ class ProductDetail extends StatelessWidget {
           () => Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  CircularContainer(
-                    width: 25,
-                    height: 25,
-                    onPressed: () => controller.productQuantityInCart.value < 1
-                        ? null
-                        : controller.productQuantityInCart.value -= 1,
-                    backgroundColor: Colors.grey,
-                    padding: EdgeInsets.all(0),
-                    child: Icon(Icons.remove),
-                  ),
-                  SizedBox(width: 6),
-                  Text(
-                    controller.productQuantityInCart.value.toString(),
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(width: 6),
-                  CircularContainer(
-                    width: 25,
-                    height: 25,
-                    onPressed: () => controller.productQuantityInCart.value += 1,
-                    backgroundColor: Colors.grey,
-                    padding: EdgeInsets.all(0),
-                    child: Icon(Icons.add),
-                  ),
-                ],
+              Container(
+                decoration: BoxDecoration(color: TColors.grey, borderRadius: BorderRadius.circular(6)),
+                child: Row(
+                  children: [
+                    CircularContainer(
+                      radius: 6,
+                      width: 25,
+                      height: 25,
+                      onPressed: () => controller.productQuantityInCart.value < 1
+                          ? null
+                          : controller.productQuantityInCart.value -= 1,
+                      backgroundColor: TColors.grey,
+                      padding: EdgeInsets.all(0),
+                      child: Icon(Icons.remove),
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      controller.productQuantityInCart.value.toString(),
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                    ),
+                    SizedBox(width: 10),
+                    CircularContainer(
+                      radius: 6,
+                      width: 25,
+                      height: 25,
+                      onPressed: () => controller.productQuantityInCart.value += 1,
+                      backgroundColor: TColors.grey,
+                      padding: EdgeInsets.all(0),
+                      child: Icon(Icons.add),
+                    ),
+                  ],
+                ),
               ),
               Row(
                 children: [
@@ -66,13 +71,12 @@ class ProductDetail extends StatelessWidget {
                     width: 60,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      color: const Color.fromARGB(255, 244, 252, 245)),
+                      color: const Color.fromARGB(255, 244, 252, 245),
+                    ),
                     child: SizedBox(
                       width: 30,
                       child: IconButton(
-                        onPressed: controller.productQuantityInCart.value < 1
-                            ? null
-                            : () => controller.addToCart(product),
+                        onPressed: () => controller.addToCart(product),
                         icon: Icon(Icons.add_shopping_cart, size: 30, color: TColors.buttonPrimary),
                       ),
                     ),

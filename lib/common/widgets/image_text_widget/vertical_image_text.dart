@@ -27,22 +27,21 @@ class VerticalImageText extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.only(right: 20),
         child: Column(
-          mainAxisSize: MainAxisSize.min, 
+          mainAxisSize: MainAxisSize.min,
           children: [
             CircularImage(
+              width: 60,
               borderRadius: 16,
               image: image,
               fit: BoxFit.fitWidth,
               padding: 0,
               isNetworkImage: isNetworkImage,
               backgroundColor: backgroundColor,
-              overlayColor: THelperFunctions.isDarkMode(context)
-                  ? TColors.white
-                  : TColors.dark, // Màu overlay (lớp phủ) tự động theo theme dark/light
+              overlayColor: THelperFunctions.isDarkMode(context) ? TColors.white : TColors.dark,
             ),
             SizedBox(height: 8),
             SizedBox(
-              width: 55,
+              width: 60,
               child: Text(
                 title,
                 style: Theme.of(context).textTheme.labelMedium!.apply(color: textColor),

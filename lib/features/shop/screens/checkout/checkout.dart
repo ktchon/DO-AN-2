@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_container.dart';
 import 'package:shop_app/common/widgets/products/cart/coupon_widget.dart';
+import 'package:shop_app/features/personalization/controllers/address_controller.dart';
+import 'package:shop_app/features/shop/controllers/coupon/coupon_controller.dart';
 import 'package:shop_app/features/shop/controllers/order_controller.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/screens/cart/widgets/cart_items.dart';
@@ -11,6 +14,7 @@ import 'package:shop_app/features/shop/screens/checkout/widgets/billing_amount_s
 import 'package:shop_app/features/shop/screens/checkout/widgets/billing_payment_section.dart';
 import 'package:shop_app/features/shop/screens/checkout/widgets/billinng_address_section.dart';
 import 'package:shop_app/features/shop/screens/payment/qr_payment.dart';
+import 'package:shop_app/utils/formatters/formatter.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/helpers/pricing_calculator.dart';
@@ -31,7 +35,7 @@ class CheckoutScreen extends StatelessWidget {
           color: Colors.white, // màu icon back
         ),
         title: Text(
-          'Xem lại đơn hàng',
+          'Đơn hàng',
           style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
         ),
         backgroundColor: TColors.primary,
@@ -71,27 +75,47 @@ class CheckoutScreen extends StatelessWidget {
       ),
       bottomNavigationBar: Padding(
         padding: EdgeInsets.all(20),
-        child: ElevatedButton(
-          onPressed: subTotal > 0
-              ? () async {
-                  final paymentMethod =
-                      orderController.checkoutController.selectedPaymentMethod.value.name;
+        child: Obx(() {
+          final subTotal = cartController.totalCartPrice.value;
+          final discount = CouponController.instance.discount.value;
+          final totalAmount = CPricingCalculator.calculateTotalWithDiscount(
+            subTotal: subTotal,
+            discount: discount,
+            location: "Hồ Chí Minh",
+          );
+          return ElevatedButton(
+            onPressed: subTotal > 0
+                ? () async {
+                    // Biến
+                    final addressController = AddressController.instance;
+                    final paymentMethod =
+                        orderController.checkoutController.selectedPaymentMethod.value.name;
 
-                  if (paymentMethod == "Chuyển khoản ngân hàng") {
-                    Get.to(() => QRPaymentScreen(amount: totalAmount));
+                    /// ❌ Chưa có địa chỉ → chặn
+                    if (addressController.selectedAddress.value.id.isEmpty) {
+                      CLoaders.errorSnackBar(
+                        title: 'Thiếu thông tin',
+                        message: 'Vui lòng chọn hoặc nhập địa chỉ giao hàng',
+                      );
+                      return;
+                    }
+                    // QR
+                    if (paymentMethod == "Chuyển khoản ngân hàng") {
+                      Get.to(() => QRPaymentScreen(amount: totalAmount));
+                    }
+                    /// COD
+                    else {
+                      await orderController.processOrder(totalAmount);
+                    }
                   }
-                  /// COD
-                  else {
-                    await orderController.processOrder(totalAmount);
-                  } 
-                }
-              : () => CLoaders.errorSnackBar(
-                  title: 'Giỏ hàng trống',
-                  message: 'Vui lòng thêm sản phẩm vào giỏ hàng để tiếp tục thanh toán.',
-                ),
-          child: Text('Thanh Toán ${totalAmount}'),
-        ),
+                : () => CLoaders.errorSnackBar(
+                    title: 'Giỏ hàng trống',
+                    message: 'Vui lòng thêm sản phẩm vào giỏ hàng để tiếp tục thanh toán.',
+                  ),
+            child: Text('Thanh Toán ${TFormatter.formatVND(totalAmount)}'),
+          );
+        }),
       ),
-    ); 
+    );
   }
 }

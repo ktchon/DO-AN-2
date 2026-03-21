@@ -11,21 +11,16 @@ class CPricingCalculator {
 
   /// Tính phí vận chuyển
   static double getShippingCost(double productPrice, String location) {
-    /// Miễn phí vận chuyển nếu đơn > 500k
-    if (productPrice >= 500000) {
-      return 0;
-    }
+    if (productPrice >= 500000) return 0;
 
-    /// Nội thành
-    if (location.toLowerCase().contains("Hà Nội") ||
-        location.toLowerCase().contains("Hồ Chí Minh") ||
-        location.toLowerCase().contains("Hải Phòng") ||
-        location.toLowerCase().contains("Đà Nẵng") ||
-        location.toLowerCase().contains("Cần Thơ")) {
+    final loc = location.toLowerCase();
+
+    const bigCities = ["hà nội", "hồ chí minh", "hải phòng", "đà nẵng", "cần thơ"];
+
+    if (bigCities.any((city) => loc.contains(city))) {
       return 20000;
     }
 
-    /// Các tỉnh khác
     return 35000;
   }
 
@@ -43,5 +38,17 @@ class CPricingCalculator {
   /// Lấy phí ship
   static double calculateShippingCost(double productPrice, String location) {
     return getShippingCost(productPrice, location);
+  }
+
+  // Tính tổng giảm giá
+  static double calculateTotalWithDiscount({
+    required double subTotal,
+    required double discount,
+    required String location,
+  }) {
+    final shipping = calculateShippingCost(subTotal, location);
+    final tax = calculateTax(subTotal, 'VN');
+
+    return subTotal + shipping + tax - discount;
   }
 }

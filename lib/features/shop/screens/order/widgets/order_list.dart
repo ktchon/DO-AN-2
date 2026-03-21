@@ -11,8 +11,8 @@ import 'package:shop_app/features/shop/screens/cart/cart.dart';
 import 'package:shop_app/features/shop/screens/order/order_detail.dart';
 import 'package:shop_app/navigation_menu.dart';
 import 'package:shop_app/utils/constants/enums.dart';
+import 'package:shop_app/utils/formatters/formatter.dart';
 import 'package:shop_app/utils/helpers/cloud_helper_functions.dart';
-import 'package:shop_app/utils/helpers/helper_functions.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 
 class OrderListItem extends StatelessWidget {
@@ -21,7 +21,7 @@ class OrderListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(OrderController());
-    final dark = THelperFunctions.isDarkMode(context);
+    // final dark = THelperFunctions.isDarkMode(context);
     final cartController = CartController.instance;
     return FutureBuilder(
       future: controller.fetchUserOrders(),
@@ -80,7 +80,7 @@ class OrderListItem extends StatelessWidget {
             return RoundedContainer(
               showBorder: true,
               padding: const EdgeInsets.all(12),
-              backgroundColor: dark ? TColors.dark : TColors.grey,
+              borderColor: TColors.grey,
               child: Column(
                 children: [
                   /// PRODUCT ROW
@@ -89,9 +89,10 @@ class OrderListItem extends StatelessWidget {
                     children: [
                       /// IMAGE
                       Container(
-                        width: 70,
-                        height: 70,
+                        width: 90,
+                        height: 110,
                         decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 236, 235, 235),
                           borderRadius: BorderRadius.circular(8),
                           image: DecorationImage(
                             image: NetworkImage(firstItem.image ?? ''),
@@ -151,7 +152,7 @@ class OrderListItem extends StatelessWidget {
                               children: [
                                 Text("Tổng tiền: ", style: Theme.of(context).textTheme.labelLarge),
                                 Text(
-                                  "${order.totalAmount}đ",
+                                  "${TFormatter.formatVND(order.totalAmount)}",
                                   style: Theme.of(
                                     context,
                                   ).textTheme.labelLarge!.apply(color: Colors.green),
@@ -177,12 +178,16 @@ class OrderListItem extends StatelessWidget {
                           order.status == OrderStatus.cancelled)
                         SizedBox(
                           width: 80,
-                          child: OutlinedButton(
+                          height: 40,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
                             onPressed: () {
                               cartController.addOrderItemsToCart(order.items);
                               Get.to(() => const CartItemScreen());
                             },
-                            child: const Text("Mua lại"),
+                            child: const Text("Mua lại", style: TextStyle(fontSize: 12)),
                           ),
                         ),
                     ],

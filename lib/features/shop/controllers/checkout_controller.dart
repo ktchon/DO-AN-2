@@ -4,6 +4,8 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
+import 'package:shop_app/features/personalization/controllers/address_controller.dart';
+import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/models/payment_method_model.dart';
 import 'package:shop_app/features/shop/screens/checkout/widgets/payment_title.dart';
 
@@ -12,11 +14,14 @@ class CheckoutController extends GetxController {
 
   // Rx variable để theo dõi phương thức thanh toán đã chọn
   final Rx<PaymentMethodModel> selectedPaymentMethod = PaymentMethodModel.emmpty().obs;
+  final cartController = CartController.instance;
+  double get subTotal => cartController.totalCartPrice.value;
 
   @override
   void onInit() {
     // Giá trị mặc định khi khởi tạo
     selectedPaymentMethod.value = PaymentMethodModel(name: 'COD', image: 'assets/logo/cod.png');
+    AddressController.instance.getAllUserAddresses();
     super.onInit();
   }
 

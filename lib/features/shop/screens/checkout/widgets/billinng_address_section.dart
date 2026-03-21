@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
@@ -60,7 +58,7 @@ class BillinngAddressSection extends StatelessWidget {
                     ),
                   ],
                 )
-              : Text('Thêm địa chỉ', style: Theme.of(context).textTheme.bodyMedium),
+              : Text('Vui lòng thêm địa chỉ giao hàng', style: TextStyle(color: Colors.red)),
         ),
       ],
     );

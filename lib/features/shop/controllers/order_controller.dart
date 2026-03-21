@@ -115,7 +115,7 @@ class OrderController extends GetxController {
         return;
       }
 
-      /// ✅ CHECK TRẠNG THÁI CHUẨN
+      /// CHECK TRẠNG THÁI
       final canCancel =
           order.status == OrderStatus.pending || order.status == OrderStatus.confirmed;
 
@@ -130,7 +130,7 @@ class OrderController extends GetxController {
       /// Loading
       CFullScreenLoader.openLoadingDialog("Đang huỷ đơn hàng...", "assets/logo/Loading.json");
 
-      /// 🔥 CALL REPO (NÊN HANDLE HOÀN KHO Ở ĐÂY)
+      /// CALL REPO
       await orderRepository.cancelOrder(userId: userId, orderId: order.id, reason: reason);
 
       /// Update local state
@@ -261,13 +261,74 @@ class OrderController extends GetxController {
     final userId = AuthenticationRepository.instance.authUser?.uid;
     if (userId == null) return;
 
+    final db = FirebaseFirestore.instance;
+
     try {
-      await FirebaseFirestore.instance
-          .collection("Users")
-          .doc(userId)
-          .collection("Orders")
-          .doc(paymentNote)
-          .delete();
+      await db.runTransaction((transaction) async {
+        final orderRef = db.collection("Users").doc(userId).collection("Orders").doc(paymentNote);
+
+        final orderSnap = await transaction.get(orderRef);
+
+        if (!orderSnap.exists) return;
+
+        final orderData = orderSnap.data();
+        if (orderData == null) return;
+
+        final List items = orderData['items'] ?? [];
+
+        /// 🔥 HOÀN STOCK + SOLD
+        for (final item in items) {
+          final productId = item['productId'];
+          final variationId = item['variationId'];
+          final quantity = item['quantity'];
+
+          final productRef = db.collection('Products').doc(productId);
+          final productSnap = await transaction.get(productRef);
+
+          if (!productSnap.exists) continue;
+
+          final productData = productSnap.data();
+          if (productData == null) continue;
+
+          final productType = productData['ProductType'] ?? 'ProductType.single';
+
+          /// ===== PRODUCT SINGLE =====
+          if (productType == 'ProductType.single') {
+            transaction.update(productRef, {
+              'Stock': FieldValue.increment(quantity),
+              'Sold': FieldValue.increment(-quantity),
+            });
+          }
+          /// ===== PRODUCT VARIATION =====
+          else {
+            if (variationId == null || variationId == '') continue;
+
+            final variations = List<Map<String, dynamic>>.from(
+              productData['ProductVariations'] ?? [],
+            );
+
+            final index = variations.indexWhere((v) => v['Id'] == variationId);
+            if (index == -1) continue;
+
+            final variation = variations[index];
+
+            variations[index] = {
+              ...variation,
+              'Stock': (variation['Stock'] ?? 0) + quantity,
+              'Sold': (variation['Sold'] ?? 0) - quantity,
+            };
+            transaction.update(productRef, {
+              'ProductVariations': variations,
+              'Sold': FieldValue.increment(-quantity),
+            });
+          }
+        }
+
+        /// 🔥 XOÁ ORDER
+        transaction.delete(orderRef);
+      });
+
+      /// update UI
       userOrders.removeWhere((o) => o.id == paymentNote);
       userOrders.refresh();
     } catch (e) {

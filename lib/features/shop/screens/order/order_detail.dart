@@ -7,6 +7,7 @@ import 'package:shop_app/features/shop/controllers/order_controller.dart';
 import 'package:shop_app/features/shop/models/order_model.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/constants/enums.dart';
+import 'package:shop_app/utils/formatters/formatter.dart';
 
 class OrderDetailScreen extends StatelessWidget {
   const OrderDetailScreen({super.key, required this.order});
@@ -35,7 +36,7 @@ class OrderDetailScreen extends StatelessWidget {
             RoundedContainer(
               padding: const EdgeInsets.all(16),
               showBorder: true,
-              backgroundColor: TColors.grey,
+              borderColor: TColors.grey,
               child: Column(
                 children: [
                   Row(
@@ -92,14 +93,16 @@ class OrderDetailScreen extends StatelessWidget {
 
                 return RoundedContainer(
                   padding: const EdgeInsets.all(10),
+                  borderColor: TColors.grey,
                   showBorder: true,
                   child: Row(
                     children: [
                       /// IMAGE
                       Container(
-                        width: 60,
-                        height: 60,
+                        width: 90,
+                        height: 110,
                         decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 236, 235, 235),
                           borderRadius: BorderRadius.circular(10),
                           image: DecorationImage(
                             image: NetworkImage(item.image ?? ''),
@@ -116,40 +119,43 @@ class OrderDetailScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(item.title ?? '', style: Theme.of(context).textTheme.titleMedium),
-
                             const SizedBox(height: 4),
-
-                            Row(
-                              children: [
-                                Text.rich(
-                                  TextSpan(
-                                    children: (item.selectedVariation ?? {}).entries
-                                        .map(
-                                          (e) => TextSpan(
-                                            children: [
-                                              // Tên thuộc tính (key) - chữ nhỏ, thường
-                                              TextSpan(
-                                                text: '${e.key}: ',
-                                                style: TextStyle(fontSize: 10, color: Colors.black),
-                                              ),
-                                              // Giá trị thuộc tính (value) - chữ đậm/lớn hơn
-                                              TextSpan(
-                                                text: '${e.value}  ',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
-                                                  fontSize: 11,
+                            if (item.selectedVariation != null &&
+                                item.selectedVariation!.isNotEmpty)
+                              Row(
+                                children: [
+                                  Text.rich(
+                                    TextSpan(
+                                      children: (item.selectedVariation ?? {}).entries
+                                          .map(
+                                            (e) => TextSpan(
+                                              children: [
+                                                // Tên thuộc tính (key) - chữ nhỏ, thường
+                                                TextSpan(
+                                                  text: '${e.key}: ',
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    color: Colors.black,
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                        .toList(),
+                                                // Giá trị thuộc tính (value) - chữ đậm/lớn hơn
+                                                TextSpan(
+                                                  text: '${e.value}  ',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black,
+                                                    fontSize: 11,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
                                   ),
-                                ),
-                                SizedBox(width: 5),
-                              ],
-                            ),
+                                  SizedBox(width: 5),
+                                ],
+                              ),
                             const SizedBox(height: 4),
 
                             Text(
@@ -160,7 +166,7 @@ class OrderDetailScreen extends StatelessWidget {
                             const SizedBox(height: 4),
 
                             Text(
-                              "${item.price}đ",
+                              "${TFormatter.formatVND(item.price)}",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.red,
@@ -186,11 +192,11 @@ class OrderDetailScreen extends StatelessWidget {
                 children: [
                   Text(
                     "Tổng tiền:",
-                    style: Theme.of(context).textTheme.displayMedium!.apply(color: Colors.black),
+                    style: Theme.of(context).textTheme.headlineSmall!.apply(color: Colors.black),
                   ),
 
                   Text(
-                    "${order.totalAmount}đ",
+                    "${TFormatter.formatVND(order.totalAmount)}",
                     style: Theme.of(context).textTheme.titleLarge!.apply(color: Colors.green),
                   ),
                 ],

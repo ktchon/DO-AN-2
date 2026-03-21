@@ -48,6 +48,12 @@ class OrderModel {
         return 'Shipment on the way';
       case OrderStatus.cancelled:
         return 'Cancelled';
+      case OrderStatus.pending:
+        return 'Pending';
+      case OrderStatus.paid:
+        return 'Paid';
+      case OrderStatus.confirmed:
+        return 'Confirmed';
       default:
         return 'Processing';
     }

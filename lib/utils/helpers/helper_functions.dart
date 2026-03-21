@@ -188,4 +188,15 @@ class THelperFunctions {
 
     return age;
   }
+
+  static String removeDiacritics(String str) {
+    var withDia =
+        'àáâãèéêìíòóôõùúýỳỹỷỵụủữữựửữừứừửưăắằẳẵặâầấẩẫậèẻẽẹếềểễệìỉĩịòỏõọốồổỗộớờởỡợùủũụủứừửữựýỷỹỵ';
+    var withoutDia =
+        'aaaaaaaaaeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyuaaaaaaaaaaaeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyy';
+    for (int i = 0; i < withDia.length; i++) {
+      str = str.replaceAll(withDia[i], withoutDia[i]);
+    }
+    return str.toLowerCase();
+  }
 }

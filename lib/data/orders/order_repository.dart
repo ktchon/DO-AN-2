@@ -28,13 +28,13 @@ class OrderRepository extends GetxController {
     }
   }
 
+  // SAVE ORDER
   Future<void> saveOrder(OrderModel order, String userId) async {
     if (userId.isEmpty) {
       throw Exception('User ID không hợp lệ');
     }
 
     await _db.runTransaction((transaction) async {
-      // 1. Kiểm tra và trừ tồn kho cho từng sản phẩm trong order
       for (final item in order.items) {
         final productRef = _db.collection('Products').doc(item.productId);
         final productSnap = await transaction.get(productRef);
@@ -48,9 +48,13 @@ class OrderRepository extends GetxController {
           throw Exception('Dữ liệu sản phẩm bị lỗi: ${item.productId}');
         }
 
-        if (item.variationId == null || item.variationId!.isEmpty) {
-          // ── CASE 1: Sản phẩm thường (không có biến thể)
-          final currentStock = (productData['stock'] as num?)?.toInt() ?? 0;
+        final productType = productData['ProductType'] ?? 'ProductType.single';
+
+        // =====================================
+        // 🧠 CASE 1: PRODUCT SINGLE
+        // =====================================
+        if (productType == 'ProductType.single') {
+          final currentStock = (productData['Stock'] as num?)?.toInt() ?? 0;
 
           if (currentStock < item.quantity) {
             throw Exception(
@@ -59,22 +63,28 @@ class OrderRepository extends GetxController {
           }
 
           transaction.update(productRef, {
-            'stock': FieldValue.increment(-item.quantity),
-            'sold': FieldValue.increment(item.quantity),
+            'Stock': FieldValue.increment(-item.quantity),
+            'Sold': FieldValue.increment(item.quantity),
           });
         } else {
-          // ── CASE 2: Sản phẩm có biến thể
-          final variations = (productData['ProductVariations'] as List<dynamic>?) ?? [];
+          // =====================================
+          // 🧠 CASE 2: PRODUCT VARIATION
+          // =====================================
+          if (item.variationId == null || item.variationId!.isEmpty) {
+            throw Exception('Thiếu variationId cho sản phẩm: ${item.productId}');
+          }
 
-          final variation = variations.firstWhere(
-            (v) => v['Id'] == item.variationId,
-            orElse: () => null,
+          final variations = List<Map<String, dynamic>>.from(
+            productData['ProductVariations'] ?? [],
           );
 
-          if (variation == null) {
+          final index = variations.indexWhere((v) => v['Id'] == item.variationId);
+
+          if (index == -1) {
             throw Exception('Biến thể không tồn tại: ${item.variationId}');
           }
 
+          final variation = variations[index];
           final currentStock = (variation['Stock'] as num?)?.toInt() ?? 0;
 
           if (currentStock < item.quantity) {
@@ -83,23 +93,22 @@ class OrderRepository extends GetxController {
             );
           }
 
-          // Tạo mảng variations đã cập nhật
-          final updatedVariations = variations.map((v) {
-            if (v['Id'] == item.variationId) {
-              return {
-                ...v,
-                'Stock': (v['Stock'] as num? ?? 0).toInt() - item.quantity,
-                'Sold': (v['Sold'] as num? ?? 0).toInt() + item.quantity,
-              };
-            }
-            return v;
-          }).toList();
+          variations[index] = {
+            ...variation,
+            'Stock': currentStock - item.quantity,
+            'Sold': (variation['Sold'] as num? ?? 0).toInt() + item.quantity,
+          };
 
-          transaction.update(productRef, {'ProductVariations': updatedVariations});
+          transaction.update(productRef, {
+            'ProductVariations': variations,
+            'Sold': FieldValue.increment(item.quantity),
+          });
         }
       }
 
-      // 2. Lưu đơn hàng vào sub-collection của user
+      // ================================
+      // 🧾 SAVE ORDER
+      // ================================
       final orderRef = _db.collection('Users').doc(userId).collection('Orders').doc(order.id);
 
       transaction.set(orderRef, {
@@ -155,8 +164,8 @@ class OrderRepository extends GetxController {
           /// ===== PRODUCT THƯỜNG =====
           if (variationId == null || variationId == '') {
             transaction.update(productRef, {
-              'stock': FieldValue.increment(quantity),
-              'sold': FieldValue.increment(-quantity),
+              'Stock': FieldValue.increment(quantity),
+              'Sold': FieldValue.increment(-quantity),
             });
           }
           /// ===== VARIATION (ARRAY) =====
