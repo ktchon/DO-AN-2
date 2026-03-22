@@ -9,6 +9,7 @@ import 'package:shop_app/common/widgets/text/section_heading.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
 import 'package:shop_app/features/shop/models/share_product_model.dart';
+import 'package:shop_app/features/shop/screens/checkout/checkout.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_attributes.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_detail_image_slide.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_meta_data.dart';
@@ -33,13 +34,16 @@ class ProductDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                decoration: BoxDecoration(color: TColors.grey, borderRadius: BorderRadius.circular(6)),
+                decoration: BoxDecoration(
+                  color: TColors.grey,
+                  borderRadius: BorderRadius.circular(6),
+                ),
                 child: Row(
                   children: [
                     CircularContainer(
                       radius: 6,
-                      width: 25,
-                      height: 25,
+                      width: 28,
+                      height: 28,
                       onPressed: () => controller.productQuantityInCart.value < 1
                           ? null
                           : controller.productQuantityInCart.value -= 1,
@@ -55,8 +59,8 @@ class ProductDetail extends StatelessWidget {
                     SizedBox(width: 10),
                     CircularContainer(
                       radius: 6,
-                      width: 25,
-                      height: 25,
+                      width: 28,
+                      height: 28,
                       onPressed: () => controller.productQuantityInCart.value += 1,
                       backgroundColor: TColors.grey,
                       padding: EdgeInsets.all(0),
@@ -85,7 +89,15 @@ class ProductDetail extends StatelessWidget {
                   SizedBox(
                     width: 160,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        final cartController = CartController.instance;
+
+                        cartController.buyNow(product);
+
+                        if (cartController.buyNowItems.isNotEmpty) {
+                          Get.to(() => const CheckoutScreen());
+                        }
+                      },
                       child: Text('Mua ngay', style: TextStyle(fontSize: 13)),
                     ),
                   ),
@@ -121,12 +133,8 @@ class ProductDetail extends StatelessWidget {
                   if (product.productType == ProductType.variable.toString())
                     ProductAttributes(product: product),
                   if (product.productType == ProductType.variable.toString()) SizedBox(height: 20),
-                  // Nút mua, bình luận, mô tả chi tiết.
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(onPressed: () {}, child: Text('Mua ngay')),
-                  ),
-                  SizedBox(height: 20),
+                  // Bình luận, mô tả chi tiết.
+                  SizedBox(height: 10),
                   SectionHeading(
                     textTitle: 'Mô tả sản phẩm',
                     showActionButton: false,

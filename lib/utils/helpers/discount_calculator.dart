@@ -19,6 +19,9 @@ class DiscountCalculator {
     } else {
       discount = coupon.value;
     }
+    if (coupon.usedCount >= coupon.usageLimit) {
+      return 0;
+    }
 
     return discount;
   }

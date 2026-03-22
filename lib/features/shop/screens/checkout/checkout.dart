@@ -26,9 +26,7 @@ class CheckoutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cartController = CartController.instance;
-    final subTotal = cartController.totalCartPrice.value;
     final orderController = Get.put(OrderController());
-    final totalAmount = CPricingCalculator.calculateTotalPrice(subTotal, 'Hồ Chí Minh');
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
@@ -46,7 +44,13 @@ class CheckoutScreen extends StatelessWidget {
           child: Column(
             children: [
               // Sản phẩm
-              CartItems(showAddRemoveButton: false),
+              Obx(() {
+                final items = cartController.isBuyNow.value
+                    ? cartController.buyNowItems
+                    : cartController.cartItems;
+
+                return CartItems(items: items, showAddRemoveButton: false);
+              }),
               SizedBox(height: 30),
               // Mã giảm giá
               CouponCode(),
@@ -76,7 +80,13 @@ class CheckoutScreen extends StatelessWidget {
       bottomNavigationBar: Padding(
         padding: EdgeInsets.all(20),
         child: Obx(() {
-          final subTotal = cartController.totalCartPrice.value;
+          final items = cartController.isBuyNow.value
+              ? cartController.buyNowItems
+              : cartController.cartItems;
+          double subTotal = 0;
+          for (var item in items) {
+            subTotal += item.price * item.quantity;
+          }
           final discount = CouponController.instance.discount.value;
           final totalAmount = CPricingCalculator.calculateTotalWithDiscount(
             subTotal: subTotal,

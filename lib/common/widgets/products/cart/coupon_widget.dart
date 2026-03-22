@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_container.dart';
 import 'package:shop_app/features/shop/controllers/coupon/coupon_controller.dart';
-import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart'
-    show CartController;
 import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 
@@ -13,7 +9,7 @@ class CouponCode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(CouponController());
+    final controller = CouponController.instance;
     final textController = TextEditingController();
     final dark = THelperFunctions.isDarkMode(context);
     return RoundedContainer(
@@ -47,18 +43,14 @@ class CouponCode extends StatelessWidget {
                     foregroundColor: hasText
                         ? Colors.white
                         : (dark ? Colors.white.withOpacity(0.5) : Colors.black.withOpacity(0.5)),
-                    backgroundColor: hasText
-                        ? TColors
-                              .accent
-                        : Colors.grey.withOpacity(0.2),
+                    backgroundColor: hasText ? TColors.accent : Colors.grey.withOpacity(0.2),
                     side: BorderSide(color: hasText ? Colors.blue : Colors.grey.withOpacity(0.1)),
                   ),
                   onPressed: hasText
                       ? () {
-                          final subTotal = CartController.instance.totalCartPrice.value;
-                          controller.applyCoupon(textController.text.trim(), subTotal);
+                          controller.applyCoupon(textController.text.trim());
                         }
-                      : null, 
+                      : null,
                   child: const Text('Áp dụng'),
                 );
               },

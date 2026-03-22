@@ -3,6 +3,7 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:shop_app/features/shop/controllers/coupon/coupon_controller.dart';
 import 'package:shop_app/features/shop/controllers/products/variation_controller.dart';
 import 'package:shop_app/features/shop/models/cart_item_model.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
@@ -19,8 +20,12 @@ class CartController extends GetxController {
   final RxInt productQuantityInCart =
       0.obs; // Số lượng tạm chọn cho sản phẩm hiện tại (trước khi add)
   final RxList<CartItemModel> cartItems = <CartItemModel>[].obs; // Danh sách các item trong giỏ
+  final RxBool isBuyNow = false.obs;
+  final RxList<CartItemModel> buyNowItems = <CartItemModel>[].obs;
 
   final VariationController variationController = VariationController.instance;
+  final couponController = CouponController.instance;
+  List<CartItemModel> get currentItems => isBuyNow.value ? buyNowItems : cartItems;
 
   CartController() {
     loadCartItems();
@@ -85,11 +90,12 @@ class CartController extends GetxController {
 
     if (index >= 0) {
       cartItems[index].quantity += 1;
+      cartItems.refresh();
+      updateCart();
     } else {
       cartItems.add(item);
+      updateCart();
     }
-
-    updateCart();
   }
 
   /// Giảm 1 sản phẩm khỏi giỏ (dùng cho nút -)
@@ -102,13 +108,13 @@ class CartController extends GetxController {
     if (index >= 0) {
       if (cartItems[index].quantity > 1) {
         cartItems[index].quantity -= 1;
+        cartItems.refresh();
+        updateCart();
       } else {
         // Show dialog before completely removing
         cartItems[index].quantity == 1 ? removeFromCartDialog(index) : cartItems.removeAt(index);
       }
     }
-
-    updateCart();
   }
 
   /// Hiển thị dialog xác nhận xóa sản phẩm (khi số lượng còn 1)
@@ -158,7 +164,9 @@ class CartController extends GetxController {
   void updateCart() {
     updateCartTotals();
     saveCartItems();
-    cartItems.refresh(); // Thông báo UI cập nhật
+    cartItems.refresh();
+
+    couponController.revalidateCoupon(currentTotalPrice);
   }
 
   /// Tính toán lại tổng tiền và tổng số lượng sản phẩm
@@ -261,5 +269,56 @@ class CartController extends GetxController {
       title: "Thành công",
       message: "Sản phẩm đã được thêm lại vào giỏ hàng",
     );
+  }
+
+  void buyNow(ProductModel product) {
+    /// Kiểm tra số lượng
+    if (productQuantityInCart.value < 1) {
+      CLoaders.customToast(message: 'Vui lòng chọn số lượng');
+      return;
+    }
+
+    /// Kiểm tra biến thể
+    if (product.productType == ProductType.variable.toString() &&
+        variationController.selectedVariation.value.id.isEmpty) {
+      CLoaders.customToast(message: 'Vui lòng chọn biến thể');
+      return;
+    }
+
+    /// Kiểm tra stock
+    if (product.productType == ProductType.variable.toString()) {
+      if (variationController.selectedVariation.value.stock < 1) {
+        CLoaders.warningSnackBar(message: 'Biến thể đã hết hàng', title: 'Lỗi');
+        return;
+      }
+    } else {
+      if (product.stock < 1) {
+        CLoaders.warningSnackBar(message: 'Sản phẩm đã hết hàng', title: 'Lỗi');
+        return;
+      }
+    }
+
+    /// 4. RESET COUPON
+    couponController.appliedCoupon.value = null;
+    couponController.discount.value = 0;
+
+    /// Convert item
+    final item = convertToCartItem(product, productQuantityInCart.value);
+
+    /// Set Buy Now mode
+    isBuyNow.value = true;
+    buyNowItems.clear();
+    buyNowItems.add(item);
+    buyNowItems.refresh();
+
+    couponController.revalidateCoupon(currentTotalPrice);
+  }
+
+  double get currentTotalPrice {
+    double total = 0;
+    for (var item in currentItems) {
+      total += item.price * item.quantity;
+    }
+    return total;
   }
 }

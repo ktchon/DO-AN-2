@@ -16,7 +16,12 @@ class BillingAmountSection extends StatelessWidget {
     final cartController = CartController.instance;
     final couponController = Get.put(CouponController());
     return Obx(() {
-      final subTotal = cartController.totalCartPrice.value;
+      final items = cartController.currentItems;
+
+      double subTotal = 0;
+      for (var item in items) {
+        subTotal += item.price * item.quantity;
+      }
       final shipping = CPricingCalculator.calculateShippingCost(subTotal, "Hồ Chí Minh");
       final tax = CPricingCalculator.calculateTax(subTotal, 'VN');
       final discount = couponController.discount.value;

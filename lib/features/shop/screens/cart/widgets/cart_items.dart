@@ -4,17 +4,21 @@ import 'package:shop_app/common/widgets/products/cart/add_remove_button.dart';
 import 'package:shop_app/common/widgets/products/cart/cart_item.dart';
 import 'package:shop_app/common/widgets/text/product_price_text.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
+import 'package:shop_app/features/shop/models/cart_item_model.dart';
 
 class CartItems extends StatelessWidget {
-  const CartItems({super.key, this.showAddRemoveButton = true});
+  const CartItems({super.key, this.showAddRemoveButton = true, this.items});
   final bool showAddRemoveButton;
+  final List<CartItemModel>? items;
 
   @override
   Widget build(BuildContext context) {
     final cartController = CartController.instance;
 
     return Obx(() {
-      if (cartController.cartItems.isEmpty) {
+      final cartItems = items ?? cartController.cartItems;
+
+      if (cartItems.isEmpty) {
         return const SizedBox.shrink();
       }
 
@@ -22,9 +26,9 @@ class CartItems extends StatelessWidget {
         shrinkWrap: true,
         physics: NeverScrollableScrollPhysics(),
         separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemCount: cartController.cartItems.length,
+        itemCount: cartItems.length,
         itemBuilder: (_, index) {
-          final item = cartController.cartItems[index];
+          final item = cartItems[index];
           return Column(
             children: [
               CartItem(cartItem: item),

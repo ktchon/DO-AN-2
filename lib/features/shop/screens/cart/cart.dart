@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shop_app/common/widgets/loaders/animation_loader.dart';
+import 'package:shop_app/features/shop/controllers/coupon/coupon_controller.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/screens/cart/widgets/cart_items.dart';
 import 'package:shop_app/features/shop/screens/checkout/checkout.dart';
@@ -54,7 +55,15 @@ class CartItemScreen extends StatelessWidget {
           child: cartController.cartItems.isEmpty
               ? null
               : ElevatedButton(
-                  onPressed: () => Get.to(() => CheckoutScreen()),
+                  onPressed: () {
+                    cartController.isBuyNow.value = false;
+
+                    /// RESET COUPON
+                    CouponController.instance.appliedCoupon.value = null;
+                    CouponController.instance.discount.value = 0;
+
+                    Get.to(() => CheckoutScreen());
+                  },
                   child: Obx(() {
                     final formattedTotal = TFormatter.formatVND(
                       cartController.totalCartPrice.value,

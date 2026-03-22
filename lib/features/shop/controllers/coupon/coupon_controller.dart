@@ -4,6 +4,7 @@ import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:get/instance_manager.dart';
 import 'package:shop_app/data/coupon/coupon_repository.dart';
+import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/models/coupon/coupon_model.dart';
 import 'package:shop_app/utils/helpers/discount_calculator.dart';
 
@@ -14,7 +15,12 @@ class CouponController extends GetxController {
   Rx<CouponModel?> appliedCoupon = Rx<CouponModel?>(null);
   RxDouble discount = 0.0.obs;
 
-  Future<void> applyCoupon(String code, double subtotal) async {
+  Future<void> applyCoupon(String code) async {
+    final cartController = CartController.instance;
+
+    /// luôn lấy subtotal đúng theo mode
+    final subtotal = cartController.currentTotalPrice;
+
     final coupon = await couponService.getCoupon(code);
 
     if (coupon == null) {
@@ -33,5 +39,24 @@ class CouponController extends GetxController {
     discount.value = discountValue;
 
     Get.snackbar("Thành công", "Áp dụng mã thành công");
+  }
+
+  void revalidateCoupon(double subtotal) {
+    final coupon = appliedCoupon.value;
+
+    if (coupon == null) return;
+
+    final newDiscount = DiscountCalculator.calculateDiscount(subtotal: subtotal, coupon: coupon);
+
+    // Không còn hợp lệ
+    if (newDiscount == 0) {
+      appliedCoupon.value = null;
+      discount.value = 0;
+
+      Get.snackbar("Thông báo", "Mã không còn hợp lệ");
+    } else {
+      // vẫn hợp lệ → cập nhật lại discount
+      discount.value = newDiscount;
+    }
   }
 }

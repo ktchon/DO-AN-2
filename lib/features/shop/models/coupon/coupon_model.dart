@@ -1,15 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CouponModel {
-  final String id; // 🆕 docId
+  final String id; // docId
   final String code;
-  final String type; // percentage | fixed
+  final String type;
   final double value;
   final double minOrder;
   final double? maxDiscount;
   final DateTime expiryDate;
-  final int usageLimit; // 🆕
-  final int usedCount; // 🆕
+  final int usageLimit;
+  final int usedCount;
   final bool isActive;
 
   CouponModel({
@@ -25,7 +25,7 @@ class CouponModel {
     required this.isActive,
   });
 
-  /// 🔽 From Firestore
+  /// From Firestore
   factory CouponModel.fromSnapshot(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
@@ -43,7 +43,7 @@ class CouponModel {
     );
   }
 
-  /// 🔼 Upload lên Firestore
+  /// Upload lên Firestore
   Map<String, dynamic> toJson() {
     return {
       'code': code,
@@ -58,7 +58,7 @@ class CouponModel {
     };
   }
 
-  /// 🧠 Helper (rất hữu ích)
+  /// Helper
   bool get isExpired => DateTime.now().isAfter(expiryDate);
 
   bool canUse(double subtotal) {

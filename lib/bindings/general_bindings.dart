@@ -11,13 +11,13 @@ import '../utils/helpers/network_manager.dart';
 class GeneralBindings extends Bindings {
   @override
   void dependencies() {
-    /// -- Core
+    /// Core
     Get.put(NetworkManager());
-    Get.put(CartController());
     Get.put(VariationController());
+    Get.put(CouponController());
+    Get.put(CartController());
     Get.put(AddressController());
     Get.put(CouponService());
-    Get.put(CouponController());
     Get.put(CheckoutController());
   }
 }

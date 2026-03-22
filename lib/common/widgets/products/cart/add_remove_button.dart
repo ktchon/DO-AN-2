@@ -22,8 +22,8 @@ class ProductQuantityWithAddRemoveButton extends StatelessWidget {
         children: [
           CircularContainer(
             radius: 6,
-            width: 20,
-            height: 20,
+            width: 28,
+            height: 28,
             backgroundColor: TColors.grey,
             padding: EdgeInsets.all(0),
             onPressed: remove,
@@ -34,8 +34,8 @@ class ProductQuantityWithAddRemoveButton extends StatelessWidget {
           SizedBox(width: 6),
           CircularContainer(
             radius: 6,
-            width: 20,
-            height: 20,
+            width: 28,
+            height: 28,
             backgroundColor: TColors.grey,
             padding: EdgeInsets.all(0),
             onPressed: add,

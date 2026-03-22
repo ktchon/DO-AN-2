@@ -10,6 +10,7 @@ import 'package:shop_app/data/orders/order_repository.dart';
 import 'package:shop_app/data/repositories/authentication/authentication_repository.dart';
 import 'package:shop_app/features/personalization/controllers/address_controller.dart';
 import 'package:shop_app/features/shop/controllers/checkout_controller.dart';
+import 'package:shop_app/features/shop/controllers/coupon/coupon_controller.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/models/cart_item_model.dart';
 import 'package:shop_app/features/shop/models/order_model.dart';
@@ -27,6 +28,7 @@ class OrderController extends GetxController {
   final addressController = AddressController.instance;
   final checkoutController = CheckoutController.instance;
   final orderRepository = Get.put(OrderRepository());
+  final couponController = CouponController.instance;
 
   // Danh sách đơn hàng (observable để UI tự update)
   final RxInt noOfOrderItems = 0.obs;
@@ -65,7 +67,29 @@ class OrderController extends GetxController {
         CFullScreenLoader.stopLoading();
         return;
       }
+      // 2. UPDATE COUPON
+      final couponController = Get.find<CouponController>();
 
+      if (couponController.appliedCoupon.value != null) {
+        final coupon = couponController.appliedCoupon.value!;
+
+        final docRef = FirebaseFirestore.instance.collection('Coupons').doc(coupon.id);
+
+        await FirebaseFirestore.instance.runTransaction((transaction) async {
+          final snapshot = await transaction.get(docRef);
+
+          final data = snapshot.data() as Map<String, dynamic>;
+
+          int used = data['usedCount'];
+          int limit = data['usageLimit'];
+
+          if (used >= limit) {
+            throw Exception("Mã đã hết lượt sử dụng");
+          }
+
+          transaction.update(docRef, {'usedCount': used + 1});
+        });
+      }
       // Tạo model đơn hàng
       final order = OrderModel(
         id: UniqueKey().toString(), // hoặc dùng UID, Firestore auto ID nếu muốn
@@ -76,14 +100,20 @@ class OrderController extends GetxController {
         paymentMethod: checkoutController.selectedPaymentMethod.value.name,
         address: addressController.selectedAddress.value,
         deliveryDate: DateTime.now().add(const Duration(days: 3)),
-        items: cartController.cartItems.toList(),
+        items: cartController.isBuyNow.value
+            ? cartController.buyNowItems.toList()
+            : cartController.cartItems.toList(),
         paymentNote: '',
+        couponId: couponController.appliedCoupon.value?.id,
       );
 
       // Lưu đơn hàng vào Firestore
       await orderRepository.saveOrder(order, userId);
       // Xóa giỏ hàng sau khi đặt thành công
       cartController.clearCart();
+      // Xoá phần sản phẩm mua ngay
+      cartController.isBuyNow.value = false;
+      cartController.buyNowItems.clear();
 
       // Đóng loading
       CFullScreenLoader.stopLoading();
@@ -132,6 +162,24 @@ class OrderController extends GetxController {
 
       /// CALL REPO
       await orderRepository.cancelOrder(userId: userId, orderId: order.id, reason: reason);
+
+      /// TRẢ LẠI COUPON (NẾU CÓ)
+      if (order.couponId != null) {
+        final docRef = FirebaseFirestore.instance.collection('Coupons').doc(order.couponId);
+
+        await FirebaseFirestore.instance.runTransaction((transaction) async {
+          final snapshot = await transaction.get(docRef);
+
+          if (!snapshot.exists) return;
+
+          final data = snapshot.data() as Map<String, dynamic>;
+          int used = data['usedCount'];
+
+          if (used > 0) {
+            transaction.update(docRef, {'usedCount': used - 1});
+          }
+        });
+      }
 
       /// Update local state
       final index = userOrders.indexWhere((o) => o.id == order.id);
