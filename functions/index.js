@@ -97,9 +97,12 @@ exports.autoCancelExpiredOrders = onDocumentCreated(
       return;
     }
 
-    const expireAt = data.expireAt.toDate();
-    const now = new Date();
-    const delayMs = expireAt.getTime() - now.getTime();
+    const createdAt = data.createdAt?.toDate();
+      if (!createdAt) return;
+
+      const expireAt = new Date(createdAt.getTime() + 60 * 1000); // 1 phút
+      const now = new Date();
+      const delayMs = expireAt.getTime() - now.getTime();
 
     if (delayMs <= 0) {
       // Đã hết hạn ngay khi tạo
@@ -109,7 +112,7 @@ exports.autoCancelExpiredOrders = onDocumentCreated(
         cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      await db.collection('OrderIds').doc(event.params.orderId).delete();
+      // await db.collection('OrderIds').doc(event.params.orderId).delete();
 
       console.log(`Đơn hàng ${event.params.orderId} đã huỷ ngay khi tạo (hết hạn)`);
       return;
@@ -126,7 +129,7 @@ exports.autoCancelExpiredOrders = onDocumentCreated(
             cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
           });
 
-          await db.collection('OrderIds').doc(event.params.orderId).delete();
+          // await db.collection('OrderIds').doc(event.params.orderId).delete();
 
           console.log(`Đơn hàng ${event.params.orderId} đã tự động huỷ do hết hạn`);
         }

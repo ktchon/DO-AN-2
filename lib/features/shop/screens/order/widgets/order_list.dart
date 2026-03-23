@@ -49,6 +49,10 @@ class OrderListItem extends StatelessWidget {
           separatorBuilder: (_, __) => SizedBox(height: 12),
           itemBuilder: (_, index) {
             final order = orders[index];
+            if (order.items.isEmpty) {
+              return const SizedBox(); 
+            }
+
             final firstItem = order.items.first;
 
             Color statusColor;

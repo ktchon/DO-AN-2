@@ -277,7 +277,19 @@ class OrderController extends GetxController {
     final userId = AuthenticationRepository.instance.authUser!.uid;
 
     final now = DateTime.now();
-    final expireAt = now.add(const Duration(minutes: 1)); // 10 phút
+
+    // Lưu mapping OrderIds
+    try {
+      await FirebaseFirestore.instance.collection("OrderIds").doc(paymentNote).set({
+        'userId': userId,
+        'orderId': paymentNote,
+        'createdAt': FieldValue.serverTimestamp(),
+        'totalAmount': amount,
+      });
+      print("Mapping saved: $paymentNote");
+    } catch (e) {
+      print("Lỗi lưu mapping: $e");
+    }
 
     final order = OrderModel(
       id: paymentNote,
@@ -289,20 +301,12 @@ class OrderController extends GetxController {
       paymentNote: paymentNote,
       address: addressController.selectedAddress.value,
       deliveryDate: now.add(const Duration(days: 3)),
-      items: cartController.cartItems.toList(),
-      expireAt: expireAt,
+      items: cartController.isBuyNow.value
+          ? cartController.buyNowItems.toList()
+          : cartController.cartItems.toList(),
     );
 
     await orderRepository.saveOrder(order, userId);
-
-    // Lưu mapping OrderIds
-    await FirebaseFirestore.instance.collection("OrderIds").doc(paymentNote).set({
-      'userId': userId,
-      'orderId': paymentNote,
-      'createdAt': FieldValue.serverTimestamp(),
-      'totalAmount': amount,
-      'expireAt': Timestamp.fromDate(expireAt),
-    });
   }
 
   Future<void> cancelPendingOrder(String paymentNote) async {
@@ -324,7 +328,7 @@ class OrderController extends GetxController {
 
         final List items = orderData['items'] ?? [];
 
-        /// 🔥 HOÀN STOCK + SOLD
+        /// HOÀN STOCK + SOLD
         for (final item in items) {
           final productId = item['productId'];
           final variationId = item['variationId'];

@@ -33,13 +33,15 @@ class _QRPaymentScreenState extends State<QRPaymentScreen> {
     paymentNote = "ORDER${DateTime.now().millisecondsSinceEpoch}";
 
     /// tạo order pending
-    OrderController.instance.createPendingOrder(widget.amount, paymentNote);
+    Future.microtask(() async {
+      await OrderController.instance.createPendingOrder(widget.amount, paymentNote);
 
-    // Bắt đầu đếm ngược 10 phút
-    startCountdown();
+      // Bắt đầu đếm ngược 10 phút
+      startCountdown();
 
-    /// bắt đầu lắng nghe trạng thái thanh toán
-    listenPaymentStatus();
+      /// bắt đầu lắng nghe trạng thái thanh toán
+      listenPaymentStatus();
+    });
   }
 
   void startCountdown() {
@@ -185,12 +187,12 @@ class _QRPaymentScreenState extends State<QRPaymentScreen> {
                   style: TextStyle(fontSize: 20, color: Colors.red, fontWeight: FontWeight.bold),
                 ),
               ),
-              Center(
-                child: const Text(
-                  "Vui lòng tạo đơn hàng mới để mua hàng.",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                ),
+            Center(
+              child: const Text(
+                "Vui lòng tạo đơn hàng mới để mua hàng.",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
+            ),
             const SizedBox(height: 20),
             if (!isExpired)
               SizedBox(
