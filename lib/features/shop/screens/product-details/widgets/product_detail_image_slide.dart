@@ -125,6 +125,7 @@ class ProductImageSilder extends StatelessWidget {
             Appbar(
               color: isDark ? Colors.white : Colors.black,
               showBackArrow: true,
+              
               title: Text(
                 'Chi tiết sản phẩm',
                 style: Theme.of(

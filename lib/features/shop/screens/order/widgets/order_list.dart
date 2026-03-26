@@ -9,6 +9,7 @@ import 'package:shop_app/features/shop/controllers/order_controller.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/screens/cart/cart.dart';
 import 'package:shop_app/features/shop/screens/order/order_detail.dart';
+import 'package:shop_app/features/shop/screens/product_reviews/write_review.dart';
 import 'package:shop_app/navigation_menu.dart';
 import 'package:shop_app/utils/constants/enums.dart';
 import 'package:shop_app/utils/formatters/formatter.dart';
@@ -42,16 +43,13 @@ class OrderListItem extends StatelessWidget {
 
         if (response != null) return response;
 
-        final orders = snapshot.data!;
+        final orders = snapshot.data!.where((order) => order.items.isNotEmpty).toList();
         return ListView.separated(
           itemCount: orders.length,
           shrinkWrap: true,
           separatorBuilder: (_, __) => SizedBox(height: 12),
           itemBuilder: (_, index) {
             final order = orders[index];
-            if (order.items.isEmpty) {
-              return const SizedBox(); 
-            }
 
             final firstItem = order.items.first;
 
@@ -178,6 +176,23 @@ class OrderListItem extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      if (order.status == OrderStatus.delivered)
+                        SizedBox(
+                          width: 120,
+                          height: 40,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              side: BorderSide(color: Colors.white),
+                              backgroundColor: Colors.redAccent,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
+                            onPressed: () {
+                              Get.to(() => WriteReviewScreen(item: firstItem));
+                            },
+                            child: const Text("Viết đánh giá", style: TextStyle(fontSize: 12)),
+                          ),
+                        ),
+                      SizedBox(width: 10),
                       if (order.status == OrderStatus.delivered ||
                           order.status == OrderStatus.cancelled)
                         SizedBox(
@@ -185,6 +200,7 @@ class OrderListItem extends StatelessWidget {
                           height: 40,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
+                              side: BorderSide(color: Colors.white),
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             ),
                             onPressed: () {

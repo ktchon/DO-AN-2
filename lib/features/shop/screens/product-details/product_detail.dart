@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -7,6 +8,7 @@ import 'package:readmore/readmore.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/circular_container.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
+import 'package:shop_app/features/shop/controllers/reviews/review_controller.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
 import 'package:shop_app/features/shop/models/share_product_model.dart';
 import 'package:shop_app/features/shop/screens/checkout/checkout.dart';
@@ -15,6 +17,7 @@ import 'package:shop_app/features/shop/screens/product-details/widgets/product_d
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_meta_data.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/rating_and_share.dart';
 import 'package:shop_app/features/shop/screens/product_reviews/product_reviews_rating.dart';
+import 'package:shop_app/features/shop/screens/product_reviews/widgets/user_review_card.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/constants/enums.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
@@ -25,6 +28,7 @@ class ProductDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = CartController.instance;
+    final reviewController = ReviewController.instance;
     return Scaffold(
       bottomNavigationBar: Container(
         padding: EdgeInsets.symmetric(horizontal: 20),
@@ -154,22 +158,51 @@ class ProductDetail extends StatelessWidget {
                   ),
                   // Bình luận
                   Divider(),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SectionHeading(
-                        textTitle: 'Bình luận (199)',
+                        textTitle: 'Đánh giá (199)',
                         showActionButton: false,
                         textColor: THelperFunctions.isDarkMode(context)
                             ? Colors.white
                             : Colors.black,
                       ),
-                      IconButton(
-                        onPressed: () => Get.to(ProductReviewsRating()),
-                        icon: Icon(Iconsax.arrow_right_3_copy),
+
+                      Row(
+                        children: [
+                          Text('Xem thêm'),
+                          IconButton(
+                            onPressed: () =>
+                                Get.to(() => ProductReviewsRating(productId: product.id)),
+                            icon: Icon(Iconsax.arrow_right_3_copy, size: 20),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                  SizedBox(height: 10),
+
+                  FutureBuilder(
+                    future: reviewController.fetchLatestReviews(product.id),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return CircularProgressIndicator();
+
+                      final reviews = snapshot.data!;
+
+                      if (reviews.isEmpty) {
+                        return Text("Chưa có đánh giá");
+                      }
+
+                      return Column(
+                        children: reviews.map((review) {
+                          return UserReviewCard(review: review);
+                        }).toList(),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 10),
                 ],
               ),
             ),
