@@ -10,11 +10,23 @@ class ReviewRepository extends GetxController {
 
   /// CREATE REVIEW
   Future<void> createReview(ReviewModel review) async {
+    final docId = "${review.productId}_${review.userId}";
     final data = review.toJson();
 
     data['createdAt'] = FieldValue.serverTimestamp();
 
-    await _db.collection('Reviews').add(data);
+    await _db.collection('Reviews').doc(docId).set(data);
+  }
+
+  Future<bool> hasUserReviewed(String productId, String userId) async {
+    final snapshot = await _db
+        .collection('Reviews')
+        .where('productId', isEqualTo: productId)
+        .where('userId', isEqualTo: userId)
+        .limit(1)
+        .get();
+
+    return snapshot.docs.isNotEmpty;
   }
 
   /// GET REVIEWS BY PRODUCT

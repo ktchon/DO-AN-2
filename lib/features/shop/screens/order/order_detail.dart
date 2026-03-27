@@ -5,6 +5,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_container.dart';
 import 'package:shop_app/features/shop/controllers/order_controller.dart';
 import 'package:shop_app/features/shop/models/order_model.dart';
+import 'package:shop_app/features/shop/screens/order/widgets/order_bottom_action_bar.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/constants/enums.dart';
 import 'package:shop_app/utils/formatters/formatter.dart';
@@ -221,7 +222,22 @@ class OrderDetailScreen extends StatelessWidget {
                 ),
               ),
             SizedBox(height: 20),
-            if (order.status != OrderStatus.cancelled)
+            if (order.status == OrderStatus.delivered)
+              RoundedContainer(
+                padding: EdgeInsets.all(12),
+                showBorder: true,
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green),
+                    SizedBox(width: 8),
+                    Text(
+                      "Đã giao hàng thành công",
+                      style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              )
+            else if (order.status != OrderStatus.cancelled)
               SizedBox(
                 width: 200,
                 child: OutlinedButton(
@@ -231,6 +247,10 @@ class OrderDetailScreen extends StatelessWidget {
               ),
           ],
         ),
+      ),
+      bottomNavigationBar: SizedBox(
+        height: 120,
+        child: order.status == OrderStatus.delivered ? OrderBottomActionBar(order: order) : null,
       ),
     );
   }

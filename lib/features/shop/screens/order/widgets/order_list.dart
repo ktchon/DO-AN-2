@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_container.dart';
 import 'package:shop_app/common/widgets/loaders/animation_loader.dart';
 import 'package:shop_app/features/shop/controllers/order_controller.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
+import 'package:shop_app/features/shop/controllers/reviews/review_controller.dart';
 import 'package:shop_app/features/shop/screens/cart/cart.dart';
 import 'package:shop_app/features/shop/screens/order/order_detail.dart';
+import 'package:shop_app/features/shop/screens/product_reviews/user_review_detail_screen.dart';
 import 'package:shop_app/features/shop/screens/product_reviews/write_review.dart';
 import 'package:shop_app/navigation_menu.dart';
 import 'package:shop_app/utils/constants/enums.dart';
@@ -77,6 +80,11 @@ class OrderListItem extends StatelessWidget {
               case OrderStatus.cancelled:
                 statusColor = Colors.red;
                 break;
+            }
+            final reviewController = ReviewController.instance;
+
+            if (order.status == OrderStatus.delivered) {
+              reviewController.checkUserReviewed(firstItem.productId);
             }
 
             return RoundedContainer(
@@ -177,21 +185,37 @@ class OrderListItem extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       if (order.status == OrderStatus.delivered)
-                        SizedBox(
-                          width: 120,
-                          height: 40,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              side: BorderSide(color: Colors.white),
-                              backgroundColor: Colors.redAccent,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        Obx(() {
+                          final controller = ReviewController.instance;
+                          final isReviewed = controller.reviewedMap[firstItem.productId] ?? false;
+
+                          return SizedBox(
+                            width: 120,
+                            height: 40,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                side: BorderSide(color: Colors.white),
+                                backgroundColor: isReviewed ? Colors.green : Colors.redAccent,
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
+                              onPressed: () {
+                                if (isReviewed) {
+                                  /// 👉 Xem lại đánh giá
+                                  Get.to(
+                                    () => UserReviewDetailScreen(productId: firstItem.productId),
+                                  );
+                                } else {
+                                  /// 👉 Viết đánh giá
+                                  Get.to(() => WriteReviewScreen(item: firstItem));
+                                }
+                              },
+                              child: Text(
+                                isReviewed ? "Đã đánh giá" : "Viết đánh giá",
+                                style: const TextStyle(fontSize: 12),
+                              ),
                             ),
-                            onPressed: () {
-                              Get.to(() => WriteReviewScreen(item: firstItem));
-                            },
-                            child: const Text("Viết đánh giá", style: TextStyle(fontSize: 12)),
-                          ),
-                        ),
+                          );
+                        }),
                       SizedBox(width: 10),
                       if (order.status == OrderStatus.delivered ||
                           order.status == OrderStatus.cancelled)

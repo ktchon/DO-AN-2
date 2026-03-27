@@ -36,6 +36,9 @@ class ReviewController extends GetxController {
   RxList<XFile> selectedImages = <XFile>[].obs;
   final ImagePicker _picker = ImagePicker();
 
+  /// Reviews
+  RxMap<String, bool> reviewedMap = <String, bool>{}.obs;
+
   /// ================= FETCH REVIEWS =================
   Future<void> fetchReviews(String productId) async {
     try {
@@ -98,6 +101,7 @@ class ReviewController extends GetxController {
 
   /// ================= SUBMIT REVIEW =================
   Future<void> submitReview({required CartItemModel item}) async {
+    if (isSubmitting.value) return;
     try {
       isSubmitting.value = true;
 
@@ -107,6 +111,15 @@ class ReviewController extends GetxController {
 
       if (firebaseUser == null) {
         throw "User chưa đăng nhập";
+      }
+      final userId = firebaseUser.uid;
+
+      /// CHẶN SPAM REVIEW
+      final alreadyReviewed = await repo.hasUserReviewed(item.productId, userId);
+
+      if (alreadyReviewed) {
+        Get.snackbar("Thông báo", "Bạn đã đánh giá sản phẩm này rồi");
+        return;
       }
 
       /// Upload ảnh
@@ -136,6 +149,7 @@ class ReviewController extends GetxController {
       );
 
       await repo.createReview(review);
+      reviewedMap[item.productId] = true;
       await fetchReviews(item.productId);
 
       /// RESET FORM
@@ -193,5 +207,15 @@ class ReviewController extends GetxController {
     } catch (e) {
       print("Like error: $e");
     }
+  }
+
+  /// check user đã review chưa theo productId
+  Future<void> checkUserReviewed(String productId) async {
+    if (reviewedMap.containsKey(productId)) return;
+    final userId = authRepo.authUser?.uid;
+    if (userId == null) return;
+
+    final result = await repo.hasUserReviewed(productId, userId);
+    reviewedMap[productId] = result;
   }
 }
