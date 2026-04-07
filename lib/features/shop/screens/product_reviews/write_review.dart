@@ -5,16 +5,20 @@ import 'package:shop_app/common/widgets/products/rating/product_reviews_rating.d
 
 import 'package:shop_app/features/shop/controllers/reviews/review_controller.dart';
 import 'package:shop_app/features/shop/models/cart_item_model.dart';
+import 'package:shop_app/features/shop/models/reviews/reviews_model.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/formatters/formatter.dart';
 
 class WriteReviewScreen extends StatelessWidget {
-  const WriteReviewScreen({super.key, required this.item});
+  const WriteReviewScreen({super.key, required this.item, this.review});
   final CartItemModel item;
+  final ReviewModel? review;
   @override
   Widget build(BuildContext context) {
     final controller = ReviewController.instance;
-    final TextEditingController commentController = TextEditingController();
+    final TextEditingController commentController = TextEditingController(
+      text: controller.comment.value,
+    );
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
@@ -171,40 +175,92 @@ class WriteReviewScreen extends StatelessWidget {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 12),
-            Obx(
-              () => Wrap(
+            Obx(() {
+              final controller = ReviewController.instance;
+
+              return Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: List.generate(controller.selectedImages.length, (index) {
-                  final img = controller.selectedImages[index];
-
-                  return Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(File(img.path), width: 80, height: 80, fit: BoxFit.cover),
-                      ),
-
-                      /// NÚT XOÁ
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: () => controller.removeImage(index),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              shape: BoxShape.circle,
+                children: [
+                  /// ===== ẢNH CŨ =====
+                  for (int i = 0; i < controller.existingImages.length; i++)
+                    Stack(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            controller.openFullScreen(context, controller.existingImages, i);
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              controller.existingImages[i],
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
                             ),
-                            child: Icon(Icons.close, size: 16, color: Colors.white),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                }),
-              ),
-            ),
+
+                        /// NÚT XOÁ
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: () {
+                              controller.existingImages.removeAt(i);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.close, size: 16, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                  /// ===== ẢNH MỚI =====
+                  for (int i = 0; i < controller.selectedImages.length; i++)
+                    Stack(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            controller.openFullScreenFiles(context, controller.selectedImages, i);
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              File(controller.selectedImages[i].path),
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: () {
+                              controller.removeImage(i);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.close, size: 16, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              );
+            }),
             const SizedBox(height: 12),
             GestureDetector(
               onTap: () => controller.pickImages(),

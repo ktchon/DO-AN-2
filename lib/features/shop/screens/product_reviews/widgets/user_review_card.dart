@@ -1,88 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/circular_image.dart';
 import 'package:shop_app/common/widgets/products/rating/rating_indicator.dart';
 import 'package:shop_app/features/shop/controllers/reviews/review_controller.dart';
+import 'package:shop_app/features/shop/models/cart_item_model.dart';
 import 'package:shop_app/features/shop/models/reviews/reviews_model.dart';
+import 'package:shop_app/features/shop/screens/product_reviews/widgets/report_review_bottom_sheet.dart';
+import 'package:shop_app/features/shop/screens/product_reviews/write_review.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 
 class UserReviewCard extends StatelessWidget {
-  const UserReviewCard({super.key, required this.review});
+  UserReviewCard({super.key, required this.review, required this.item});
   final ReviewModel review;
+  final CartItemModel item;
+  final controller = ReviewController.instance;
+  void _showOptions(BuildContext context) {
+    final isOwner = controller.isMyReview(review.userId);
 
-  void _showReportBottomSheet(BuildContext context) {
     showModalBottomSheet(
-      backgroundColor: Colors.white,
       context: context,
-      isScrollControlled: true,
       builder: (_) {
-        String selectedReason = "";
-        final TextEditingController otherController = TextEditingController();
+        return SafeArea(
+          child: Wrap(
+            children: [
+              /// ===== OWNER =====
+              if (isOwner) ...[
+                ListTile(
+                  leading: const Icon(Icons.edit),
+                  title: const Text("Chỉnh sửa"),
+                  onTap: () {
+                    Navigator.pop(context);
 
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Padding(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text("Báo cáo bình luận", style: TextStyle(fontSize: 18, color: Colors.red)),
-                  Divider(),
-                  ListTile(
-                    title: Text("Spam"),
-                    leading: Radio(
-                      value: "Spam",
-                      groupValue: selectedReason,
-                      onChanged: (value) => setState(() => selectedReason = value!),
-                    ),
-                  ),
-                  ListTile(
-                    title: Text("Nội dung không phù hợp"),
-                    leading: Radio(
-                      value: "Inappropriate",
-                      groupValue: selectedReason,
-                      onChanged: (value) => setState(() => selectedReason = value!),
-                    ),
-                  ),
-                  ListTile(
-                    title: Text("Lừa đảo"),
-                    leading: Radio(
-                      value: "Scam",
-                      groupValue: selectedReason,
-                      onChanged: (value) => setState(() => selectedReason = value!),
-                    ),
-                  ),
-                  ListTile(
-                    title: Text("Khác"),
-                    leading: Radio(
-                      value: "Other",
-                      groupValue: selectedReason,
-                      onChanged: (value) => setState(() => selectedReason = value!),
-                    ),
-                  ),
+                    controller.setEditingReview(review);
+                    Get.to(() => WriteReviewScreen(review: review, item: item));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.delete, color: Colors.red),
+                  title: const Text("Xoá"),
+                  onTap: () {
+                    Navigator.pop(context);
 
-                  if (selectedReason == "Other")
-                    TextField(
-                      controller: otherController,
-                      decoration: InputDecoration(hintText: "Nhập lý do..."),
-                    ),
-
-                  SizedBox(height: 10),
-
-                  SizedBox(
-                    width: 200,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
+                    Get.defaultDialog(
+                      title: "Xác nhận",
+                      middleText: "Bạn có chắc muốn xoá?",
+                      onConfirm: () {
+                        controller.deleteReview(review.id, review.productId);
+                        Get.back();
                       },
-                      child: Text("Gửi báo cáo"),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+                      onCancel: () {},
+                    );
+                  },
+                ),
+              ]
+              /// ===== USER KHÁC =====
+              else ...[
+                ListTile(
+                  leading: const Icon(Icons.flag, color: Colors.orange),
+                  title: const Text("Báo cáo"),
+                  onTap: () {
+                    Navigator.pop(context);
+
+                    ReportReviewBottomSheet.show(context, (reason) {
+                      controller.reportReview(reviewId: review.id, reason: reason);
+                    });
+                  },
+                ),
+              ],
+            ],
+          ),
         );
       },
     );
@@ -106,10 +95,7 @@ class UserReviewCard extends StatelessWidget {
             ),
 
             /// MENU 3 CHẤM
-            IconButton(
-              onPressed: () => _showReportBottomSheet(context),
-              icon: Icon(Icons.more_vert),
-            ),
+            IconButton(onPressed: () => _showOptions(context), icon: Icon(Icons.more_vert)),
           ],
         ),
 
@@ -133,9 +119,10 @@ class UserReviewCard extends StatelessWidget {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: review.images.map((img) {
-              return _buildImage(img);
-            }).toList(),
+            children: List.generate(review.images.length, (index) {
+              final img = review.images[index];
+              return _buildImage(context, img, review.images, index);
+            }),
           ),
 
         SizedBox(height: 10),
@@ -170,17 +157,20 @@ class UserReviewCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(String imageUrl) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Image.network(
-        imageUrl.trim(),
-        width: 80,
-        height: 80,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Icon(Icons.broken_image);
-        },
+  Widget _buildImage(BuildContext context, String imageUrl, List<String> images, int index) {
+    return GestureDetector(
+      onTap: () => controller.openFullScreen(context, images, index),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          imageUrl.trim(),
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(Icons.broken_image);
+          },
+        ),
       ),
     );
   }

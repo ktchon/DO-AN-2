@@ -59,7 +59,7 @@ class OrderBottomActionBar extends StatelessWidget {
                   if (isReviewed) {
                     ///  Xem review
                     Get.to(() => UserReviewDetailScreen(
-                          productId: firstItem.productId,
+                          productId: firstItem.productId, item: firstItem,
                         ));
                   } else {
                     ///  Viết review

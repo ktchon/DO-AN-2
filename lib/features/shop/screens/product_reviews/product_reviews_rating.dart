@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-import 'package:shop_app/common/widgets/products/rating/product_reviews_rating.dart';
 import 'package:shop_app/common/widgets/products/rating/rating_indicator.dart';
 import 'package:shop_app/features/shop/controllers/reviews/review_controller.dart';
+import 'package:shop_app/features/shop/models/cart_item_model.dart';
 import 'package:shop_app/features/shop/screens/product_reviews/widgets/rating_progress_indicator.dart';
 import 'package:shop_app/features/shop/screens/product_reviews/widgets/user_review_card.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
@@ -53,9 +53,25 @@ class _ProductReviewsRatingState extends State<ProductReviewsRating> {
                 'Xếp hạng và đánh giá đã được xác minh và đến từ những người sử dụng cùng loại thiết bị mà bạn đang dùng.',
               ),
               SizedBox(height: 12),
-              OverallProductRating(),
-              CRatingBarIndicator(rating: 5),
-              Text('12.342', style: Theme.of(context).textTheme.labelSmall),
+              Obx(() {
+                final avg = controller.averageRating;
+                final total = controller.totalReviews;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    OverallProductRating(controller: controller),
+
+                    SizedBox(height: 8),
+
+                    CRatingBarIndicator(rating: avg),
+
+                    SizedBox(height: 4),
+
+                    Text('$total đánh giá', style: Theme.of(context).textTheme.labelSmall),
+                  ],
+                );
+              }),
               SizedBox(height: 32),
 
               // Đánh giá của người dùng
@@ -75,7 +91,7 @@ class _ProductReviewsRatingState extends State<ProductReviewsRating> {
                   separatorBuilder: (_, __) => SizedBox(height: 12),
                   itemBuilder: (_, index) {
                     final review = controller.reviews[index];
-                    return UserReviewCard(review: review);
+                    return UserReviewCard(review: review, item: CartItemModel.empty());
                   },
                 );
               }),

@@ -202,15 +202,19 @@ class OrderListItem extends StatelessWidget {
                                 if (isReviewed) {
                                   /// 👉 Xem lại đánh giá
                                   Get.to(
-                                    () => UserReviewDetailScreen(productId: firstItem.productId),
+                                    () => UserReviewDetailScreen(
+                                      productId: firstItem.productId,
+                                      item: firstItem, 
+                                    ),
                                   );
                                 } else {
                                   /// 👉 Viết đánh giá
+                                  controller.resetForm();
                                   Get.to(() => WriteReviewScreen(item: firstItem));
                                 }
                               },
                               child: Text(
-                                isReviewed ? "Đã đánh giá" : "Viết đánh giá",
+                                isReviewed ? "Xem đánh giá" : "Viết đánh giá",
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -9,6 +8,7 @@ import 'package:shop_app/common/widgets/custom_shapes/containers/circular_contai
 import 'package:shop_app/common/widgets/text/section_heading.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/controllers/reviews/review_controller.dart';
+import 'package:shop_app/features/shop/models/cart_item_model.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
 import 'package:shop_app/features/shop/models/share_product_model.dart';
 import 'package:shop_app/features/shop/screens/checkout/checkout.dart';
@@ -154,7 +154,7 @@ class ProductDetail extends StatelessWidget {
                     trimMode: TrimMode.Line,
                     moreStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                     lessStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-                    product.description ?? '',
+                    product.description,
                   ),
                   // Bình luận
                   Divider(),
@@ -162,13 +162,16 @@ class ProductDetail extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SectionHeading(
-                        textTitle: 'Đánh giá (199)',
-                        showActionButton: false,
-                        textColor: THelperFunctions.isDarkMode(context)
-                            ? Colors.white
-                            : Colors.black,
-                      ),
+                      Obx(() {
+                        final totalReview = reviewController.totalReviews;
+                        return SectionHeading(
+                          textTitle: 'Đánh giá (${totalReview})',
+                          showActionButton: false,
+                          textColor: THelperFunctions.isDarkMode(context)
+                              ? Colors.white
+                              : Colors.black,
+                        );
+                      }),
 
                       Row(
                         children: [
@@ -197,7 +200,7 @@ class ProductDetail extends StatelessWidget {
 
                       return Column(
                         children: reviews.map((review) {
-                          return UserReviewCard(review: review);
+                          return UserReviewCard(review: review, item: CartItemModel.empty());
                         }).toList(),
                       );
                     },

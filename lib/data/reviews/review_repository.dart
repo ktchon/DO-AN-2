@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
@@ -7,6 +8,7 @@ import 'package:shop_app/features/shop/models/reviews/reviews_model.dart';
 class ReviewRepository extends GetxController {
   static ReviewRepository get instance => Get.find();
   final _db = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   /// CREATE REVIEW
   Future<void> createReview(ReviewModel review) async {
@@ -50,15 +52,26 @@ class ReviewRepository extends GetxController {
   }
 
   /// REPORT
-  Future<void> reportReview({
-    required String reviewId,
-    required String userId,
-    required String reason,
-  }) async {
-    await _db.collection('Reviews').doc(reviewId).collection('Reports').add({
-      'userId': userId,
-      'reason': reason,
-      'createdAt': FieldValue.serverTimestamp(),
+  Future<void> reportReview(String reviewId, String reason) async {
+    final userId = _auth.currentUser?.uid;
+
+    if (userId == null) return;
+    // Chống spam báo cáo
+    final existing = await _db
+        .collection("Reports")
+        .where("reviewId", isEqualTo: reviewId)
+        .where("userId", isEqualTo: userId)
+        .get();
+
+    if (existing.docs.isNotEmpty) {
+      throw "Bạn đã báo cáo rồi";
+    }
+
+    await _db.collection("Reports").add({
+      "reviewId": reviewId,
+      "userId": userId,
+      "reason": reason,
+      "createdAt": FieldValue.serverTimestamp(),
     });
   }
 
@@ -80,5 +93,27 @@ class ReviewRepository extends GetxController {
         .get();
 
     return doc.exists;
+  }
+
+  // updateReview
+  Future<void> updateReview(
+    String reviewId, {
+    required double rating,
+    required String comment,
+    required bool isAnonymous,
+    required List<String> images,
+  }) async {
+    await _db.collection("Reviews").doc(reviewId).update({
+      "rating": rating,
+      "comment": comment,
+      "isAnonymous": isAnonymous,
+      "images": images,
+      "updatedAt": DateTime.now(),
+    });
+  }
+
+  // deleteReview
+  Future<void> deleteReview(String reviewId) async {
+    await _db.collection("Reviews").doc(reviewId).delete();
   }
 }
