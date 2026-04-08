@@ -78,6 +78,6 @@ class TFormatter {
 
   static String formatVND(num amount) {
     final formatter = NumberFormat('#,###', 'vi_VN');
-    return formatter.format(amount).replaceAll(',', '.') + 'đ';
+    return '${formatter.format(amount).replaceAll(',', '.')}đ';
   }
 }

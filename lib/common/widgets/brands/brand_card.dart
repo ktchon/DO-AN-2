@@ -3,7 +3,6 @@ import 'package:shop_app/common/widgets/custom_shapes/containers/circular_image.
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_container.dart';
 import 'package:shop_app/common/widgets/text/brand_title_text_with_verified_icon.dart';
 import 'package:shop_app/features/shop/models/brand_model.dart';
-import 'package:shop_app/utils/helpers/emulator_helper.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 
 class BrandCard extends StatelessWidget {

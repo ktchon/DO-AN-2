@@ -14,6 +14,7 @@ import 'package:shop_app/features/shop/controllers/coupon/coupon_controller.dart
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/models/cart_item_model.dart';
 import 'package:shop_app/features/shop/models/order_model.dart';
+import 'package:shop_app/features/shop/screens/order/order.dart';
 import 'package:shop_app/navigation_menu.dart';
 import 'package:shop_app/utils/constants/enums.dart';
 import 'package:shop_app/utils/popups/full_screen_loader.dart';
@@ -34,6 +35,11 @@ class OrderController extends GetxController {
   final RxInt noOfOrderItems = 0.obs;
   RxList<OrderModel> userOrders = <OrderModel>[].obs;
 
+   @override
+  void onInit() {
+    super.onInit();
+    fetchUserOrders(); 
+  }
   /// Lấy lịch sử đơn hàng của người dùng hiện tại
   Future<List<OrderModel>> fetchUserOrders() async {
     try {
@@ -121,7 +127,11 @@ class OrderController extends GetxController {
       // Chuyển sang màn hình thành công
       Get.off(
         () => SuccessScreen(
+          buttonAdd: true,
           onPressed: () => Get.offAll(() => NavigationMenu()),
+          titleButton: "Về trang chủ",
+          titleButton1: "Xem đơn hàng",
+          onPressed1: () => Get.to(() => OrderScreen()),
           width: 150,
           height: 150,
           title: 'Đặt hàng Thành Công',
@@ -232,7 +242,7 @@ class OrderController extends GetxController {
                     },
                     title: Text(reason),
                   );
-                }).toList(),
+                }),
 
                 /// nếu chọn lý do khác
                 if (selectedReason == "Lý do khác")

@@ -33,7 +33,7 @@ class _UserReviewDetailScreenState extends State<UserAllReviewDetailScreen> {
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
         title: Text(
-          'Đánh giá của bạn',
+          'Tất cả đánh giá',
           style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
         ),
         backgroundColor: TColors.primary,

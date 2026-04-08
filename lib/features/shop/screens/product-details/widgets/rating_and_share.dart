@@ -27,8 +27,8 @@ class RatingAndShare extends StatelessWidget {
               Text.rich(
                 TextSpan(
                   children: [
-                    TextSpan(text: "${avg}", style: Theme.of(context).textTheme.bodyLarge),
-                    TextSpan(text: '(${total})'),
+                    TextSpan(text: "$avg", style: Theme.of(context).textTheme.bodyLarge),
+                    TextSpan(text: '($total)'),
                   ],
                 ),
               ),

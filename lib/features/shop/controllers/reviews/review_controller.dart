@@ -90,14 +90,14 @@ class ReviewController extends GetxController {
 
     final images = await _picker.pickMultiImage(imageQuality: 70, maxWidth: 512, maxHeight: 512);
 
-    if (images != null && images.isNotEmpty) {
+    if (images.isNotEmpty) {
       /// Giới hạn sau khi chọn (trường hợp user chọn nhiều cùng lúc)
       final remainingSlots = 5 - selectedImages.length;
 
       selectedImages.addAll(images.take(remainingSlots));
 
       if (images.length > remainingSlots) {
-        Get.snackbar("Thông báo", "Chỉ lấy ${remainingSlots} ảnh");
+        Get.snackbar("Thông báo", "Chỉ lấy $remainingSlots ảnh");
       }
     }
   }

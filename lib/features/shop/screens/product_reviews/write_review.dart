@@ -68,7 +68,7 @@ class WriteReviewScreen extends StatelessWidget {
 
                         /// GIÁ
                         Text(
-                          '${TFormatter.formatVND(item.price)}',
+                          TFormatter.formatVND(item.price),
                           style: TextStyle(fontWeight: FontWeight.w500, color: Colors.red),
                         ),
 

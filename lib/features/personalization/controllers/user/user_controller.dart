@@ -56,7 +56,7 @@ class UserController extends GetxController {
       await fetchUserRecord();
 
       // If no record already stored.
-      if (this.user.value.id.isEmpty) {
+      if (user.value.id.isEmpty) {
         if (userCredentials != null) {
           // Convert Name to First and Last Name
           final nameParts = UserModel.nameParts(userCredentials.user!.displayName ?? '');
@@ -165,7 +165,7 @@ class UserController extends GetxController {
   }
 
   /// Upload Profile Image
-  uploadUserProfilePicture() async {
+  Future<void> uploadUserProfilePicture() async {
     try {
       imageUploading.value = true;
       // Chọn ảnh từ gallery với chất lượng nén và kích thước giới hạn

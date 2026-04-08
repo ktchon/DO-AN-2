@@ -167,7 +167,7 @@ class OrderDetailScreen extends StatelessWidget {
                             const SizedBox(height: 4),
 
                             Text(
-                              "${TFormatter.formatVND(item.price)}",
+                              TFormatter.formatVND(item.price),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.red,
@@ -197,7 +197,7 @@ class OrderDetailScreen extends StatelessWidget {
                   ),
 
                   Text(
-                    "${TFormatter.formatVND(order.totalAmount)}",
+                    TFormatter.formatVND(order.totalAmount),
                     style: Theme.of(context).textTheme.titleLarge!.apply(color: Colors.green),
                   ),
                 ],
@@ -224,15 +224,22 @@ class OrderDetailScreen extends StatelessWidget {
             SizedBox(height: 20),
             if (order.status == OrderStatus.delivered)
               RoundedContainer(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 showBorder: true,
+                borderColor: Colors.green.shade200,
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.check_circle, color: Colors.green),
-                    SizedBox(width: 8),
+                    const Icon(Icons.check_circle, color: Colors.green, size: 28),
+                    const SizedBox(width: 12),
                     Text(
                       "Đã giao hàng thành công",
-                      style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),

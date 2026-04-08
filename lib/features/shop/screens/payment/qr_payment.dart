@@ -9,6 +9,7 @@ import 'package:shop_app/data/repositories/authentication/authentication_reposit
 import 'package:shop_app/features/authentication/screens/login/login.dart';
 import 'package:shop_app/features/shop/controllers/order_controller.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
+import 'package:shop_app/features/shop/screens/order/order.dart';
 import 'package:shop_app/navigation_menu.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 
@@ -106,16 +107,19 @@ class _QRPaymentScreenState extends State<QRPaymentScreen> {
               Get.offAll(() => LoginScreen()); // hoặc màn hình login
               return;
             }
-
             Get.off(
               () => SuccessScreen(
+                buttonAdd: true,
+                onPressed: () => Get.offAll(() => NavigationMenu()),
+                titleButton: "Về trang chủ",
+                titleButton1: "Xem đơn hàng",
+                onPressed1: () => Get.to(() => OrderScreen()),
                 width: 150,
                 height: 150,
                 title: "Thanh toán thành công",
                 subTitle: "Đơn hàng của bạn đã được xác nhận",
-                animationJson: "assets/logo/Success.json",
-                onPressed: () => Get.offAll(() => NavigationMenu()),
-                check: true,
+                animationJson: 'assets/logo/Success.json',
+                check: false,
               ),
             );
           }

@@ -28,10 +28,8 @@ class ImagesController extends GetxController {
     selectedProductImage.value = product.thumbnail;
 
     // Lấy tất cả ảnh từ trường images của Product Model (nếu có)
-    if (product.images != null) {
-      images.addAll(product.images!);
-    }
-
+    images.addAll(product.images!);
+  
     // Lấy tất cả ảnh từ các biến thể sản phẩm (nếu có biến thể)
     if (product.productVariations != null || product.productVariations!.isNotEmpty) {
       images.addAll(product.productVariations!.map((variation) => variation.image));

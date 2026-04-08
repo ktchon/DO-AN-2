@@ -34,7 +34,7 @@ class CSearchController extends GetxController {
   }
 
   // Autocomplete realtime
-  onSearchChanged(String query) {
+  void onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () async {
       if (query.trim().isNotEmpty) {

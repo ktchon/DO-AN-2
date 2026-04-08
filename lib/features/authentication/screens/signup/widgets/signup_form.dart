@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shop_app/features/authentication/controller/signup/sigup_controller.dart';
 import 'package:shop_app/features/authentication/screens/signup/widgets/terms_conditions_checkbox.dart';

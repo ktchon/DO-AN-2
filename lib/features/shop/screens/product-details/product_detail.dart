@@ -166,7 +166,7 @@ class ProductDetail extends StatelessWidget {
                       Obx(() {
                         final totalReview = reviewController.totalReviews;
                         return SectionHeading(
-                          textTitle: 'Đánh giá (${totalReview})',
+                          textTitle: 'Đánh giá ($totalReview)',
                           showActionButton: false,
                           textColor: THelperFunctions.isDarkMode(context)
                               ? Colors.white

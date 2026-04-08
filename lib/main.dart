@@ -1,17 +1,12 @@
-import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop_app/data/repositories/authentication/authentication_repository.dart';
-import 'package:shop_app/dev_tools/firestore_full_migrator.dart';
 import 'package:shop_app/firebase_options.dart';
 import 'package:shop_app/utils/app.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:shop_app/utils/storage/storage_utility.dart';
 
 Future<void> main() async {

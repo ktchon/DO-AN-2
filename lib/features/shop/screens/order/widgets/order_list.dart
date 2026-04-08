@@ -162,7 +162,7 @@ class OrderListItem extends StatelessWidget {
                               children: [
                                 Text("Tổng tiền: ", style: Theme.of(context).textTheme.labelLarge),
                                 Text(
-                                  "${TFormatter.formatVND(order.totalAmount)}",
+                                  TFormatter.formatVND(order.totalAmount),
                                   style: Theme.of(
                                     context,
                                   ).textTheme.labelLarge!.apply(color: Colors.green),

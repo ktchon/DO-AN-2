@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shop_app/common/widgets/appbar/appbar.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/primary_header_container.dart';
@@ -13,7 +12,6 @@ import 'package:shop_app/features/personalization/screens/settings/test_upload/t
 import 'package:shop_app/features/shop/screens/cart/cart.dart';
 import 'package:shop_app/features/shop/screens/order/order.dart';
 import 'package:shop_app/features/shop/screens/product_reviews/full_user_review_screen.dart';
-import 'package:shop_app/features/shop/screens/product_reviews/user_review_detail_screen.dart';
 
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
@@ -70,7 +68,7 @@ class SettingScreen extends StatelessWidget {
               SettingMenuTile(
                 title: 'Bình luận của tôi',
                 subTitle: 'Các bình luận sản phẩm trước đó',
-                icon: Iconsax.component_copy,
+                icon: Icons.comment,
                 onTap: () => Get.to(() => UserAllReviewDetailScreen()),
               ),
               SettingMenuTile(

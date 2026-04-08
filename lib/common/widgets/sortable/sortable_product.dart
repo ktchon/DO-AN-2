@@ -19,7 +19,7 @@ class SortableProducts extends StatelessWidget {
       children: [
         DropdownButtonFormField(
           decoration: InputDecoration(prefixIcon: Icon(Icons.filter_list)),
-          value: controller.selectedSortOption.value,
+          initialValue: controller.selectedSortOption.value,
           items: [
             'Name',
             'Giá cao',

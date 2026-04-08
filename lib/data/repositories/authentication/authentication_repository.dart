@@ -35,7 +35,7 @@ class AuthenticationRepository extends GetxController {
     screenRedirect();
   }
 
-  screenRedirect() async {
+  Future<void> screenRedirect() async {
     await _auth.currentUser?.reload();
     final user = _auth.currentUser;
     if (user != null) {

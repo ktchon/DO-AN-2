@@ -5,7 +5,7 @@ class ProductAttributeModel {
   ProductAttributeModel({this.name, this.values});
 
   /// Json Format
-  toJson() {
+  Map<String, Object?> toJson() {
     return {'Name': name, 'Values': values};
   }
 

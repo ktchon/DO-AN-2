@@ -5,7 +5,7 @@ import 'package:shop_app/utils/constants/colors.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class OnBoardingNavigation extends StatelessWidget {
-  OnBoardingNavigation({super.key});
+  const OnBoardingNavigation({super.key});
 
   @override
   Widget build(BuildContext context) {

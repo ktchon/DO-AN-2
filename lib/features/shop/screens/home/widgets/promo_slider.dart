@@ -1,7 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:shop_app/common/images/banner_images.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/circular_container.dart';
 import 'package:shop_app/common/widgets/shimmer/shimmer.dart';

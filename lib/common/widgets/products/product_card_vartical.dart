@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shop_app/common/styles/shadows.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/circular_container.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_image.dart';
-import 'package:shop_app/common/widgets/icons/circular_icon.dart';
 import 'package:shop_app/common/widgets/products/cart/add_to_cart_button.dart';
 import 'package:shop_app/common/widgets/products/favourite_icon/favourite_icon.dart';
 import 'package:shop_app/common/widgets/text/brand_title_text_with_verified_icon.dart';

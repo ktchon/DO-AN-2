@@ -13,15 +13,20 @@ class SuccessScreen extends StatelessWidget {
     this.padding = const EdgeInsets.only(top: 112, left: 48, right: 48, bottom: 48),
     required this.check,
     this.animationJson,
+    this.buttonAdd = false,
+    this.titleButton = "Tiếp theo",
+    this.onPressed1, this.titleButton1,
   });
 
   final String title, subTitle;
   final String? image;
-  final VoidCallback? onPressed;
+  final VoidCallback? onPressed, onPressed1;
   final double? width, height;
   final EdgeInsetsGeometry padding;
   final bool check;
   final String? animationJson;
+  final bool? buttonAdd;
+  final String? titleButton, titleButton1;
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +81,14 @@ class SuccessScreen extends StatelessWidget {
               // Nút
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(onPressed: onPressed, child: const Text("Tiếp theo")),
+                child: ElevatedButton(onPressed: onPressed, child: Text("$titleButton")),
               ),
+              SizedBox(height: 12),
+              if (buttonAdd == true)
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(onPressed: onPressed1, child: Text("$titleButton1")),
+                ),
             ],
           ),
         ),

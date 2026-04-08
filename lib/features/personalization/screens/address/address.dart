@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:shop_app/features/personalization/controllers/address_controller.dart';
 import 'package:shop_app/features/personalization/screens/address/add_new_address.dart';
 import 'package:shop_app/features/personalization/screens/address/widgets/single_address.dart';
