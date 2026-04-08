@@ -6,7 +6,7 @@ import 'package:shop_app/utils/constants/colors.dart';
 
 class UserReviewDetailScreen extends StatelessWidget {
   final String productId;
-  final CartItemModel item; 
+  final CartItemModel item;
 
   const UserReviewDetailScreen({super.key, required this.productId, required this.item});
 
@@ -39,9 +39,7 @@ class UserReviewDetailScreen extends StatelessWidget {
 
           return Padding(
             padding: EdgeInsets.all(16),
-            child: UserReviewCard(
-              item: item, 
-              review: userReview),
+            child: UserReviewCard(item: item, review: userReview),
           );
         },
       ),

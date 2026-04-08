@@ -36,75 +36,76 @@ class WriteReviewScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Sản phẩm
-            Row(
-              children: [
-                Container(
-                  width: 90,
-                  height: 110,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 236, 235, 235),
-                    borderRadius: BorderRadius.circular(8),
-                    image: DecorationImage(
-                      image: NetworkImage(item.image ?? ''),
-                      fit: BoxFit.cover,
+            if (item.image != null && item.image!.isNotEmpty)
+              Row(
+                children: [
+                  Container(
+                    width: 90,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 236, 235, 235),
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(
+                        image: NetworkImage(item.image ?? ''),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      /// TÊN
-                      Text(
-                        item.title ?? '',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-
-                      SizedBox(height: 4),
-
-                      /// GIÁ
-                      Text(
-                        '${TFormatter.formatVND(item.price)}',
-                        style: TextStyle(fontWeight: FontWeight.w500, color: Colors.red),
-                      ),
-
-                      SizedBox(height: 4),
-
-                      /// SIZE + COLOR (VARIATION)
-                      if (item.selectedVariation != null && item.selectedVariation!.isNotEmpty)
-                        Text.rich(
-                          TextSpan(
-                            children: item.selectedVariation!.entries.map((e) {
-                              return TextSpan(
-                                children: [
-                                  /// KEY (Màu, Size)
-                                  TextSpan(
-                                    text: '${e.key}: ',
-                                    style: TextStyle(fontSize: 11, color: Colors.grey),
-                                  ),
-
-                                  /// VALUE (Đen, M)
-                                  TextSpan(
-                                    text: '${e.value}  ',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                          ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        /// TÊN
+                        Text(
+                          item.title ?? '',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontWeight: FontWeight.w500),
                         ),
-                    ],
+
+                        SizedBox(height: 4),
+
+                        /// GIÁ
+                        Text(
+                          '${TFormatter.formatVND(item.price)}',
+                          style: TextStyle(fontWeight: FontWeight.w500, color: Colors.red),
+                        ),
+
+                        SizedBox(height: 4),
+
+                        /// SIZE + COLOR (VARIATION)
+                        if (item.selectedVariation != null && item.selectedVariation!.isNotEmpty)
+                          Text.rich(
+                            TextSpan(
+                              children: item.selectedVariation!.entries.map((e) {
+                                return TextSpan(
+                                  children: [
+                                    /// KEY (Màu, Size)
+                                    TextSpan(
+                                      text: '${e.key}: ',
+                                      style: TextStyle(fontSize: 11, color: Colors.grey),
+                                    ),
+
+                                    /// VALUE (Đen, M)
+                                    TextSpan(
+                                      text: '${e.value}  ',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
             const SizedBox(height: 24),
             // Rating stars

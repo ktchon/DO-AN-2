@@ -45,6 +45,7 @@ class ReviewController extends GetxController {
 
   /// Reviews
   RxMap<String, bool> reviewedMap = <String, bool>{}.obs;
+  RxList<ReviewModel> userReviews = <ReviewModel>[].obs;
 
   /// ================= FETCH REVIEWS =================
   Future<void> fetchReviews(String productId) async {
@@ -336,6 +337,7 @@ class ReviewController extends GetxController {
       await repo.deleteReview(reviewId);
 
       reviews.removeWhere((r) => r.id == reviewId);
+      userReviews.removeWhere((r) => r.id == reviewId);
       reviewedMap[productId] = false;
 
       Get.snackbar("Thành công", "Đã xoá đánh giá");
@@ -382,5 +384,18 @@ class ReviewController extends GetxController {
         builder: (_) => FullScreenGalleryFiles(images: images, initialIndex: index),
       ),
     );
+  }
+
+  Future<void> fetchUserReviews() async {
+    try {
+      final userId = authRepo.authUser?.uid;
+      if (userId == null) return;
+
+      final reviews = await repo.getReviewsByUser(userId);
+
+      userReviews.assignAll(reviews);
+    } catch (e) {
+      print(e);
+    }
   }
 }

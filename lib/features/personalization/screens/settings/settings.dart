@@ -12,6 +12,8 @@ import 'package:shop_app/features/personalization/screens/address/address.dart';
 import 'package:shop_app/features/personalization/screens/settings/test_upload/test_upload.dart';
 import 'package:shop_app/features/shop/screens/cart/cart.dart';
 import 'package:shop_app/features/shop/screens/order/order.dart';
+import 'package:shop_app/features/shop/screens/product_reviews/full_user_review_screen.dart';
+import 'package:shop_app/features/shop/screens/product_reviews/user_review_detail_screen.dart';
 
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
@@ -64,6 +66,12 @@ class SettingScreen extends StatelessWidget {
                 subTitle: 'Đơn hàng đang xử lý và đã hoàn thành',
                 icon: Iconsax.receipt_2_copy,
                 onTap: () => Get.to(() => OrderScreen()),
+              ),
+              SettingMenuTile(
+                title: 'Bình luận của tôi',
+                subTitle: 'Các bình luận sản phẩm trước đó',
+                icon: Iconsax.component_copy,
+                onTap: () => Get.to(() => UserAllReviewDetailScreen()),
               ),
               SettingMenuTile(
                 title: 'Tài khoản ngân hàng',

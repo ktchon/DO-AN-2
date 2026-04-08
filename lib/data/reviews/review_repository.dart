@@ -116,4 +116,14 @@ class ReviewRepository extends GetxController {
   Future<void> deleteReview(String reviewId) async {
     await _db.collection("Reviews").doc(reviewId).delete();
   }
+
+  // Lấy bình luận của user
+  Future<List<ReviewModel>> getReviewsByUser(String userId) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('Reviews')
+        .where('userId', isEqualTo: userId)
+        .get();
+
+    return snapshot.docs.map((doc) => ReviewModel.fromSnapshot(doc)).toList();
+  }
 }

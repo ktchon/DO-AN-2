@@ -29,6 +29,7 @@ class ProductDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = CartController.instance;
     final reviewController = ReviewController.instance;
+    reviewController.fetchReviews(product.id);
     return Scaffold(
       bottomNavigationBar: Container(
         padding: EdgeInsets.symmetric(horizontal: 20),

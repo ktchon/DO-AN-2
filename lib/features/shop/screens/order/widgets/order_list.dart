@@ -200,15 +200,15 @@ class OrderListItem extends StatelessWidget {
                               ),
                               onPressed: () {
                                 if (isReviewed) {
-                                  /// 👉 Xem lại đánh giá
+                                  /// Xem lại đánh giá
                                   Get.to(
                                     () => UserReviewDetailScreen(
                                       productId: firstItem.productId,
-                                      item: firstItem, 
+                                      item: firstItem,
                                     ),
                                   );
                                 } else {
-                                  /// 👉 Viết đánh giá
+                                  /// Viết đánh giá
                                   controller.resetForm();
                                   Get.to(() => WriteReviewScreen(item: firstItem));
                                 }
