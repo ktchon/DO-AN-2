@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:shop_app/data/repositories/authentication/authentication_repository.dart';
 import 'package:shop_app/features/shop/models/order_model.dart';
+import 'package:shop_app/utils/constants/enums.dart';
 
 class OrderRepository extends GetxController {
   static OrderRepository get instance => Get.find();
@@ -196,6 +197,45 @@ class OrderRepository extends GetxController {
       });
     } catch (e) {
       throw Exception("Huỷ đơn thất bại: $e");
+    }
+  }
+
+  Stream<OrderModel> trackOrder(String orderId) {
+    return _db
+        .collection('orders')
+        .doc(orderId)
+        .snapshots()
+        .map((doc) => OrderModel.fromSnapshot(doc));
+  }
+
+  // Cập nhật đơn hàng
+  Future<void> updateStatus(String orderId, OrderStatus status) async {
+    final doc = _db.collection('orders').doc(orderId);
+
+    await doc.update({
+      'status': status.name,
+      'timeline': FieldValue.arrayUnion([
+        {"status": status.name, "title": _getTitle(status), "time": FieldValue.serverTimestamp()},
+      ]),
+    });
+  }
+
+  String _getTitle(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.pending:
+        return "Đặt hàng thành công";
+      case OrderStatus.confirmed:
+        return "Shop đã xác nhận";
+      case OrderStatus.processing:
+        return "Đang chuẩn bị hàng";
+      case OrderStatus.shipped:
+        return "Đang giao hàng";
+      case OrderStatus.delivered:
+        return "Giao thành công";
+      case OrderStatus.cancelled:
+        return "Đã huỷ";
+      case OrderStatus.paid:
+        return "Đã thanh toán";
     }
   }
 }

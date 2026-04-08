@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_container.dart';
 import 'package:shop_app/features/shop/controllers/order_controller.dart';
+import 'package:shop_app/features/shop/controllers/order_tracking_controller.dart';
 import 'package:shop_app/features/shop/models/order_model.dart';
+import 'package:shop_app/features/shop/screens/order/order_tracking_screen.dart';
 import 'package:shop_app/features/shop/screens/order/widgets/order_bottom_action_bar.dart';
+import 'package:shop_app/features/shop/screens/order/widgets/order_progress_bar.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 import 'package:shop_app/utils/constants/enums.dart';
 import 'package:shop_app/utils/formatters/formatter.dart';
@@ -18,6 +22,7 @@ class OrderDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(OrderController());
+    Get.put(OrderTrackingController());
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
@@ -29,10 +34,19 @@ class OrderDetailScreen extends StatelessWidget {
         ),
         backgroundColor: TColors.primary,
       ),
+      
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () => Get.to(() => OrderTrackingScreen(orderId: order.id)),
+              child: OrderProgressBar(status: order.status),
+            ),
+
+            const SizedBox(height: 40),
+
             /// ORDER INFO
             RoundedContainer(
               padding: const EdgeInsets.all(16),

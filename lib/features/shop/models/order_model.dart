@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shop_app/features/personalization/models/address_model.dart';
 import 'package:shop_app/features/shop/models/cart_item_model.dart';
+import 'package:shop_app/features/shop/models/order_timeline/order_timeline_model.dart';
 import 'package:shop_app/utils/constants/enums.dart';
-import 'package:shop_app/utils/helpers/helper_functions.dart'; // nếu dùng Firestore
+import 'package:shop_app/utils/helpers/helper_functions.dart';
 
 class OrderModel {
   final String id;
@@ -18,6 +19,7 @@ class OrderModel {
   final String paymentNote;
   final DateTime? expireAt;
   final String? couponId;
+  final List<OrderTimeline> timeline;
 
   OrderModel({
     required this.id,
@@ -33,15 +35,16 @@ class OrderModel {
     required this.paymentNote,
     this.expireAt,
     this.couponId,
+    this.timeline = const [], // ✅ default tránh null crash
   });
 
-  // Getter formatted date
+  /// ================= GETTERS =================
+
   String get formattedOrderDate => THelperFunctions.getFormattedDate(orderDate);
 
   String get formattedDeliveryDate =>
       deliveryDate != null ? THelperFunctions.getFormattedDate(deliveryDate!) : '';
 
-  // Getter trạng thái dạng text
   String get orderStatusText {
     switch (status) {
       case OrderStatus.delivered:
@@ -61,57 +64,80 @@ class OrderModel {
     }
   }
 
-  // Convert to JSON (để lưu Firestore hoặc gửi API)
+  /// ================= TO JSON =================
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'userId': userId,
-      'status': status.toString().split('.').last, // chỉ lấy "processing", "shipped",...
+      'status': status.name,
       'totalAmount': totalAmount,
       'orderDate': Timestamp.fromDate(orderDate),
       'paymentMethod': paymentMethod,
-      "paymentNote": paymentNote,
+      'paymentNote': paymentNote,
       'address': address?.toJson(),
       'deliveryDate': deliveryDate != null ? Timestamp.fromDate(deliveryDate!) : null,
       'cancelReason': cancelReason,
       'items': items.map((item) => item.toJson()).toList(),
       'expireAt': expireAt != null ? Timestamp.fromDate(expireAt!) : null,
       'couponId': couponId,
+
+      ///  ADD TIMELINE
+      'timeline': timeline.map((e) => e.toJson()).toList(),
     };
   }
 
-  // Factory từ Firestore snapshot
+  /// ================= FROM FIRESTORE =================
+
   factory OrderModel.fromSnapshot(DocumentSnapshot snapshot) {
     final data = snapshot.data() as Map<String, dynamic>;
 
     return OrderModel(
-      id: snapshot.id, // id trong document
-      userId: data['userId'] as String? ?? '',
+      id: snapshot.id,
+      userId: data['userId'] ?? '',
+
       status: OrderStatus.values.firstWhere(
-        (e) => e.toString().split('.').last == (data['status'] as String? ?? 'processing'),
+        (e) => e.name == (data['status'] ?? 'processing'),
         orElse: () => OrderStatus.processing,
       ),
+
       totalAmount: (data['totalAmount'] as num?)?.toDouble() ?? 0.0,
+
       orderDate: (data['orderDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      paymentMethod: data['paymentMethod'] as String? ?? 'COD',
-      paymentNote: data['paymentNote'] as String,
-      cancelReason: data['cancelReason'] as String?,
-      address: data['address'] != null
-          ? AddressModel.fromMap(data['address'] as Map<String, dynamic>)
-          : null,
+
+      paymentMethod: data['paymentMethod'] ?? 'COD',
+
+      paymentNote: data['paymentNote'] ?? '', // ✅ tránh null crash
+
+      cancelReason: data['cancelReason'],
+
+      address: data['address'] != null ? AddressModel.fromMap(data['address']) : null,
+
       deliveryDate: data['deliveryDate'] != null
           ? (data['deliveryDate'] as Timestamp).toDate()
           : null,
+
       items:
-          (data['items'] as List<dynamic>?)
-              ?.map((itemData) => CartItemModel.fromJson(itemData as Map<String, dynamic>))
-              .toList() ??
-          [],
+          (data['items'] as List<dynamic>?)?.map((e) => CartItemModel.fromJson(e)).toList() ?? [],
+
       expireAt: data['expireAt'] != null ? (data['expireAt'] as Timestamp).toDate() : null,
+
       couponId: data['couponId'],
+
+      /// ✅ PARSE TIMELINE
+      timeline:
+          (data['timeline'] as List<dynamic>?)?.map((e) => OrderTimeline.fromMap(e)).toList() ?? [],
     );
   }
-  OrderModel copyWith({OrderStatus? status, String? cancelReason, DateTime? expireAt}) {
+
+  /// ================= COPY WITH =================
+
+  OrderModel copyWith({
+    OrderStatus? status,
+    String? cancelReason,
+    DateTime? expireAt,
+    List<OrderTimeline>? timeline,
+  }) {
     return OrderModel(
       id: id,
       userId: userId,
@@ -126,6 +152,7 @@ class OrderModel {
       paymentNote: paymentNote,
       expireAt: expireAt ?? this.expireAt,
       couponId: couponId,
+      timeline: timeline ?? this.timeline,
     );
   }
 }

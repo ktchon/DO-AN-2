@@ -4,6 +4,7 @@ import 'package:shop_app/features/personalization/controllers/address_controller
 import 'package:shop_app/features/personalization/controllers/user/user_controller.dart';
 import 'package:shop_app/features/shop/controllers/checkout_controller.dart';
 import 'package:shop_app/features/shop/controllers/coupon/coupon_controller.dart';
+import 'package:shop_app/features/shop/controllers/order_tracking_controller.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/controllers/products/variation_controller.dart';
 import 'package:shop_app/features/shop/controllers/reviews/review_controller.dart';
@@ -23,5 +24,6 @@ class GeneralBindings extends Bindings {
     Get.put(CheckoutController());
     Get.put(UserController());
     Get.put(ReviewController());
+    Get.put(OrderTrackingController());
   }
 }
