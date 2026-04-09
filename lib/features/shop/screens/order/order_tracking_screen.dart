@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:intl/intl.dart';
 import 'package:shop_app/features/shop/controllers/order_tracking_controller.dart';
 
 class OrderTrackingScreen extends StatelessWidget {
@@ -13,6 +14,7 @@ class OrderTrackingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(OrderTrackingController());
     controller.trackOrder(orderId);
+    controller.simulateShipping(orderId);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Theo dõi đơn hàng")),
@@ -29,7 +31,7 @@ class OrderTrackingScreen extends StatelessWidget {
             return ListTile(
               leading: const Icon(Icons.check_circle, color: Colors.green),
               title: Text(step.title),
-              subtitle: Text(step.time.toString()),
+              subtitle: Text(DateFormat('HH:mm dd/MM/yyyy').format(step.time)),
             );
           },
         );

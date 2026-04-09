@@ -201,8 +201,12 @@ class OrderRepository extends GetxController {
   }
 
   Stream<OrderModel> trackOrder(String orderId) {
+    final userId = AuthenticationRepository.instance.authUser!.uid;
+
     return _db
-        .collection('orders')
+        .collection('Users')
+        .doc(userId)
+        .collection('Orders')
         .doc(orderId)
         .snapshots()
         .map((doc) => OrderModel.fromSnapshot(doc));
@@ -210,7 +214,9 @@ class OrderRepository extends GetxController {
 
   // Cập nhật đơn hàng
   Future<void> updateStatus(String orderId, OrderStatus status) async {
-    final doc = _db.collection('orders').doc(orderId);
+    final userId = AuthenticationRepository.instance.authUser!.uid;
+
+    final doc = _db.collection('Users').doc(userId).collection('Orders').doc(orderId);
 
     await doc.update({
       'status': status.name,

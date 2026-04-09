@@ -14,6 +14,7 @@ import 'package:shop_app/features/shop/controllers/coupon/coupon_controller.dart
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/models/cart_item_model.dart';
 import 'package:shop_app/features/shop/models/order_model.dart';
+import 'package:shop_app/features/shop/models/order_timeline/order_timeline_model.dart';
 import 'package:shop_app/features/shop/screens/order/order.dart';
 import 'package:shop_app/navigation_menu.dart';
 import 'package:shop_app/utils/constants/enums.dart';
@@ -35,11 +36,12 @@ class OrderController extends GetxController {
   final RxInt noOfOrderItems = 0.obs;
   RxList<OrderModel> userOrders = <OrderModel>[].obs;
 
-   @override
+  @override
   void onInit() {
     super.onInit();
-    fetchUserOrders(); 
+    fetchUserOrders();
   }
+
   /// Lấy lịch sử đơn hàng của người dùng hiện tại
   Future<List<OrderModel>> fetchUserOrders() async {
     try {
@@ -111,6 +113,13 @@ class OrderController extends GetxController {
             : cartController.cartItems.toList(),
         paymentNote: '',
         couponId: couponController.appliedCoupon.value?.id,
+        timeline: [
+          OrderTimeline(
+            status: OrderStatus.pending.name,
+            title: "Đặt hàng thành công",
+            time: DateTime.now(),
+          ),
+        ],
       );
 
       // Lưu đơn hàng vào Firestore
