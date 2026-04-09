@@ -20,6 +20,9 @@ class OrderModel {
   final DateTime? expireAt;
   final String? couponId;
   final List<OrderTimeline> timeline;
+  final String? ghnCode;
+  final String? ghnStatus;
+  final String? shippingProvider;
 
   OrderModel({
     required this.id,
@@ -35,7 +38,10 @@ class OrderModel {
     required this.paymentNote,
     this.expireAt,
     this.couponId,
-    this.timeline = const [], // ✅ default tránh null crash
+    this.timeline = const [],
+    this.ghnCode,
+    this.ghnStatus,
+    this.shippingProvider,
   });
 
   /// ================= GETTERS =================
@@ -81,9 +87,10 @@ class OrderModel {
       'items': items.map((item) => item.toJson()).toList(),
       'expireAt': expireAt != null ? Timestamp.fromDate(expireAt!) : null,
       'couponId': couponId,
-
-      ///  ADD TIMELINE
       'timeline': timeline.map((e) => e.toJson()).toList(),
+      'ghnCode': ghnCode,
+      'ghnStatus': ghnStatus,
+      'shippingProvider': shippingProvider,
     };
   }
 
@@ -107,7 +114,7 @@ class OrderModel {
 
       paymentMethod: data['paymentMethod'] ?? 'COD',
 
-      paymentNote: data['paymentNote'] ?? '', // ✅ tránh null crash
+      paymentNote: data['paymentNote'] ?? '',
 
       cancelReason: data['cancelReason'],
 
@@ -124,9 +131,11 @@ class OrderModel {
 
       couponId: data['couponId'],
 
-      /// ✅ PARSE TIMELINE
       timeline:
           (data['timeline'] as List<dynamic>?)?.map((e) => OrderTimeline.fromMap(e)).toList() ?? [],
+      ghnCode: data['ghnCode'],
+      ghnStatus: data['ghnStatus'],
+      shippingProvider: data['shippingProvider'],
     );
   }
 
@@ -137,6 +146,9 @@ class OrderModel {
     String? cancelReason,
     DateTime? expireAt,
     List<OrderTimeline>? timeline,
+    String? ghnCode,
+    String? ghnStatus,
+    String? shippingProvider,
   }) {
     return OrderModel(
       id: id,
@@ -153,6 +165,9 @@ class OrderModel {
       expireAt: expireAt ?? this.expireAt,
       couponId: couponId,
       timeline: timeline ?? this.timeline,
+      ghnCode: ghnCode ?? this.ghnCode,
+      ghnStatus: ghnStatus ?? this.ghnStatus,
+      shippingProvider: shippingProvider ?? this.shippingProvider,
     );
   }
 }

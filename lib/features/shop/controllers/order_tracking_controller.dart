@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
@@ -11,6 +12,15 @@ class OrderTrackingController extends GetxController {
   final repo = OrderRepository();
 
   Rxn<OrderModel> order = Rxn<OrderModel>();
+  RxList timeline = [].obs;
+  RxString ghnStatus = "".obs;
+  RxDouble lat = 10.0333.obs;
+  RxDouble lng = 105.7833.obs;
+
+  void fakeMove() {
+    lat.value += 0.001;
+    lng.value += 0.001;
+  }
 
   void trackOrder(String orderId) {
     repo.trackOrder(orderId).listen((event) {
@@ -31,17 +41,6 @@ class OrderTrackingController extends GetxController {
       default:
         return 0;
     }
-  }
-
-  Future<void> simulateShipping(String orderId) async {
-    await Future.delayed(Duration(seconds: 3));
-    await repo.updateStatus(orderId, OrderStatus.confirmed);
-
-    await Future.delayed(Duration(seconds: 3));
-    await repo.updateStatus(orderId, OrderStatus.shipped);
-
-    await Future.delayed(Duration(seconds: 3));
-    await repo.updateStatus(orderId, OrderStatus.delivered);
   }
 
   OrderStatus mapGHNStatus(String ghnStatus) {
@@ -68,13 +67,68 @@ class OrderTrackingController extends GetxController {
     }
   }
 
-  Future<void> syncWithGHN(String orderId, String userId) async {
-    final url = "https://your-cloud-function-url/syncGHNOrder";
+  Future<void> syncWithGHN(OrderModel order) async {
+    if (order.ghnCode == null) return;
 
-    await http.post(
-      Uri.parse(url),
-      body: jsonEncode({"order_code": orderId, "userId": userId}),
-      headers: {"Content-Type": "application/json"},
-    );
+    final url = "https://syncghnorder-6fdwcwqf4a-uc.a.run.app";
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: jsonEncode({
+          "order_code": order.ghnCode, // "LHQNMV"
+          "userId": order.userId, // "lbbUb2KlVtOTGkdohFoSgZbacth1"
+          "orderId": order.id, // "[#534f2]"
+        }),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        print("✅ GHN sync thành công: ${response.body}");
+      } else {
+        print("❌ GHN sync lỗi: ${response.statusCode} ${response.body}");
+      }
+    } catch (e) {
+      print("❌ GHN sync exception: $e");
+    }
+  }
+
+  Timer? timer;
+
+  void startTracking(String orderCode, String userId, String orderId) {
+    fetchTracking(orderCode, userId, orderId);
+
+    timer = Timer.periodic(Duration(seconds: 5), (_) {
+      fetchTracking(orderCode, userId, orderId);
+      fakeMove();
+    });
+  }
+
+  Future<void> fetchTracking(String orderCode, String userId, String orderId) async {
+    try {
+      final res = await http.post(
+        Uri.parse("https://syncghnorder-6fdwcwqf4a-uc.a.run.app"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"order_code": orderCode, "userId": userId, "orderId": orderId}),
+      );
+
+      final data = jsonDecode(res.body);
+
+      if (data["success"] == true) {
+        ghnStatus.value = data["ghnStatus"];
+
+        if (data["timeline"] != null) {
+          timeline.value = data["timeline"];
+        }
+      }
+    } catch (e) {
+      print("Tracking error: $e");
+    }
+  }
+
+  @override
+  void onClose() {
+    timer?.cancel();
+    super.onClose();
   }
 }

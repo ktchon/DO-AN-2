@@ -5,6 +5,20 @@ const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 admin.initializeApp();
 const db = admin.firestore();
 const axios = require("axios");
+const GHN_TOKEN = "1f1b3a6d-33c4-11f1-a973-aee5264794df";
+const GHN_SHOP_ID = "199906"; 
+function mapStatus(status) {
+  switch (status) {
+    case "ready_to_pick": return "Chờ lấy hàng";
+    case "picking": return "Đang lấy hàng";
+    case "picked": return "Đã lấy hàng";
+    case "transporting": return "Đang vận chuyển";
+    case "delivering": return "Đang giao hàng";
+    case "delivered": return "Đã giao";
+    case "cancel": return "Đã huỷ";
+    default: return status;
+  }
+}
 // 1. Webhook Sepay
 exports.sepayWebhook = functions.https.onRequest(async (req, res) => {
   if (req.method !== 'POST') {
@@ -141,69 +155,85 @@ exports.autoCancelExpiredOrders = onDocumentCreated(
   }
 );
 
-const GHN_TOKEN = "1f1b3a6d-33c4-11f1-a973-aee5264794df";
-
 exports.syncGHNOrder = functions.https.onRequest(async (req, res) => {
   try {
-    const { order_code } = req.body;
+    const { order_code, userId, orderId } = req.body;
 
-    if (!order_code) {
-      return res.status(400).send("Missing order_code");
+    if (!order_code || !userId || !orderId) {
+      return res.status(400).send("Missing order_code, userId, or orderId");
     }
 
-    /// 1. Call GHN API
-    const ghnRes = await axios.post(
-      "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/detail",
-      { order_code },
-      {
-        headers: {
-          Token: GHN_TOKEN,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    const data = ghnRes.data.data?.[0];
-    if (!data) {
-      return res.status(404).send("GHN order not found");
+    let ghnRes;
+    try {
+      ghnRes = await axios.post(
+        "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/detail",
+        { order_code },
+        {
+          headers: {
+            Token: GHN_TOKEN,
+            ShopId: GHN_SHOP_ID,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (ghnError) {
+      // ✅ Log chi tiết lỗi GHN trả về
+      console.error("❌ GHN API error:", JSON.stringify(ghnError.response?.data));
+      return res.status(500).json({
+        error: "GHN API failed",
+        status: ghnError.response?.status,
+        detail: ghnError.response?.data,  // ← xem lỗi cụ thể GHN báo gì
+      });
     }
+
+    const data = ghnRes.data.data;
+    if (!data) return res.status(404).send("GHN order not found");
 
     const logs = data.log || [];
+    let timeline = [];
 
-    /// 2. Convert timeline
-    const timeline = logs.map((l) => ({
-      status: l.status,
-      title: mapStatus(l.status), 
-      time: new Date(l.updated_date),
-    }));
+    if (logs.length === 0) {
+      const fakeSteps = ["ready_to_pick", "picked", "transporting", "delivering"];
+      const now = new Date();
 
-    const lastStatus = logs[logs.length - 1]?.status || "unknown";
-
-    /// 3. 🔥 Tìm order trong Firestore theo ghnCode
-    const snapshot = await db
-      .collectionGroup("Orders")
-      .where("ghnCode", "==", order_code)
-      .get();
-
-    if (snapshot.empty) {
-      return res.status(404).send("Order not found in Firestore");
+      timeline = fakeSteps.map((s, i) => ({
+        status: s,
+        title: mapStatus(s),
+        time: new Date(now.getTime() - (fakeSteps.length - i) * 60000),
+      }));
+    } else {
+      timeline = logs.map((l) => ({
+        status: l.status,
+        title: mapStatus(l.status),
+        time: new Date(l.updated_date),
+      }));
     }
 
-    const orderRef = snapshot.docs[0].ref;
+    const lastStatus = logs.length > 0 ? logs[logs.length - 1].status : "unknown";
 
-    /// 4. Update
+    const orderRef = db
+      .collection("Users").doc(userId)
+      .collection("Orders").doc(orderId);
+
+    const orderSnap = await orderRef.get();
+    if (!orderSnap.exists) {
+      return res.status(404).send(`Order ${orderId} not found`);
+    }
+
     await orderRef.update({
       timeline,
       ghnStatus: lastStatus,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    console.log("✅ GHN sync success:", order_code);
-
-    return res.json({ success: true });
+    return res.json({
+      success: true,
+      ghnStatus: lastStatus,
+      timeline: timeline,
+    });
 
   } catch (error) {
-    console.error("❌ GHN sync error:", error.response?.data || error.message);
+    console.error("❌ Unexpected error:", error.message);
     return res.status(500).send(error.toString());
   }
 });
@@ -220,7 +250,7 @@ exports.createGHNOrder = functions.https.onRequest(async (req, res) => {
 
     const order = orderDoc.data();
 
-    /// ❗ TRÁNH TẠO 2 LẦN
+    /// TRÁNH TẠO 2 LẦN
     if (order.ghnCode) {
       return res.json({ ghnOrderCode: order.ghnCode });
     }
@@ -245,9 +275,10 @@ exports.createGHNOrder = functions.https.onRequest(async (req, res) => {
         to_phone: order.address?.PhoneNumber || "0000000000",
         to_address: order.address?.Street || "",
 
-        /// ⚠️ TODO: dynamic sau
-        to_district_id: 1493,
-        to_ward_code: "1A0710",
+        to_district_id: order.address?.districtId || 1493,  
+        to_ward_code: order.address?.wardCode || "1A0710",  
+
+        cod_amount: Math.round(order.totalAmount || 0),
 
         weight: 200,
         length: 10,
@@ -265,6 +296,7 @@ exports.createGHNOrder = functions.https.onRequest(async (req, res) => {
       {
         headers: {
           Token: GHN_TOKEN,
+          ShopId: GHN_SHOP_ID,
           "Content-Type": "application/json",
         },
       }

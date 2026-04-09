@@ -52,6 +52,7 @@ dependencies:
   lottie: ^3.3.2
   shimmer: ^3.0.0
   cached_network_image: ^3.4.1
+  google_maps_flutter: ^2.5.0
   #firebase_core
   firebase_core: ^4.4.0
   get_storage: ^2.1.1
