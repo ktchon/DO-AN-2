@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
@@ -6,8 +7,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shop_app/data/repositories/authentication/authentication_repository.dart';
 import 'package:shop_app/firebase_options.dart';
 import 'package:shop_app/utils/app.dart';
+import 'package:shop_app/utils/services/notification_service.dart';
 
 import 'package:shop_app/utils/storage/storage_utility.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('Background message: ${message.notification?.title}');
+}
 
 Future<void> main() async {
   GoogleFonts.config.allowRuntimeFetching = false;
@@ -40,8 +47,11 @@ Future<void> main() async {
   // /// 🔥 MIGRATE FIRESTORE (Emulator → Firebase thật)
   // await FirestoreMigrator.migrateAll();
 
+  // FirebaseMessaging
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   // Register Repository
   Get.put(AuthenticationRepository());
+  NotificationService().init();
 
   // // Debug
   // debugPrint("Storage bucket: ${FirebaseStorage.instance.bucket}");

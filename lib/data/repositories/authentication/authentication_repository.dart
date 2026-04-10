@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -43,9 +45,11 @@ class AuthenticationRepository extends GetxController {
         // Khởi tạo Storage dành riêng cho từng người dùng
         // (sử dụng uid của user làm tên bucket để dữ liệu được tách biệt giữa các tài khoản)
         await CLocalStorage.init(user.uid);
+        await _saveFCMToken(user.uid);
         // Chuyển hướng đến trang chủ
         Get.offAll(NavigationMenu());
       } else {
+        await _saveFCMToken(user.uid);
         Get.offAll(NavigationMenu()); // VeryfyEmaillScreen
       }
     } else {
@@ -213,6 +217,21 @@ class AuthenticationRepository extends GetxController {
       throw CPlatformException(e.code).message;
     } catch (e) {
       throw 'Có lỗi xảy ra, vui lòng thử lại sau.';
+    }
+  }
+
+  // Thêm hàm này vào class
+  Future<void> _saveFCMToken(String userId) async {
+    try {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        await FirebaseFirestore.instance.collection('Users').doc(userId).update({
+          'fcmToken': token,
+        });
+        print('✅ FCM Token saved: $token');
+      }
+    } catch (e) {
+      print('❌ FCM Token error: $e');
     }
   }
 }

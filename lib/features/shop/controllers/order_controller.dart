@@ -6,6 +6,7 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:shop_app/common/widgets/success_screen/success_screen.dart';
+import 'package:shop_app/data/notification/notification_repository.dart';
 import 'package:shop_app/data/orders/order_repository.dart';
 import 'package:shop_app/data/repositories/authentication/authentication_repository.dart';
 import 'package:shop_app/features/personalization/controllers/address_controller.dart';
@@ -124,6 +125,15 @@ class OrderController extends GetxController {
 
       // Lưu đơn hàng vào Firestore
       await orderRepository.saveOrder(order, userId);
+      // Lưu Notification
+      await NotificationRepository().createOrderNotification(
+        userId: userId,
+        orderId: order.id,
+        subtype: 'placed',
+        title: 'Đơn hàng #${order.id}',
+        body: '${order.items.first.title} đã được đặt thành công',
+        image: order.items.first.image,
+      );
       // Xóa giỏ hàng sau khi đặt thành công
       cartController.clearCart();
       // Xoá phần sản phẩm mua ngay

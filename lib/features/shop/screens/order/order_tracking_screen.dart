@@ -62,6 +62,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
           child: Column(
             children: [
               /// MAP
+              /// MAP
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: SizedBox(
@@ -70,24 +71,23 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                     () => FlutterMap(
                       options: MapOptions(
                         initialCenter: latlng.LatLng(controller.lat.value, controller.lng.value),
-                        initialZoom: 13.0,
-                        minZoom: 5.0,
-                        maxZoom: 18.0,
+                        initialZoom: 12.0, // Giảm zoom xuống một chút để dễ load hơn
                       ),
                       children: [
+                        // Tile 
                         TileLayer(
                           urlTemplate: 'https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
                           userAgentPackageName: 'com.example.shop_app',
                         ),
 
-                        // Marker vị trí đơn hàng
+                        // Marker
                         MarkerLayer(
                           markers: [
                             Marker(
                               point: latlng.LatLng(controller.lat.value, controller.lng.value),
-                              child: const Icon(Icons.location_on, color: Colors.red, size: 40),
-                              width: 40,
-                              height: 40,
+                              child: const Icon(Icons.location_on, color: Colors.red, size: 45),
+                              width: 45,
+                              height: 45,
                             ),
                           ],
                         ),

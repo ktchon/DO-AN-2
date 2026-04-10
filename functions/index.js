@@ -1,12 +1,15 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentUpdated, onDocumentWritten} = require("firebase-functions/v2/firestore");
 
 admin.initializeApp();
+
 const db = admin.firestore();
 const axios = require("axios");
+
 const GHN_TOKEN = "1f1b3a6d-33c4-11f1-a973-aee5264794df";
 const GHN_SHOP_ID = "199906"; 
+
 function mapStatus(status) {
   switch (status) {
     case "ready_to_pick": return "Chờ lấy hàng";
@@ -305,3 +308,293 @@ exports.createGHNOrder = functions.https.onRequest(async (req, res) => {
     return res.status(500).send(e.toString());
   }
 });
+// ════════════════════════════════════════════════════════════
+// HELPER: Gửi FCM + lưu Notification document
+// ════════════════════════════════════════════════════════════
+ 
+async function sendNotification({ userId, type, subtype, title, body, image, data }) {
+  try {
+    const userDoc = await db.collection("Users").doc(userId).get();
+    if (!userDoc.exists) return;
+ 
+    const fcmToken = userDoc.data().fcmToken;
+ 
+    // Lưu vào Firestore
+    await db.collection("Notifications").add({
+      userId,
+      type,
+      subtype: subtype || null,
+      title,
+      body,
+      image: image || null,
+      isRead: false,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      data: data || {},
+    });
+ 
+    // Gửi push nếu có token
+    if (fcmToken) {
+      await admin.messaging().send({
+        token: fcmToken,
+        notification: { title, body },
+        data: {
+          type,
+          subtype: subtype || "",
+          ...Object.fromEntries(
+            Object.entries(data || {}).map(([k, v]) => [k, String(v)])
+          ),
+        },
+        android: {
+          notification: { channelId: type === "order" ? "order_channel" : type === "chat" ? "chat_channel" : type === "promo" ? "promo_channel" : "general_channel" },
+          priority: "high",
+        },
+        apns: {
+          payload: { aps: { badge: 1, sound: "default" } },
+        },
+      });
+      console.log(`[FCM] Sent to ${userId}: ${title}`);
+    }
+  } catch (err) {
+    console.error("[sendNotification] Error:", err);
+  }
+}
+ 
+// ════════════════════════════════════════════════════════════
+// 5. NOTIFICATION: Đơn hàng đổi trạng thái
+// ════════════════════════════════════════════════════════════
+ 
+exports.onOrderStatusChange = onDocumentWritten(
+  "Users/{userId}/Orders/{orderId}",
+  async (event) => {
+    const before = event.data?.before?.data();
+    const after = event.data?.after?.data();
+    const { userId, orderId } = event.params;
+ 
+    if (!after) return; // document bị xóa
+    if (before?.status === after.status) return; // không đổi
+ 
+    const statusMap = {
+      confirmed: {
+        subtype: "placed",
+        title: "🛍️ Đặt hàng thành công",
+        body: `Đơn hàng #${orderId.slice(-6).toUpperCase()} đã được đặt thành công`,
+      },
+      paid: {
+        subtype: "confirmed",
+        title: "✅ Thanh toán thành công",
+        body: "Đơn hàng đã được xác nhận thanh toán, shop đang chuẩn bị hàng",
+      },
+      shipping: {
+        subtype: "shipping",
+        title: "🚚 Đang giao hàng",
+        body: "Đơn hàng đang trên đường đến bạn",
+      },
+      delivered: {
+        subtype: "delivered",
+        title: "✅ Giao hàng thành công",
+        body: "Đơn hàng đã được giao thành công. Hãy đánh giá sản phẩm nhé!",
+      },
+      cancelled: {
+        subtype: "failed",
+        title: "❌ Đơn hàng đã huỷ",
+        body: after.cancelReason || "Đơn hàng đã bị huỷ",
+      },
+      returned: {
+        subtype: "returned",
+        title: "🔁 Hoàn trả đơn hàng",
+        body: "Đơn hàng đang được hoàn trả về shop",
+      },
+      refunded: {
+        subtype: "refunded",
+        title: "💸 Hoàn tiền thành công",
+        body: "Tiền hoàn trả đã được gửi về tài khoản của bạn",
+      },
+    };
+ 
+    const noti = statusMap[after.status];
+    if (!noti) return;
+ 
+    await sendNotification({ userId, type: "order", ...noti, data: { orderId } });
+  }
+);
+ 
+// ════════════════════════════════════════════════════════════
+// 6. NOTIFICATION: Nhắc đánh giá sau khi giao hàng
+// ════════════════════════════════════════════════════════════
+ 
+exports.onOrderDelivered = onDocumentUpdated(
+  "Users/{userId}/Orders/{orderId}",
+  async (event) => {
+    const before = event.data.before.data();
+    const after = event.data.after.data();
+    const { userId, orderId } = event.params;
+ 
+    if (before.status === "delivered" || after.status !== "delivered") return;
+ 
+    const items = after.items || [];
+    await sendNotification({
+      userId,
+      type: "review",
+      subtype: "remind",
+      title: "⭐ Đánh giá sản phẩm",
+      body: "Bạn đã nhận được hàng. Hãy chia sẻ trải nghiệm của bạn nhé!",
+      data: { orderId, productId: items[0]?.productId || "" },
+    });
+  }
+);
+ 
+// ════════════════════════════════════════════════════════════
+// 7. NOTIFICATION: Coupon mới
+// ════════════════════════════════════════════════════════════
+ 
+exports.onNewCoupon = onDocumentCreated("Coupons/{couponId}", async (event) => {
+  const coupon = event.data.data();
+  const { couponId } = event.params;
+  if (!coupon.isActive) return;
+ 
+  const usersSnap = await db.collection("Users").get();
+  await Promise.allSettled(
+    usersSnap.docs.map((doc) =>
+      sendNotification({
+        userId: doc.id,
+        type: "promo",
+        subtype: "coupon",
+        title: `🎟️ Mã giảm giá mới: ${coupon.code}`,
+        body: `Giảm ${coupon.discountPercent || coupon.discountAmount}${coupon.discountPercent ? "%" : "đ"}`,
+        data: { couponId, code: coupon.code },
+      })
+    )
+  );
+});
+ 
+// ════════════════════════════════════════════════════════════
+// 8. NOTIFICATION: Banner mới
+// ════════════════════════════════════════════════════════════
+ 
+exports.onNewBanner = onDocumentCreated("Banners/{bannerId}", async (event) => {
+  const banner = event.data.data();
+  const { bannerId } = event.params;
+  if (!banner.isActive) return;
+ 
+  const usersSnap = await db.collection("Users").get();
+  await Promise.allSettled(
+    usersSnap.docs.map((doc) =>
+      sendNotification({
+        userId: doc.id,
+        type: "promo",
+        subtype: "banner",
+        title: "🔥 " + (banner.title || "Ưu đãi mới từ Shop"),
+        body: banner.description || "Khám phá ngay các sản phẩm đang giảm giá",
+        image: banner.imageUrl || null,
+        data: { bannerId },
+      })
+    )
+  );
+});
+ 
+// ════════════════════════════════════════════════════════════
+// 9. NOTIFICATION: Sản phẩm đã xem giảm giá
+// ════════════════════════════════════════════════════════════
+ 
+exports.onProductPriceChange = onDocumentUpdated(
+  "Products/{productId}",
+  async (event) => {
+    const before = event.data.before.data();
+    const after = event.data.after.data();
+    const { productId } = event.params;
+ 
+    const oldPrice = before.salePrice || before.price;
+    const newPrice = after.salePrice || after.price;
+ 
+    if (!newPrice || newPrice >= oldPrice) return;
+ 
+    const discount = Math.round(((oldPrice - newPrice) / oldPrice) * 100);
+    if (discount < 10) return;
+ 
+    const searchSnap = await db
+      .collectionGroup("SearchHistory")
+      .where("viewedProducts", "array-contains", productId)
+      .get();
+ 
+    const notifiedUsers = new Set();
+    const batch = [];
+ 
+    for (const doc of searchSnap.docs) {
+      const userId = doc.ref.parent.parent.id;
+      if (notifiedUsers.has(userId)) continue;
+      notifiedUsers.add(userId);
+ 
+      batch.push(
+        sendNotification({
+          userId,
+          type: "personal",
+          subtype: "price_drop",
+          title: `💰 Sản phẩm bạn xem giảm ${discount}%`,
+          body: `"${after.title || after.name}" đang giảm còn ${newPrice.toLocaleString("vi-VN")}đ`,
+          image: after.thumbnail || after.images?.[0] || null,
+          data: { productId },
+        })
+      );
+    }
+ 
+    await Promise.allSettled(batch);
+  }
+);
+ 
+// ════════════════════════════════════════════════════════════
+// 10. NOTIFICATION: Review được duyệt
+// ════════════════════════════════════════════════════════════
+ 
+exports.onReviewApproved = onDocumentUpdated(
+  "Reviews/{reviewId}",
+  async (event) => {
+    const before = event.data.before.data();
+    const after = event.data.after.data();
+    const { reviewId } = event.params;
+ 
+    if (before.status === "approved" || after.status !== "approved") return;
+ 
+    await sendNotification({
+      userId: after.userId,
+      type: "review",
+      subtype: "approved",
+      title: "👍 Đánh giá của bạn đã được duyệt",
+      body: "Cảm ơn bạn đã chia sẻ trải nghiệm. Đánh giá đã được hiển thị!",
+      data: { reviewId, productId: after.productId },
+    });
+  }
+);
+ 
+// ════════════════════════════════════════════════════════════
+// 11. NOTIFICATION: Tin nhắn chat mới
+// ════════════════════════════════════════════════════════════
+ 
+exports.onNewChatMessage = onDocumentCreated(
+  "Chats/{chatId}/Messages/{messageId}",
+  async (event) => {
+    const message = event.data.data();
+    const { chatId } = event.params;
+ 
+    const chatDoc = await db.collection("Chats").doc(chatId).get();
+    if (!chatDoc.exists) return;
+ 
+    const chat = chatDoc.data();
+    const senderId = message.senderId;
+    const participants = chat.participants || [];
+    const recipientId = participants.find((id) => id !== senderId);
+    if (!recipientId) return;
+ 
+    const senderDoc = await db.collection("Users").doc(senderId).get();
+    const senderData = senderDoc.data() || {};
+ 
+    await sendNotification({
+      userId: recipientId,
+      type: "chat",
+      subtype: "message",
+      title: senderData.name || "Shop",
+      body: message.text || "Đã gửi một tệp đính kèm",
+      image: senderData.avatar || null,
+      data: { chatId, senderId },
+    });
+  }
+);
