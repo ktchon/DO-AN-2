@@ -163,77 +163,62 @@ exports.syncGHNOrder = functions.https.onRequest(async (req, res) => {
       return res.status(400).send("Missing order_code, userId, or orderId");
     }
 
-    let ghnRes;
-    try {
-      ghnRes = await axios.post(
-        "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/detail",
-        { order_code },
-        {
-          headers: {
-            Token: GHN_TOKEN,
-            ShopId: GHN_SHOP_ID,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    } catch (ghnError) {
-      // ✅ Log chi tiết lỗi GHN trả về
-      console.error("❌ GHN API error:", JSON.stringify(ghnError.response?.data));
-      return res.status(500).json({
-        error: "GHN API failed",
-        status: ghnError.response?.status,
-        detail: ghnError.response?.data,  // ← xem lỗi cụ thể GHN báo gì
-      });
-    }
+    // ================= FAKE TIMELINE TỪ HCM → CẦN THƠ =================
+    const fakeTimeline = [
+    {
+    status: "delivered",
+    title: "Đã giao hàng thành công",
+    time: new Date(now - 10 * 60 * 1000),
+    },
+    {
+    status: "delivering",
+    title: "Đang giao hàng tại Cần Thơ",
+    time: new Date(now - 30 * 60 * 1000),           
+    },
+    {
+      status: "sorting",
+      title: "Đang trung chuyển tại kho Cần Thơ",
+      time: new Date(now - 2 * 60 * 60 * 1000),
+    },
+    {
+      status: "transporting",
+      title: "Đang vận chuyển từ TP.HCM",
+      time: new Date(now - 5 * 60 * 60 * 1000),
+    },
+    {
+      status: "picked",
+      title: "Đã lấy hàng",
+      time: new Date(now - 7 * 60 * 60 * 1000),
+    },
+    {
+      status: "ready_to_pick",
+      title: "Chờ lấy hàng",
+      time: new Date(now - 10 * 60 * 60 * 1000),      // cũ nhất
+    },
+    ];
 
-    const data = ghnRes.data.data;
-    if (!data) return res.status(404).send("GHN order not found");
-
-    const logs = data.log || [];
-    let timeline = [];
-
-    if (logs.length === 0) {
-      const fakeSteps = ["ready_to_pick", "picked", "transporting", "delivering"];
-      const now = new Date();
-
-      timeline = fakeSteps.map((s, i) => ({
-        status: s,
-        title: mapStatus(s),
-        time: new Date(now.getTime() - (fakeSteps.length - i) * 60000),
-      }));
-    } else {
-      timeline = logs.map((l) => ({
-        status: l.status,
-        title: mapStatus(l.status),
-        time: new Date(l.updated_date),
-      }));
-    }
-
-    const lastStatus = logs.length > 0 ? logs[logs.length - 1].status : "unknown";
+    const lastStatus = "delivering";
 
     const orderRef = db
       .collection("Users").doc(userId)
       .collection("Orders").doc(orderId);
 
-    const orderSnap = await orderRef.get();
-    if (!orderSnap.exists) {
-      return res.status(404).send(`Order ${orderId} not found`);
-    }
-
     await orderRef.update({
-      timeline,
+      timeline: fakeTimeline,
       ghnStatus: lastStatus,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
+    console.log(`✅ Fake timeline HCM → Cần Thơ cho order ${orderId}`);
+
     return res.json({
       success: true,
       ghnStatus: lastStatus,
-      timeline: timeline,
+      timeline: fakeTimeline,
     });
 
   } catch (error) {
-    console.error("❌ Unexpected error:", error.message);
+    console.error("❌ syncGHNOrder error:", error);
     return res.status(500).send(error.toString());
   }
 });

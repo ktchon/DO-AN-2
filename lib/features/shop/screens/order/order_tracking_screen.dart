@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shop_app/features/shop/controllers/order_tracking_controller.dart';
 import 'package:shop_app/utils/constants/colors.dart';
+
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart' as latlng;
 
 class OrderTrackingScreen extends StatefulWidget {
   final String orderId;
@@ -23,10 +25,8 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
     controller.trackOrder(widget.orderId);
 
-    /// ⏱ delay để đảm bảo có order rồi mới start tracking
     Future.delayed(const Duration(milliseconds: 500), () {
       final order = controller.order.value;
-
       if (order != null) {
         controller.startTracking(order.ghnCode ?? "", order.userId ?? "", order.id ?? "");
       }
@@ -43,9 +43,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(
-          color: Colors.white, // màu icon back
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
           'Theo dõi đơn hàng',
           style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
@@ -60,7 +58,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         }
 
         return Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             children: [
               /// MAP
@@ -69,22 +67,37 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                 child: SizedBox(
                   height: 200,
                   child: Obx(
-                    () => GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: LatLng(controller.lat.value, controller.lng.value),
-                        zoom: 14,
+                    () => FlutterMap(
+                      options: MapOptions(
+                        initialCenter: latlng.LatLng(controller.lat.value, controller.lng.value),
+                        initialZoom: 13.0,
+                        minZoom: 5.0,
+                        maxZoom: 18.0,
                       ),
-                      markers: {
-                        Marker(
-                          markerId: const MarkerId("order"),
-                          position: LatLng(controller.lat.value, controller.lng.value),
+                      children: [
+                        TileLayer(
+                          urlTemplate: 'https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+                          userAgentPackageName: 'com.example.shop_app',
                         ),
-                      },
+
+                        // Marker vị trí đơn hàng
+                        MarkerLayer(
+                          markers: [
+                            Marker(
+                              point: latlng.LatLng(controller.lat.value, controller.lng.value),
+                              child: const Icon(Icons.location_on, color: Colors.red, size: 40),
+                              width: 40,
+                              height: 40,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+
+              const SizedBox(height: 20),
 
               /// TIMELINE
               Expanded(
@@ -96,7 +109,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        /// LINE + DOT
                         Column(
                           children: [
                             const Icon(Icons.circle, size: 12, color: Colors.green),
@@ -104,10 +116,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                               Container(width: 2, height: 50, color: Colors.grey),
                           ],
                         ),
-
                         const SizedBox(width: 10),
-
-                        /// TEXT
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 16),

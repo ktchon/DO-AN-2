@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart' as latlng;
 import 'package:shop_app/data/orders/order_repository.dart';
 import 'package:shop_app/features/shop/models/order_model.dart';
 import 'package:shop_app/utils/constants/enums.dart';
@@ -76,9 +77,9 @@ class OrderTrackingController extends GetxController {
       final response = await http.post(
         Uri.parse(url),
         body: jsonEncode({
-          "order_code": order.ghnCode, // "LHQNMV"
-          "userId": order.userId, // "lbbUb2KlVtOTGkdohFoSgZbacth1"
-          "orderId": order.id, // "[#534f2]"
+          "order_code": order.ghnCode,
+          "userId": order.userId,
+          "orderId": order.id,
         }),
         headers: {"Content-Type": "application/json"},
       );
@@ -98,9 +99,9 @@ class OrderTrackingController extends GetxController {
   void startTracking(String orderCode, String userId, String orderId) {
     fetchTracking(orderCode, userId, orderId);
 
-    timer = Timer.periodic(Duration(seconds: 5), (_) {
+    timer = Timer.periodic(const Duration(seconds: 15), (_) {
       fetchTracking(orderCode, userId, orderId);
-      fakeMove();
+      fakeMoveAlongRoute(); 
     });
   }
 
@@ -130,5 +131,26 @@ class OrderTrackingController extends GetxController {
   void onClose() {
     timer?.cancel();
     super.onClose();
+  }
+
+  final List<latlng.LatLng> routePoints = [
+    latlng.LatLng(10.7769, 106.7009), // TP.HCM
+    latlng.LatLng(10.6500, 106.5500), // Gần Long An
+    latlng.LatLng(10.4000, 106.3000), // Gần Mỹ Tho
+    latlng.LatLng(10.2000, 106.0000), // Gần Vĩnh Long
+    latlng.LatLng(10.0333, 105.7833), // Cần Thơ
+  ];
+
+  int currentRouteIndex = 0;
+
+  void fakeMoveAlongRoute() {
+    if (currentRouteIndex < routePoints.length - 1) {
+      currentRouteIndex++;
+    } else {
+      currentRouteIndex = routePoints.length - 1;
+    }
+
+    lat.value = routePoints[currentRouteIndex].latitude;
+    lng.value = routePoints[currentRouteIndex].longitude;
   }
 }

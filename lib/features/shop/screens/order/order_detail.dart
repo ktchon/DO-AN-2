@@ -34,18 +34,26 @@ class OrderDetailScreen extends StatelessWidget {
         ),
         backgroundColor: TColors.primary,
       ),
-      
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             const SizedBox(height: 20),
+            OrderProgressBar(status: order.status),
+            const SizedBox(height: 20),
             GestureDetector(
               onTap: () => Get.to(() => OrderTrackingScreen(orderId: order.id)),
-              child: OrderProgressBar(status: order.status),
+              child: Text(
+                "Theo dõi đơn hàng",
+                style: Theme.of(context).textTheme.bodySmall!.apply(
+                  color: Colors.black,
+                  decoration: TextDecoration.underline, 
+                  decorationColor: Colors.green,
+                ),
+              ),
             ),
-
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
 
             /// ORDER INFO
             RoundedContainer(
