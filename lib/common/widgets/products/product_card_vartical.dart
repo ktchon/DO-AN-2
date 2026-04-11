@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
+import 'package:get/get.dart';
 import 'package:shop_app/common/styles/shadows.dart';
-import 'package:shop_app/common/widgets/custom_shapes/containers/circular_container.dart';
-import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_image.dart';
 import 'package:shop_app/common/widgets/products/cart/add_to_cart_button.dart';
 import 'package:shop_app/common/widgets/products/favourite_icon/favourite_icon.dart';
 import 'package:shop_app/common/widgets/text/brand_title_text_with_verified_icon.dart';
@@ -28,11 +25,11 @@ class ProductCardVartical extends StatelessWidget {
     final salePercentage = controller.calculateSalePercentage(product.price, product.salePrice);
     final fixedImageUrl = fixEmulatorImageUrl(product.thumbnail);
     final dark = THelperFunctions.isDarkMode(context);
+
     return GestureDetector(
-      onTap: () => Get.to(ProductDetail(product: product)),
+      onTap: () => Get.to(() => ProductDetail(product: product)),
       child: Container(
-        width: 180,
-        padding: const EdgeInsets.all(1),
+        width: 180, 
         decoration: BoxDecoration(
           boxShadow: [ShadowStyle.verticalProductShadow],
           borderRadius: BorderRadius.circular(TSizes.productImageRadius),
@@ -41,85 +38,91 @@ class ProductCardVartical extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Thumbnail - Yêu thích - giảm giá
-            CircularContainer(
-              radius: 16,
-              height: 180,
-              width: 180,
-              padding: const EdgeInsets.all(10),
-              backgroundColor: dark ? TColors.dark : TColors.white,
-              child: Stack(
-                children: [
-                  // Thumbnail
-                  Center(
-                    child: RoundedImage(
-                      imageUrl: fixedImageUrl,
-                      applyImageRadius: true,
-                      isNetworkImage: true,
+            Stack(
+              children: [
+                // Ảnh chính 
+                ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(TSizes.productImageRadius),
+                    topRight: Radius.circular(TSizes.productImageRadius),
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 180, 
+                    child: Image.network(
+                      fixedImageUrl,
+                      fit: BoxFit.cover, 
+                      alignment: Alignment.center,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Center(child: Icon(Icons.error_outline, size: 40)),
                     ),
                   ),
-                  // Giảm giá
-                  if (salePercentage != null)
-                    Positioned(
-                      top: 12,
-                      child: CircularContainer(
-                        height: 28,
-                        width: 50,
-                        radius: 10,
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        backgroundColor: Colors.yellowAccent.withOpacity(0.8),
-                        child: Text(
-                          '$salePercentage%',
-                          style: Theme.of(context).textTheme.labelLarge!.apply(color: Colors.black),
-                        ),
+                ),
+
+                // Giảm giá (nếu có)
+                if (salePercentage != null)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.yellowAccent.withOpacity(0.95),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '$salePercentage%',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelLarge!.apply(color: Colors.black, fontWeightDelta: 2),
                       ),
                     ),
-                  Positioned(top: 0, right: 0, child: CFavouriteIcon(productId: product.id)),
-                ],
-              ),
+                  ),
+
+                // Icon trái tim
+                Positioned(top: 8, right: 8, child: CFavouriteIcon(productId: product.id)),
+              ],
             ),
-            SizedBox(height: 6),
-            // Thông tin
+
+            // ==================== PHẦN THÔNG TIN ====================
             Padding(
-              padding: EdgeInsets.only(left: 10),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ProductTitleText(text: product.title),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   BrandTitleWithVerifiedIcon(title: product.brand?.name ?? ''),
-                ],
-              ),
-            ),
-            Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Giá
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 8),
+
+                  // Giá + Add to cart
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      if (product.productType == ProductType.single.toString() &&
-                          product.salePrice > 0)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10),
-                          child: ProductPriceText(
-                            price: product.price,
-                            isLarge: false,
-                            lineThrough: true,
-                          ),
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (product.productType == ProductType.single.toString() &&
+                                product.salePrice > 0)
+                              ProductPriceText(
+                                price: product.price,
+                                isLarge: false,
+                                lineThrough: true,
+                              ),
+                            ProductPriceText(
+                              price: controller.getProductPrice(product),
+                              isLarge: true,
+                            ),
+                          ],
                         ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 10),
-                        child: ProductPriceText(price: controller.getProductPrice(product)),
                       ),
+                      AddToCartButton(product: product),
                     ],
                   ),
-                ),
-                // Add to cart
-                AddToCartButton(product: product)
-              ],
+                ],
+              ),
             ),
           ],
         ),

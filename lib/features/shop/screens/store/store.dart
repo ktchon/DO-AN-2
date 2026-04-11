@@ -39,7 +39,7 @@ class StoreScreen extends StatelessWidget {
           actions: [
             Padding(
               padding: EdgeInsetsGeometry.only(right: 10),
-              child: CartCounterIcon(onPressed: () => Get.to(() => CartItemScreen())),
+              child: CartCounterIcon(colorCart: true,onPressed: () => Get.to(() => CartItemScreen())),
             ),
           ],
         ),

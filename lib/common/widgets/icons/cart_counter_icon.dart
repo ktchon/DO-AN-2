@@ -21,7 +21,7 @@ class CartCounterIcon extends StatelessWidget {
             'assets/logo/icon-cart.png',
             width: 32,
             height: 32,
-            color: colorCart ? Colors.green : Colors.white,
+            color: colorCart ? Colors.white: Colors.green,
           ),
           //Icon(
           //   Icons.shopping_cart_outlined,

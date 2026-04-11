@@ -17,6 +17,7 @@ class OrderTrackingController extends GetxController {
   RxString ghnStatus = "".obs;
   RxDouble lat = 10.0333.obs;
   RxDouble lng = 105.7833.obs;
+  Timer? timer;
 
   void fakeMove() {
     lat.value += 0.001;
@@ -94,14 +95,15 @@ class OrderTrackingController extends GetxController {
     }
   }
 
-  Timer? timer;
-
   void startTracking(String orderCode, String userId, String orderId) {
-    fetchTracking(orderCode, userId, orderId);
+    // Nếu order chưa có ghnCode thật (test case) thì vẫn fake được
+    final effectiveCode = (orderCode == null || orderCode.isEmpty) ? "fake-${orderId}" : orderCode;
+
+    fetchTracking(effectiveCode, userId, orderId);
 
     timer = Timer.periodic(const Duration(seconds: 15), (_) {
-      fetchTracking(orderCode, userId, orderId);
-      fakeMoveAlongRoute(); 
+      fetchTracking(effectiveCode, userId, orderId); // dùng effectiveCode
+      fakeMoveAlongRoute();
     });
   }
 
@@ -110,17 +112,23 @@ class OrderTrackingController extends GetxController {
       final res = await http.post(
         Uri.parse("https://syncghnorder-6fdwcwqf4a-uc.a.run.app"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"order_code": orderCode, "userId": userId, "orderId": orderId}),
+        body: jsonEncode({
+          "order_code": orderCode, // giờ luôn có giá trị
+          "userId": userId,
+          "orderId": orderId,
+        }),
       );
 
-      final data = jsonDecode(res.body);
-
-      if (data["success"] == true) {
-        ghnStatus.value = data["ghnStatus"];
-
-        if (data["timeline"] != null) {
-          timeline.value = data["timeline"];
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        if (data["success"] == true) {
+          ghnStatus.value = data["ghnStatus"] ?? "";
+          if (data["timeline"] != null) {
+            timeline.value = data["timeline"]; // (dù UI chưa dùng nhưng giữ nguyên)
+          }
         }
+      } else {
+        print("❌ GHN sync lỗi: ${res.statusCode} ${res.body}");
       }
     } catch (e) {
       print("Tracking error: $e");

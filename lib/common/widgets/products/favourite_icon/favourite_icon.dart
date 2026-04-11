@@ -12,9 +12,10 @@ class CFavouriteIcon extends StatelessWidget {
     final controller = Get.put(FavouritesController());
     return Obx(
       () => CircularIcon(
+        backgroundColor: Colors.transparent,
         icon: controller.isFavourite(productId) ? Iconsax.heart : Iconsax.heart_copy,
         size: 20,
-        color: controller.isFavourite(productId) ? Colors.red : null,
+        color: controller.isFavourite(productId) ? Colors.red : Colors.white,
         onPressed: () => controller.toggleFavoriteProduct(productId),
       ),
     );

@@ -62,21 +62,21 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
           child: Column(
             children: [
               /// MAP
-              /// MAP
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: SizedBox(
-                  height: 200,
+                  height: 280, // tăng nhẹ cho dễ nhìn
                   child: Obx(
                     () => FlutterMap(
                       options: MapOptions(
                         initialCenter: latlng.LatLng(controller.lat.value, controller.lng.value),
-                        initialZoom: 12.0, // Giảm zoom xuống một chút để dễ load hơn
+                        initialZoom: 11.0, // giảm zoom một chút để thấy rõ route
                       ),
                       children: [
-                        // Tile 
+                        // TileLayer ĐÃ SỬA (chuẩn OSM - load tốt hơn ở VN)
                         TileLayer(
-                          urlTemplate: 'https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+                          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          subdomains: const ['a', 'b', 'c'],
                           userAgentPackageName: 'com.example.shop_app',
                         ),
 

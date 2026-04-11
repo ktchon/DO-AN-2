@@ -5,12 +5,15 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:readmore/readmore.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/circular_container.dart';
+import 'package:shop_app/common/widgets/icons/cart_counter_icon.dart';
+import 'package:shop_app/common/widgets/products/favourite_icon/favourite_icon.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
 import 'package:shop_app/features/shop/controllers/reviews/review_controller.dart';
 import 'package:shop_app/features/shop/models/cart_item_model.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
 import 'package:shop_app/features/shop/models/share_product_model.dart';
+import 'package:shop_app/features/shop/screens/cart/cart.dart';
 import 'package:shop_app/features/shop/screens/checkout/checkout.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_attributes.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_detail_image_slide.dart';
@@ -31,6 +34,18 @@ class ProductDetail extends StatelessWidget {
     final reviewController = ReviewController.instance;
     reviewController.fetchReviews(product.id);
     return Scaffold(
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          'Chi tiết sản phẩm',
+          style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
+        ),
+        backgroundColor: TColors.primary,
+        actions: [
+          CartCounterIcon(colorCart: true, onPressed: () => Get.to(() => CartItemScreen())),
+          CFavouriteIcon(productId: product.id),
+        ],
+      ),
       bottomNavigationBar: Container(
         padding: EdgeInsets.symmetric(horizontal: 20),
         height: 120,

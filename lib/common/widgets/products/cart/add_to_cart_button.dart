@@ -38,7 +38,7 @@ class AddToCartButton extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: productQuantityInCart > 0 ? TColors.primary : Colors.black,
+            color: productQuantityInCart > 0 ? TColors.primary : const Color.fromARGB(255, 244, 243, 243),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(TSizes.cardRadiusMd),
               bottomRight: Radius.circular(TSizes.productImageRadius),
@@ -53,7 +53,7 @@ class AddToCartButton extends StatelessWidget {
                       productQuantityInCart.toString(),
                       style: Theme.of(context).textTheme.bodyLarge!.apply(color: TColors.white),
                     )
-                  : const Icon(Icons.add_shopping_cart, color: TColors.white),
+                  : const Icon(Icons.add_shopping_cart, color: TColors.primary),
             ),
           ),
         );

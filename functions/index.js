@@ -167,40 +167,42 @@ exports.syncGHNOrder = functions.https.onRequest(async (req, res) => {
     }
 
     // ================= FAKE TIMELINE TỪ HCM → CẦN THƠ =================
+    const now = Date.now();  
+
     const fakeTimeline = [
-    {
-    status: "delivered",
-    title: "Đã giao hàng thành công",
-    time: new Date(now - 10 * 60 * 1000),
-    },
-    {
-    status: "delivering",
-    title: "Đang giao hàng tại Cần Thơ",
-    time: new Date(now - 30 * 60 * 1000),           
-    },
-    {
-      status: "sorting",
-      title: "Đang trung chuyển tại kho Cần Thơ",
-      time: new Date(now - 2 * 60 * 60 * 1000),
-    },
-    {
-      status: "transporting",
-      title: "Đang vận chuyển từ TP.HCM",
-      time: new Date(now - 5 * 60 * 60 * 1000),
-    },
-    {
-      status: "picked",
-      title: "Đã lấy hàng",
-      time: new Date(now - 7 * 60 * 60 * 1000),
-    },
-    {
-      status: "ready_to_pick",
-      title: "Chờ lấy hàng",
-      time: new Date(now - 10 * 60 * 60 * 1000),      // cũ nhất
-    },
+      {
+        status: "delivered",
+        title: "Đã giao hàng thành công",
+        time: new Date(now - 10 * 60 * 1000),
+      },
+      {
+        status: "delivering",
+        title: "Đang giao hàng tại Cần Thơ",
+        time: new Date(now - 30 * 60 * 1000),
+      },
+      {
+        status: "sorting",
+        title: "Đang trung chuyển tại kho Cần Thơ",
+        time: new Date(now - 2 * 60 * 60 * 1000),
+      },
+      {
+        status: "transporting",
+        title: "Đang vận chuyển từ TP.HCM",
+        time: new Date(now - 5 * 60 * 60 * 1000),
+      },
+      {
+        status: "picked",
+        title: "Đã lấy hàng",
+        time: new Date(now - 7 * 60 * 60 * 1000),
+      },
+      {
+        status: "ready_to_pick",
+        title: "Chờ lấy hàng",
+        time: new Date(now - 10 * 60 * 60 * 1000),
+      },
     ];
 
-    const lastStatus = "delivering";
+    const lastStatus = "delivered";  
 
     const orderRef = db
       .collection("Users").doc(userId)
