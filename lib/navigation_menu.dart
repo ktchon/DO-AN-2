@@ -14,17 +14,22 @@ class NavigationMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(NavigationController());
-
-    // Đăng ký NotificationController ngay khi vào app
-    final notifController = Get.put(NotificationController());
+    // Đăng ký sớm để Firestore stream bắt đầu ngay khi vào app
+    Get.put(NotificationController());
 
     return Scaffold(
-      bottomNavigationBar: Obx(
-        () => NavigationBar(
+      bottomNavigationBar: Obx(() {
+        // ⚠️ QUAN TRỌNG: đọc unreadCount BÊN TRONG Obx
+        // để NavigationBar rebuild khi count thay đổi
+        final unread = Get.find<NotificationController>().unreadCount.value;
+        final selectedIndex = controller.selectedIndex.value;
+
+        return NavigationBar(
           height: 70,
           elevation: 0,
-          selectedIndex: controller.selectedIndex.value,
-          onDestinationSelected: (index) => controller.selectedIndex.value = index,
+          selectedIndex: selectedIndex,
+          onDestinationSelected: (index) =>
+              controller.selectedIndex.value = index,
           destinations: [
             const NavigationDestination(
               selectedIcon: Icon(Iconsax.home_copy, color: Colors.green),
@@ -41,43 +46,61 @@ class NavigationMenu extends StatelessWidget {
               icon: Icon(Iconsax.heart_copy),
               label: 'Yêu thích',
             ),
-
-            // ── THÔNG BÁO với badge đỏ ──
             NavigationDestination(
-              selectedIcon: Obx(() => _notifIcon(notifController, selected: true)),
-              icon: Obx(() => _notifIcon(notifController, selected: false)),
+              selectedIcon: _BadgeIcon(
+                icon: Iconsax.notification_copy,
+                color: Colors.green,
+                count: unread,
+              ),
+              icon: _BadgeIcon(
+                icon: Iconsax.notification_copy,
+                count: unread,
+              ),
               label: 'Thông báo',
             ),
-
             const NavigationDestination(
               selectedIcon: Icon(Iconsax.user_copy, color: Colors.green),
               icon: Icon(Iconsax.user_copy),
               label: 'Hồ sơ',
             ),
           ],
-        ),
-      ),
+        );
+      }),
       body: Obx(() => controller.screens[controller.selectedIndex.value]),
     );
   }
+}
 
-  Widget _notifIcon(NotificationController notifController, {required bool selected}) {
-    final count = notifController.unreadCount.value;
+/// Widget badge đỏ — nhận count từ ngoài, không cần Obx bên trong
+class _BadgeIcon extends StatelessWidget {
+  final IconData icon;
+  final Color? color;
+  final int count;
+
+  const _BadgeIcon({
+    required this.icon,
+    required this.count,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Icon(
-          selected ? Iconsax.notification_copy : Iconsax.notification_copy,
-          color: selected ? Colors.green : null,
-        ),
+        Icon(icon, color: color),
         if (count > 0)
           Positioned(
             top: -4,
             right: -4,
             child: Container(
               padding: const EdgeInsets.all(3),
-              decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+              constraints:
+                  const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(
                 count > 99 ? '99+' : '$count',
                 style: const TextStyle(

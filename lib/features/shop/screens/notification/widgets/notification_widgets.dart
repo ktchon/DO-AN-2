@@ -4,7 +4,7 @@ import 'package:shop_app/features/shop/controllers/notification/notification_con
 import 'package:shop_app/features/shop/models/notification/notification_model.dart';
 
 // ─────────────────────────────────────────────────────────────
-// NOTIFICATION BADGE (dùng ở icon tab bar)
+// NOTIFICATION BADGE
 // ─────────────────────────────────────────────────────────────
 
 class NotificationBadge extends StatelessWidget {
@@ -46,7 +46,7 @@ class NotificationBadge extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────
-// TAB BAR (Tất cả / Đơn hàng / Khuyến mãi / ...)
+// TAB BAR
 // ─────────────────────────────────────────────────────────────
 
 class NotificationTabBar extends StatelessWidget {
@@ -64,7 +64,6 @@ class NotificationTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<NotificationController>();
-
     return SizedBox(
       height: 40,
       child: ListView.separated(
@@ -74,10 +73,8 @@ class NotificationTabBar extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
           final tab = _tabs[i];
-
           return Obx(() {
             final isActive = controller.selectedTab.value == tab['key'];
-
             return GestureDetector(
               onTap: () => controller.changeTab(tab['key']!),
               child: AnimatedContainer(
@@ -108,7 +105,7 @@ class NotificationTabBar extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────
-// NOTIFICATION TILE
+// NOTIFICATION TILE — FIX: tách Dismissible ra ngoài Obx
 // ─────────────────────────────────────────────────────────────
 
 class NotificationTile extends StatelessWidget {
@@ -118,21 +115,57 @@ class NotificationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<NotificationController>();
-    return Obx(() {
-      final isSelected = controller.selectedIds.contains(notification.id);
-      final isSelectMode = controller.isSelectMode.value;
 
-      return Dismissible(
-        key: Key(notification.id),
-        direction: DismissDirection.endToStart,
-        background: Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 20),
-          color: Colors.red,
-          child: const Icon(Icons.delete, color: Colors.white),
+    return Dismissible(
+      key: ValueKey(notification.id), // dùng ValueKey thay Key
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 24),
+        decoration: const BoxDecoration(color: Colors.red),
+        child: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.delete_outline, color: Colors.white, size: 28),
+            SizedBox(height: 4),
+            Text(
+              'Xóa',
+              style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+          ],
         ),
-        onDismissed: (_) => controller.deleteNotification(notification.id),
-        child: GestureDetector(
+      ),
+      confirmDismiss: (_) async {
+        // Xác nhận trước khi xóa
+        return await showDialog<bool>(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Xóa thông báo'),
+            content: const Text('Bạn có chắc muốn xóa thông báo này?'),
+            actions: [
+              TextButton(onPressed: () => Get.back(result: false), child: const Text('Hủy')),
+              TextButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+        );
+      },
+      onDismissed: (_) {
+        controller.deleteNotification(notification.id);
+        Get.snackbar(
+          '🗑️',
+          'Đã xóa thông báo',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+      },
+      child: Obx(() {
+        final isSelected = controller.selectedIds.contains(notification.id);
+        final isSelectMode = controller.isSelectMode.value;
+
+        return GestureDetector(
           onLongPress: () {
             controller.enterSelectMode();
             controller.toggleSelect(notification.id);
@@ -154,29 +187,88 @@ class NotificationTile extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Checkbox (select mode)
                   if (isSelectMode) ...[
                     Checkbox(
                       value: isSelected,
                       onChanged: (_) => controller.toggleSelect(notification.id),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 4),
                   ],
+
+                  // Avatar / Icon
                   _buildAvatar(context),
                   const SizedBox(width: 12),
-                  Expanded(child: Text(notification.title)),
+
+                  // Content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title + time
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                notification.title,
+                                style: TextStyle(
+                                  fontWeight: notification.isRead
+                                      ? FontWeight.normal
+                                      : FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Colors.grey.shade900,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              controller.getTimeAgo(notification.createdAt),
+                              style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+
+                        // Body
+                        Text(
+                          notification.body,
+                          style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.4),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+
+                        // Type chip
+                        _buildTypeChip(),
+                      ],
+                    ),
+                  ),
+
+                  // Unread dot
+                  if (!notification.isRead && !isSelectMode)
+                    Container(
+                      width: 8,
+                      height: 8,
+                      margin: const EdgeInsets.only(top: 4, left: 8),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF007AFF),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                 ],
               ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      }),
+    );
   }
 
   Widget _buildAvatar(BuildContext context) {
-    // Nếu có image thì hiển thị ảnh
-    if (notification.image != null) {
+    if (notification.image != null && notification.image!.isNotEmpty) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: Image.network(
@@ -184,14 +276,14 @@ class NotificationTile extends StatelessWidget {
           width: 48,
           height: 48,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildIconContainer(context),
+          errorBuilder: (_, __, ___) => _buildIconContainer(),
         ),
       );
     }
-    return _buildIconContainer(context);
+    return _buildIconContainer();
   }
 
-  Widget _buildIconContainer(BuildContext context) {
+  Widget _buildIconContainer() {
     return Container(
       width: 48,
       height: 48,

@@ -130,7 +130,7 @@ class OrderController extends GetxController {
         userId: userId,
         orderId: order.id,
         subtype: 'placed',
-        title: 'Đơn hàng #${order.id}',
+        title: 'Đơn hàng ${order.id}',
         body: '${order.items.first.title} đã được đặt thành công',
         image: order.items.first.image,
       );

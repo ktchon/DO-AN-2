@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:shop_app/data/notification/notification_repository.dart';
 import 'package:shop_app/features/shop/models/notification/notification_model.dart';
+import 'package:shop_app/features/shop/screens/order/order.dart';
+import 'package:shop_app/navigation_menu.dart';
 
 class NotificationController extends GetxController {
   static NotificationController get instance => Get.find();
@@ -24,10 +26,7 @@ class NotificationController extends GetxController {
   // ── GETTERS ──────────────────────────────────────────────────
   List<AppNotification> get filteredNotifications {
     if (selectedTab.value == 'all') return _allNotifications;
-
-    return _allNotifications.where((n) {
-      return n.type.value.toLowerCase().trim() == selectedTab.value.toLowerCase().trim();
-    }).toList();
+    return _allNotifications.where((n) => n.type.value == selectedTab.value).toList();
   }
 
   bool get hasUnread => unreadCount.value > 0;
@@ -46,19 +45,31 @@ class NotificationController extends GetxController {
     super.onClose();
   }
 
-  // ── INIT ─────────────────────────────────────────────────────
+  // ── STREAM ───────────────────────────────────────────────────
   void _startListening() {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    print('🔥 USER ID: $userId');
-
-    _notificationStream = _repo.watchUserNotifications(userId!).listen((notifications) {
-      print('🔥 FIRESTORE RETURN: ${notifications.length}');
-      for (var n in notifications) {
-        print('➡️ ${n.title} | ${n.type.value}');
-      }
-
-      _allNotifications.assignAll(notifications);
+    if (userId == null) {
       isLoading.value = false;
+      return;
+    }
+
+    // Stream notifications
+    _notificationStream = _repo
+        .watchUserNotifications(userId)
+        .listen(
+          (list) {
+            _allNotifications.assignAll(list);
+            isLoading.value = false;
+          },
+          onError: (e) {
+            print('[NotificationController] Error: $e');
+            isLoading.value = false;
+          },
+        );
+
+    // Stream unread count (badge)
+    _unreadStream = _repo.watchUnreadCount(userId).listen((count) {
+      unreadCount.value = count;
     });
   }
 
@@ -95,7 +106,7 @@ class NotificationController extends GetxController {
   Future<void> deleteSelected() async {
     if (selectedIds.isEmpty) return;
     isDeleting.value = true;
-    for (final id in selectedIds) {
+    for (final id in List<String>.from(selectedIds)) {
       await _repo.deleteNotification(id);
     }
     isDeleting.value = false;
@@ -121,36 +132,39 @@ class NotificationController extends GetxController {
     selectedIds.addAll(filteredNotifications.map((n) => n.id));
   }
 
-  // ── NAVIGATION KHI TAP ───────────────────────────────────────
+  // ── NAVIGATION KHI TAP (không dùng named routes) ─────────────
   void handleNotificationTap(AppNotification noti) {
     if (!noti.isRead) markAsRead(noti.id);
 
     switch (noti.type) {
       case NotificationType.order:
-        final orderId = noti.data?['orderId'];
-        if (orderId != null) Get.toNamed('/order-detail', arguments: orderId);
+        // Mở màn hình đơn hàng — không cần truyền orderId vì OrderScreen
+        // sẽ tự load danh sách đơn hàng của user
+        Get.to(() => OrderScreen());
         break;
+
       case NotificationType.promo:
-        final couponId = noti.data?['couponId'];
-        couponId != null ? Get.toNamed('/coupons', arguments: couponId) : Get.toNamed('/store');
+        // Chuyển về trang chủ (có banner/coupon)
+        Get.offAll(() => NavigationMenu());
         break;
+
       case NotificationType.personal:
-        final productId = noti.data?['productId'];
-        if (productId != null) {
-          Get.toNamed('/product-detail', arguments: productId);
-        }
+        // Chuyển về trang chủ hoặc store
+        Get.offAll(() => NavigationMenu());
         break;
+
       case NotificationType.review:
-        final productId = noti.data?['productId'];
-        if (productId != null) {
-          Get.toNamed('/product-detail', arguments: productId);
-        }
+        // Mở màn hình đơn hàng để user đánh giá
+        Get.to(() => OrderScreen());
         break;
+
       case NotificationType.chat:
-        final chatId = noti.data?['chatId'];
-        if (chatId != null) Get.toNamed('/chat', arguments: chatId);
+        // Chưa có chat screen → về trang chủ
+        Get.offAll(() => NavigationMenu());
         break;
+
       case NotificationType.system:
+        Get.offAll(() => NavigationMenu());
         break;
     }
   }

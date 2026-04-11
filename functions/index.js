@@ -367,54 +367,72 @@ exports.onOrderStatusChange = onDocumentWritten(
   "Users/{userId}/Orders/{orderId}",
   async (event) => {
     const before = event.data?.before?.data();
-    const after = event.data?.after?.data();
+    const after  = event.data?.after?.data();
     const { userId, orderId } = event.params;
  
-    if (!after) return; // document bị xóa
-    if (before?.status === after.status) return; // không đổi
+    if (!after) return;
+    if (before?.status === after.status) return;
+ 
+    // ── Thông tin sản phẩm ──
+    const items        = after.items || [];
+    const firstItem    = items[0];
+    const productName  = firstItem?.title || firstItem?.name || "sản phẩm";
+    const productImage = firstItem?.image || firstItem?.thumbnail || null;
+    const itemText     = items.length > 1
+      ? `${productName} và ${items.length - 1} sản phẩm khác`
+      : productName;
+ 
+    // ── Mã đơn hàng ──
+    const shortId = orderId;
  
     const statusMap = {
       confirmed: {
         subtype: "placed",
-        title: "🛍️ Đặt hàng thành công",
-        body: `Đơn hàng #${orderId.slice(-6).toUpperCase()} đã được đặt thành công`,
+        title: "🛍️ Đơn hàng đã được xác nhận",
+        body: `${shortId} • ${itemText}`,
       },
       paid: {
         subtype: "confirmed",
         title: "✅ Thanh toán thành công",
-        body: "Đơn hàng đã được xác nhận thanh toán, shop đang chuẩn bị hàng",
+        body: `${shortId} • ${itemText} - Shop đang chuẩn bị hàng`,
       },
       shipping: {
         subtype: "shipping",
-        title: "🚚 Đang giao hàng",
-        body: "Đơn hàng đang trên đường đến bạn",
+        title: "🚚 Đơn hàng đang giao",
+        body: `${shortId} • ${itemText} đang trên đường đến bạn`,
       },
       delivered: {
         subtype: "delivered",
         title: "✅ Giao hàng thành công",
-        body: "Đơn hàng đã được giao thành công. Hãy đánh giá sản phẩm nhé!",
+        body: `${shortId} • ${itemText} đã được giao. Hãy đánh giá nhé!`,
       },
       cancelled: {
         subtype: "failed",
         title: "❌ Đơn hàng đã huỷ",
-        body: after.cancelReason || "Đơn hàng đã bị huỷ",
+        body: `${shortId} • ${after.cancelReason || "Đơn hàng đã bị huỷ"}`,
       },
       returned: {
         subtype: "returned",
         title: "🔁 Hoàn trả đơn hàng",
-        body: "Đơn hàng đang được hoàn trả về shop",
+        body: `${shortId} • ${itemText} đang được hoàn trả về shop`,
       },
       refunded: {
         subtype: "refunded",
         title: "💸 Hoàn tiền thành công",
-        body: "Tiền hoàn trả đã được gửi về tài khoản của bạn",
+        body: `${shortId} • Tiền hoàn trả đã về tài khoản của bạn`,
       },
     };
  
     const noti = statusMap[after.status];
     if (!noti) return;
  
-    await sendNotification({ userId, type: "order", ...noti, data: { orderId } });
+    await sendNotification({
+      userId,
+      type: "order",
+      ...noti,
+      image: productImage,
+      data: { orderId },
+    });
   }
 );
  
@@ -451,7 +469,31 @@ exports.onNewCoupon = onDocumentCreated("Coupons/{couponId}", async (event) => {
   const coupon = event.data.data();
   const { couponId } = event.params;
   if (!coupon.isActive) return;
- 
+
+  // ── Đúng field name theo Firestore ──
+  const code      = coupon.code  || '';
+  const value     = coupon.value || 0;
+  const type      = coupon.type  || '';          
+  const minOrder  = coupon.minOrder  || 0;
+  const maxDiscount = coupon.maxDiscount || 0;
+
+  // Build nội dung body
+  let discountText = '';
+  if (type === 'percentage') {
+    discountText = `Giảm ${value}% - Tối đa ${Number(maxDiscount).toLocaleString('vi-VN')}đ`;
+  } else {
+    discountText = `Giảm ${Number(value).toLocaleString('vi-VN')}đ`;
+  }
+
+  const minOrderText = minOrder > 0
+    ? ` - Đơn tối thiểu ${Number(minOrder).toLocaleString('vi-VN')}đ`
+    : '';
+
+  const expiryDate = coupon.expiryDate?.toDate?.();
+  const expiryText = expiryDate
+    ? ` - HSD: ${expiryDate.toLocaleDateString('vi-VN')}`
+    : '';
+
   const usersSnap = await db.collection("Users").get();
   await Promise.allSettled(
     usersSnap.docs.map((doc) =>
@@ -459,9 +501,9 @@ exports.onNewCoupon = onDocumentCreated("Coupons/{couponId}", async (event) => {
         userId: doc.id,
         type: "promo",
         subtype: "coupon",
-        title: `🎟️ Mã giảm giá mới: ${coupon.code}`,
-        body: `Giảm ${coupon.discountPercent || coupon.discountAmount}${coupon.discountPercent ? "%" : "đ"}`,
-        data: { couponId, code: coupon.code },
+        title: `🎟️ Mã giảm giá mới: ${code}`,
+        body: discountText + minOrderText + expiryText,
+        data: { couponId, code },
       })
     )
   );
