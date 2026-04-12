@@ -1,3 +1,4 @@
+import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -21,7 +22,7 @@ class ProductRepository extends GetxController {
       final snapshot = await _db
           .collection('Products')
           .where('IsFeatured', isEqualTo: true)
-          .limit(4)
+          .limit(12)
           .get();
 
       return snapshot.docs.map((e) => ProductModel.fromSnapshot(e)).toList();
@@ -154,6 +155,92 @@ class ProductRepository extends GetxController {
       throw CPlatformException(e.code).message;
     } catch (e) {
       throw 'Something went wrong. Please try again';
+    }
+  }
+
+  /// 1. SẢN PHẨM TƯƠNG TỰ (query động)
+  Future<List<ProductModel>> getSimilarProducts({
+    required String productId,
+    required String categoryId,
+    String brandId = '',
+    int limit = 8,
+  }) async {
+    try {
+      print("🔍 Query similar - CategoryId: $categoryId, BrandId: $brandId, Exclude: $productId");
+
+      Query query = _db
+          .collection('Products')
+          .where('CategoryId', isEqualTo: categoryId)
+          .where(FieldPath.documentId, isNotEqualTo: productId)
+          .limit(limit);
+
+      if (brandId.isNotEmpty) {
+        query = query.where('Brand.Id', isEqualTo: brandId);
+      }
+
+      final snapshot = await query.get();
+
+      print("📊 Docs length: ${snapshot.docs.length}");
+
+      // SỬA Ở ĐÂY: Chuyển QueryDocumentSnapshot thành DocumentSnapshot
+      final products = snapshot.docs
+          .map((doc) => ProductModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>))
+          .toList();
+
+      print("✅ Similar products loaded: ${products.length} items");
+      return products;
+    } catch (e) {
+      print("❌ getSimilarProducts error: $e");
+      return [];
+    }
+  }
+
+  /// 2. SẢN PHẨM KÈM THEO (dùng complementaryProductIds)
+  Future<List<ProductModel>> getComplementaryProducts(List<String> ids) async {
+    if (ids.isEmpty) return [];
+
+    try {
+      final snapshot = await _db
+          .collection('Products')
+          .where(FieldPath.documentId, whereIn: ids)
+          .get();
+
+      return snapshot.docs.map((doc) => ProductModel.fromSnapshot(doc)).toList();
+    } catch (e) {
+      print("❌ getComplementaryProducts error: $e");
+      return [];
+    }
+  }
+
+  /// 3. GỢI Ý DỰA TRÊN LỊCH SỬ MUA (đã mua trước)
+  Future<List<ProductModel>> getRecommendationsFromPurchaseHistory(
+    String userId, {
+    int limit = 8,
+  }) async {
+    try {
+      final orders = await _db.collection('Users').doc(userId).collection('Orders').get();
+
+      // Lấy tất cả productId đã mua
+      final Set<String> boughtProductIds = {};
+      for (var orderDoc in orders.docs) {
+        final items = orderDoc['items'] as List<dynamic>;
+        for (var item in items) {
+          boughtProductIds.add(item['productId']);
+        }
+      }
+
+      if (boughtProductIds.isEmpty) return [];
+
+      // Query sản phẩm tương tự những gì đã mua
+      final snapshot = await _db
+          .collection('Products')
+          .where(FieldPath.documentId, whereIn: boughtProductIds.take(10).toList())
+          .get();
+
+      return snapshot.docs.map((doc) => ProductModel.fromSnapshot(doc)).toList();
+    } catch (e) {
+      print("❌ getRecommendationsFromPurchaseHistory error: $e");
+      return [];
     }
   }
 }

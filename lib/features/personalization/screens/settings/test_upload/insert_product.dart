@@ -3,9 +3,9 @@ import 'package:shop_app/utils/popups/loaders.dart';
 
 Future<void> insertSampleProducts() async {
   final firestore = FirebaseFirestore.instance;
-  final batch = firestore.batch();
 
-  final List<Map<String, dynamic>> products = [
+  // ==================== DANH SÁCH SẢN PHẨM MỚI MUỐN THÊM ====================
+  final List<Map<String, dynamic>> newProducts = [
     // =========================
     // PRODUCT 1
     // =========================
@@ -381,22 +381,41 @@ Future<void> insertSampleProducts() async {
     },
   ];
 
-  try {
-    for (int i = 0; i < products.length; i++) {
-      // Tạo ID theo định dạng 001, 002, 003...
-      // .padLeft(3, '0') giúp biến số 1 thành "001"
-      String customId = (i + 1).toString().padLeft(3, '0');
+  int addedCount = 0;
 
-      final docRef = firestore.collection('Products').doc(customId);
-      batch.set(docRef, products[i]);
+  try {
+    // Lấy ID lớn nhất hiện tại
+    final snapshot = await firestore.collection('Products').get();
+
+    int maxId = 0;
+    for (var doc in snapshot.docs) {
+      final idNum = int.tryParse(doc.id) ?? 0;
+      if (idNum > maxId) maxId = idNum;
     }
 
-    await batch.commit();
+    int nextId = maxId + 1;
 
-    CLoaders.successSnackBar(
-      title: 'Thành công!',
-      message: 'Đã thêm các sản phẩm với ID từ 001 đến 006',
-    );
+    final batch = firestore.batch();
+
+    for (var product in newProducts) {
+      final String newDocId = nextId.toString().padLeft(3, '0'); // 007, 008,...
+
+      batch.set(firestore.collection('Products').doc(newDocId), product);
+
+      nextId++;
+      addedCount++;
+    }
+
+    if (addedCount > 0) {
+      await batch.commit();
+
+      CLoaders.successSnackBar(
+        title: 'Thành công!',
+        message: 'Đã thêm $addedCount sản phẩm mới.\nID tiếp theo là $nextId',
+      );
+    } else {
+      CLoaders.warningSnackBar(title: 'Thông báo', message: 'Không có sản phẩm nào được thêm.');
+    }
   } catch (e) {
     CLoaders.errorSnackBar(title: 'Lỗi!', message: 'Không thể thêm sản phẩm: $e');
   }

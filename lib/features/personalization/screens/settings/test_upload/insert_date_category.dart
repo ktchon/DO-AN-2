@@ -4,29 +4,54 @@ import 'package:shop_app/utils/popups/loaders.dart';
 
 Future<void> insertSampleCategories() async {
   final firestore = FirebaseFirestore.instance;
-  final batch = firestore.batch();
 
-  // Khởi tạo danh sách 6 danh mục mẫu
-  final List<CategoryModel> categories = [
-    CategoryModel(id: '1', name: 'Điện thoại', image: 'url_anh_1', isFeatured: true),
-    CategoryModel(id: '2', name: 'Laptop', image: 'url_anh_2', isFeatured: true),
-    CategoryModel(id: '3', name: 'Thể thao', image: 'url_anh_3', isFeatured: true),
-    CategoryModel(id: '4', name: 'Giày dép', image: 'url_anh_4', isFeatured: true),
+  // ==================== 4 DANH MỤC MỚI BẠN MUỐN THÊM MỖI LẦN ====================
+  final List<CategoryModel> newCategories = [
+    CategoryModel(id: '', name: 'Đồng hồ', image: 'https://example.com/dongho.jpg', isFeatured: true),
+    CategoryModel(id: '', name: 'Tai nghe', image: 'https://example.com/tainghe.jpg', isFeatured: true),
+    CategoryModel(id: '', name: 'Máy tính bảng', image: 'https://example.com/tablet.jpg', isFeatured: true),
+    CategoryModel(id: '', name: 'Phụ kiện', image: 'https://example.com/phukien.jpg', isFeatured: false),
   ];
 
-  try {
-    for (var category in categories) {
-      // Sử dụng category.id làm Document ID thay vì để trống
-      final docRef = firestore.collection('Categories').doc(category.id);
+  int addedCount = 0;
 
-      batch.set(docRef, category.toJson());
+  try {
+    // Lấy ID lớn nhất hiện tại để tiếp tục đánh số
+    final snapshot = await firestore.collection('Categories').get();
+
+    int maxId = 0;
+    for (var doc in snapshot.docs) {
+      final idNum = int.tryParse(doc.id) ?? 0;
+      if (idNum > maxId) maxId = idNum;
+    }
+
+    int nextId = maxId + 1;
+
+    final batch = firestore.batch();
+
+    for (var category in newCategories) {
+      final String newDocId = nextId.toString().padLeft(3, '0'); // 001, 002, 003...
+
+      // Tạo bản sao với ID mới
+      final categoryToAdd = CategoryModel(
+        id: newDocId,
+        name: category.name,
+        image: category.image,
+        isFeatured: category.isFeatured,
+      );
+
+      final docRef = firestore.collection('Categories').doc(newDocId);
+      batch.set(docRef, categoryToAdd.toJson());
+
+      nextId++;
+      addedCount++;
     }
 
     await batch.commit();
 
     CLoaders.successSnackBar(
       title: 'Thành công!',
-      message: 'Đã thêm ${categories.length} danh mục với ID từ 1 đến 4',
+      message: 'Đã thêm $addedCount danh mục mới.\nID tiếp theo là $nextId',
     );
   } catch (e) {
     CLoaders.errorSnackBar(title: 'Lỗi!', message: 'Không thể thêm danh mục: $e');

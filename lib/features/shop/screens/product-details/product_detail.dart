@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -9,16 +10,20 @@ import 'package:shop_app/common/widgets/icons/cart_counter_icon.dart';
 import 'package:shop_app/common/widgets/products/favourite_icon/favourite_icon.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
 import 'package:shop_app/features/shop/controllers/products/cart_conntroller.dart';
+import 'package:shop_app/features/shop/controllers/products/image_controller.dart';
+import 'package:shop_app/features/shop/controllers/products/recommendation_controller.dart';
 import 'package:shop_app/features/shop/controllers/reviews/review_controller.dart';
 import 'package:shop_app/features/shop/models/cart_item_model.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
 import 'package:shop_app/features/shop/models/share_product_model.dart';
 import 'package:shop_app/features/shop/screens/cart/cart.dart';
 import 'package:shop_app/features/shop/screens/checkout/checkout.dart';
+import 'package:shop_app/features/shop/screens/product-details/widgets/complementary_products_section.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_attributes.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_detail_image_slide.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/product_meta_data.dart';
 import 'package:shop_app/features/shop/screens/product-details/widgets/rating_and_share.dart';
+import 'package:shop_app/features/shop/screens/product-details/widgets/similar_products_section.dart';
 import 'package:shop_app/features/shop/screens/product_reviews/product_reviews_rating.dart';
 import 'package:shop_app/features/shop/screens/product_reviews/widgets/user_review_card.dart';
 import 'package:shop_app/utils/constants/colors.dart';
@@ -30,9 +35,17 @@ class ProductDetail extends StatelessWidget {
   final ProductModel product;
   @override
   Widget build(BuildContext context) {
+    Get.put(ImagesController(), permanent: false); 
     final controller = CartController.instance;
     final reviewController = ReviewController.instance;
     reviewController.fetchReviews(product.id);
+    // Khởi tạo RecommendationController và load dữ liệu
+    final recommendationController = Get.put(RecommendationController());
+
+    // Gọi load ngay khi build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      recommendationController.loadRecommendationsForProduct(this.product);
+    });
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
@@ -221,7 +234,21 @@ class ProductDetail extends StatelessWidget {
                       );
                     },
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 30),
+
+                  // ==================== GỢI Ý SẢN PHẨM ====================
+
+                  // SẢN PHẨM TƯƠNG TỰ
+                  SimilarProductsSection(products: recommendationController.similarProducts),
+
+                  const SizedBox(height: 24),
+
+                  // SẢN PHẨM THƯỜNG MUA KÈM
+                  ComplementaryProductsSection(
+                    products: recommendationController.complementaryProducts,
+                  ),
+
+                  const SizedBox(height: 40),
                 ],
               ),
             ),

@@ -12,7 +12,7 @@ class ProductImageSilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ImagesController());
+    final controller = Get.find<ImagesController>(); 
     final images = controller.getAllProductImages(product);
 
     return Stack(
@@ -25,7 +25,7 @@ class ProductImageSilder extends StatelessWidget {
           child: Center(
             child: Obx(() {
               final imageUrl = controller.selectedProductImage.value;
-              final fixedImageUrl = fixEmulatorImageUrl(imageUrl);
+              // final fixedImageUrl = fixEmulatorImageUrl(imageUrl);
 
               return GestureDetector(
                 onTap: () => controller.showEnlargedImage(imageUrl),
@@ -34,7 +34,7 @@ class ProductImageSilder extends StatelessWidget {
                   height: 420,
                   margin: const EdgeInsets.symmetric(horizontal: 0),
                   child: CachedNetworkImage(
-                    imageUrl: fixedImageUrl,
+                    imageUrl: imageUrl,
                     fit: BoxFit.cover, 
                     alignment: Alignment.center,
                     placeholder: (_, __) =>

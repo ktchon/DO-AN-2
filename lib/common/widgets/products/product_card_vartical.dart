@@ -27,9 +27,14 @@ class ProductCardVartical extends StatelessWidget {
     final dark = THelperFunctions.isDarkMode(context);
 
     return GestureDetector(
-      onTap: () => Get.to(() => ProductDetail(product: product)),
+      onTap: () => Get.to(
+        () => ProductDetail(product: product),
+        preventDuplicates: false, 
+        transition: Transition.fadeIn,
+        duration: const Duration(milliseconds: 300),
+      ),
       child: Container(
-        width: 180, 
+        width: 180,
         decoration: BoxDecoration(
           boxShadow: [ShadowStyle.verticalProductShadow],
           borderRadius: BorderRadius.circular(TSizes.productImageRadius),
@@ -40,7 +45,7 @@ class ProductCardVartical extends StatelessWidget {
           children: [
             Stack(
               children: [
-                // Ảnh chính 
+                // Ảnh chính
                 ClipRRect(
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(TSizes.productImageRadius),
@@ -48,10 +53,10 @@ class ProductCardVartical extends StatelessWidget {
                   ),
                   child: SizedBox(
                     width: double.infinity,
-                    height: 180, 
+                    height: 180,
                     child: Image.network(
                       fixedImageUrl,
-                      fit: BoxFit.cover, 
+                      fit: BoxFit.cover,
                       alignment: Alignment.center,
                       errorBuilder: (context, error, stackTrace) =>
                           const Center(child: Icon(Icons.error_outline, size: 40)),

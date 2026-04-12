@@ -20,6 +20,7 @@ class ProductModel {
   List<String> images;
   List<ProductAttributeModel>? productAttributes;
   List<ProductVariationModel>? productVariations;
+  final List<String> complementaryProductIds;
 
   ProductModel({
     required this.id,
@@ -37,7 +38,7 @@ class ProductModel {
     this.images = const [],
     this.productAttributes,
     this.productVariations,
-    this.date,
+    this.date, this.complementaryProductIds = const [],
   });
 
   /// Json Format
@@ -62,6 +63,7 @@ class ProductModel {
       'ProductVariations': productVariations != null
           ? productVariations!.map((e) => e.toJson()).toList()
           : [],
+      'complementaryProductIds': complementaryProductIds,
     };
   }
 
@@ -99,6 +101,7 @@ class ProductModel {
                 .map((e) => ProductVariationModel.fromJson(e as Map<String, dynamic>))
                 .toList()
           : null,
+      complementaryProductIds: List<String>.from(data['complementaryProductIds'] ?? []),
     );
   }
 
@@ -130,6 +133,7 @@ class ProductModel {
                 .map((e) => ProductVariationModel.fromJson(e as Map<String, dynamic>))
                 .toList()
           : null,
+      complementaryProductIds: List<String>.from(data['complementaryProductIds'] ?? []),
     );
   }
 }

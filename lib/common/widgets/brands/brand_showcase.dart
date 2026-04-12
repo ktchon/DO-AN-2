@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get.dart';
 import 'package:shop_app/common/widgets/brands/brand_card.dart';
 import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_container.dart';
 import 'package:shop_app/common/widgets/shimmer/shimmer.dart';
@@ -11,52 +10,69 @@ import 'package:shop_app/utils/helpers/emulator_helper.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 
 class BrandShowcase extends StatelessWidget {
-  const BrandShowcase({super.key, required this.images, required this.brand});
+  const BrandShowcase({
+    super.key,
+    required this.images,
+    required this.brand,
+  });
 
   final BrandModel brand;
   final List<String> images;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = THelperFunctions.isDarkMode(context);
+
     return InkWell(
-      onTap: () => Get.to(ProductBrandScreen(brand: brand)),
+      onTap: () => Get.to(() => ProductBrandScreen(brand: brand)),
       child: RoundedContainer(
-        margin: EdgeInsets.all(16),
+        margin: const EdgeInsets.all(16),
         showBorder: true,
         borderColor: Colors.green,
-        backgroundColor: THelperFunctions.isDarkMode(context) ? Colors.black : Colors.white,
+        backgroundColor: isDark ? Colors.black : Colors.white,
         child: Column(
           children: [
             BrandCard(brand: brand),
-            Row(children: images.map((image) => BrandTopProductWidget(image, context)).toList()),
+
+            // ==================== PHẦN ẢNH SẢN PHẨM - ĐẸP VỚI 2 & 3 ẢNH ====================
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,   // Căn giữa để 2 ảnh và 3 ảnh đều đẹp
+                children: List.generate(images.length, (index) {
+                  final fixedUrl = fixEmulatorImageUrl(images[index]);
+
+                  return Expanded(
+                    child: Container(
+                      height: 100,                          // Chiều cao đẹp, rõ ràng
+                      margin: EdgeInsets.only(
+                        left: index == 0 ? 0 : 8,
+                        right: index == images.length - 1 ? 0 : 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.grey[900] : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark ? Colors.grey.shade700 : Colors.green.withOpacity(0.3),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: CachedNetworkImage(
+                          imageUrl: fixedUrl,
+                          fit: BoxFit.cover,               // Ảnh luôn đầy khung
+                          alignment: Alignment.center,
+                          placeholder: (_, __) => const CShimmerEffect(height: 140, width: 100,),
+                          errorWidget: (_, __, ___) => const Icon(Icons.error_outline, size: 40),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget BrandTopProductWidget(String image, context) {
-    final fixImageNetwork = fixEmulatorImageUrl(image);
-    return Expanded(
-      child: RoundedContainer(
-        showBorder: true,
-        backgroundColor: THelperFunctions.isDarkMode(context) ? Colors.grey : Colors.white,
-        margin: EdgeInsets.only(right: 10),
-        padding: EdgeInsets.all(0),
-        borderColor: THelperFunctions.isDarkMode(context) ? Colors.white : Colors.green,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: CachedNetworkImage(
-            fit: BoxFit.contain,
-            imageUrl:
-                fixImageNetwork, // URL của hình ảnh sản phẩm (thường từ Firebase Storage hoặc CDN)
-            // Widget hiển thị trong lúc đang tải ảnh (progress)
-            progressIndicatorBuilder: (context, url, downloadProgress) =>
-                const CShimmerEffect(width: 100, height: 100),
-
-            // Widget hiển thị nếu tải ảnh thất bại (error)
-            errorWidget: (context, url, error) => const Icon(Icons.error),
-          ), // CachedNetworkImage
         ),
       ),
     );

@@ -50,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                           textColor: Colors.white,
                           showActionButton: false,
                         ),
-                        SizedBox(height: 2),
+                        SizedBox(height: 10),
                         // Danh mục
                         HomeCategories(),
                         SizedBox(height: 30),

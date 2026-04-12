@@ -43,10 +43,10 @@ class BrandCard extends StatelessWidget {
                     "${brand.productsCount ?? 0} Sản phẩm",
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelMedium,
-                  ), // Text
+                  ), 
                 ],
               ),
-            ), // Column// Container
+            ), 
           ],
         ),
       ),

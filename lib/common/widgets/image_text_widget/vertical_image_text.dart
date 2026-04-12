@@ -8,7 +8,7 @@ class VerticalImageText extends StatelessWidget {
     required this.image,
     required this.title,
     this.textColor = Colors.white,
-    this.backgroundColor = Colors.white,
+    this.backgroundColor,
     this.onTap,
     super.key,
     this.isNetworkImage = true,
@@ -22,10 +22,12 @@ class VerticalImageText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = THelperFunctions.isDarkMode(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Padding(
-        padding: EdgeInsets.only(right: 20),
+        padding: const EdgeInsets.only(right: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -33,20 +35,20 @@ class VerticalImageText extends StatelessWidget {
               width: 60,
               borderRadius: 16,
               image: image,
-              fit: BoxFit.fitWidth,
+              fit: BoxFit.cover, 
               padding: 0,
               isNetworkImage: isNetworkImage,
-              backgroundColor: backgroundColor,
-              overlayColor: THelperFunctions.isDarkMode(context) ? TColors.white : TColors.dark,
+              backgroundColor: backgroundColor ?? (isDark ? TColors.dark : Colors.white),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             SizedBox(
-              width: 60,
+              width: 80,
               child: Text(
                 title,
                 style: Theme.of(context).textTheme.labelMedium!.apply(color: textColor),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
+                textAlign: TextAlign.center,
               ),
             ),
           ],

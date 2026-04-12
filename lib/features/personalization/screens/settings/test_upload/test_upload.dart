@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shop_app/features/personalization/screens/settings/test_upload/covert.dart';
 import 'package:shop_app/features/personalization/screens/settings/test_upload/insert_data_coupon.dart';
-import 'package:shop_app/features/personalization/screens/settings/test_upload/insert_data_test.dart';
 import 'package:shop_app/features/personalization/screens/settings/test_upload/insert_date_category.dart';
+import 'package:shop_app/features/personalization/screens/settings/test_upload/insert_product.dart';
 
 class TestUpload extends StatelessWidget {
   const TestUpload({super.key});
