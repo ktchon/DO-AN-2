@@ -4,6 +4,8 @@ import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:shop_app/data/products/product_repository.dart';
 import 'package:shop_app/features/shop/models/product_model.dart';
+import 'package:shop_app/services/product_scoring_service.dart';
+import 'package:shop_app/services/user_behavior_service.dart';
 import 'package:shop_app/utils/constants/enums.dart';
 import 'package:shop_app/utils/popups/loaders.dart';
 
@@ -12,6 +14,7 @@ class ProductController extends GetxController {
 
   final isLoading = false.obs;
   final productRepository = Get.put(ProductRepository());
+  final _behaviorService = UserBehaviorService();
 
   RxList<ProductModel> featuredProducts = <ProductModel>[].obs;
 
@@ -23,14 +26,19 @@ class ProductController extends GetxController {
 
   void fetchFeaturedProducts() async {
     try {
-      // Show loader while loading Products
       isLoading.value = true;
 
-      // Fetch Products
-      final products = await productRepository.getFeaturedProducts();
+      // Gọi song song để nhanh hơn
+      final results = await Future.wait([
+        productRepository.getFeaturedProducts(),
+        _behaviorService.getUserBehavior(),
+      ]);
 
-      // Assign Products
-      featuredProducts.assignAll(products);
+      final products = results[0] as List<ProductModel>;
+      final behavior = results[1] as UserBehavior;
+
+      final ranked = ProductScoringService.rankAndShuffle(products, behavior);
+      featuredProducts.assignAll(ranked);
     } catch (e) {
       CLoaders.errorSnackBar(title: 'Có gì đó không ổn!', message: e.toString());
     } finally {

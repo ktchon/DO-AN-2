@@ -45,7 +45,7 @@ class RoundedImage extends StatelessWidget {
         child: ClipRRect(
           borderRadius: applyImageRadius ? BorderRadius.circular(borderRadius) : BorderRadius.zero,
           child: Image(
-            fit: fit,
+            fit: fit ?? BoxFit.cover, 
             image: isNetworkImage ? NetworkImage(imageUrl) : AssetImage(imageUrl),
             errorBuilder: (context, error, stackTrace) {
               return const Icon(Icons.image_not_supported_outlined);

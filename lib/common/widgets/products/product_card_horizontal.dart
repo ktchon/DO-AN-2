@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_container.dart';
-import 'package:shop_app/common/widgets/custom_shapes/containers/rounded_image.dart';
+import 'package:get/get.dart';
+import 'package:shop_app/common/widgets/products/cart/add_to_cart_button.dart';
 import 'package:shop_app/common/widgets/products/favourite_icon/favourite_icon.dart';
 import 'package:shop_app/common/widgets/text/brand_title_text_with_verified_icon.dart';
 import 'package:shop_app/common/widgets/text/product_price_text.dart';
@@ -25,114 +23,94 @@ class ProductCardHorizontal extends StatelessWidget {
     final controller = ProductController.instance;
     final salePercentage = controller.calculateSalePercentage(product.price, product.salePrice);
     final dark = THelperFunctions.isDarkMode(context);
+
     return GestureDetector(
       onTap: () => Get.to(ProductDetail(product: product)),
       child: Container(
         width: 310,
-        padding: const EdgeInsets.all(1),
+        height: 120,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(TSizes.productImageRadius),
           color: dark ? TColors.darkGrey : TColors.lightContainer,
         ),
         child: Row(
           children: [
-            // thumnail
-            RoundedContainer(
-              height: 120,
-              backgroundColor: dark ? TColors.dark : TColors.white,
+            // ── THUMBNAIL ───
+            ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(TSizes.productImageRadius),
+                bottomLeft: Radius.circular(TSizes.productImageRadius),
+              ),
               child: Stack(
                 children: [
-                  // ảnh chính
+                  // Ảnh chính
                   SizedBox(
                     width: 120,
                     height: 120,
-                    child: RoundedImage(
+                    child: Image.network(
+                      product.thumbnail,
                       width: 120,
-                      imageUrl: product.thumbnail,
-                      isNetworkImage: true,
-                    ),
-                  ),
-                  // Giảm giá
-                  Positioned(
-                    top: 0,
-                    left: 0,
-
-                    child: RoundedContainer(
-                      height: 28,
-                      width: 50,
-                      radius: 10,
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      backgroundColor: Colors.yellowAccent.withOpacity(0.8),
-                      child: Text(
-                        '$salePercentage%',
-                        style: Theme.of(context).textTheme.labelLarge!.apply(color: Colors.black),
+                      height: 120,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: dark ? TColors.dark : TColors.white,
+                        child: const Icon(Icons.image_not_supported),
                       ),
                     ),
                   ),
-                  // tim
-                  Positioned(top: -10, right: -15, child: CFavouriteIcon(productId: product.id)),
+
+                  // Badge giảm giá
+                  if (salePercentage != null && salePercentage.isNotEmpty && salePercentage != '0')
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.yellowAccent.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '$salePercentage%',
+                          style: Theme.of(context).textTheme.labelSmall!.apply(color: Colors.black),
+                        ),
+                      ),
+                    ),
+
+                  // Nút yêu thích
+                  Positioned(top: -8, right: -12, child: CFavouriteIcon(productId: product.id)),
                 ],
               ),
             ),
-            SizedBox(
-              width: 150,
-              child: Column(
+
+            // ── NỘI DUNG ───
+            Expanded(
+              child: Stack(
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(top: 10, left: 10),
+                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        ProductTitleText(text: product.title),
-                        SizedBox(height: 6),
-                        BrandTitleWithVerifiedIcon(title: product.brand!.name ?? ''),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Giá
-                            Flexible(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (product.productType == ProductType.single.toString() &&
-                                      product.salePrice > 0)
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 10),
-                                      child: ProductPriceText(
-                                        price: product.price,
-                                        isLarge: false,
-                                        lineThrough: true,
-                                      ),
-                                    ),
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 10),
-                                    child: ProductPriceText(
-                                      price: controller.getProductPrice(product),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Add to cart
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black,
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(12),
-                                  bottomRight: Radius.circular(12),
-                                ),
-                              ),
-                              child: SizedBox(
-                                height: 32,
-                                width: 32,
-                                child: Icon(Icons.add, color: Colors.white),
-                              ),
-                            ),
-                          ],
-                        ),
+                        ProductTitleText(text: product.title, maxLines: 2),
+                        const SizedBox(height: 4),
+                        BrandTitleWithVerifiedIcon(title: product.brand?.name ?? ''),
+                        const SizedBox(height: 10),
+                        if (product.productType == ProductType.single.toString() &&
+                            product.salePrice > 0)
+                          ProductPriceText(price: product.price, isLarge: false, lineThrough: true),
+                        ProductPriceText(price: controller.getProductPrice(product)),
                       ],
+                    ),
+                  ),
+                  // Nút + góc phải dưới
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      height: 32,
+                      width: 32,
+                      child: AddToCartButton(product: product),
                     ),
                   ),
                 ],

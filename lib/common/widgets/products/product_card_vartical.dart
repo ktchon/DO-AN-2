@@ -29,7 +29,7 @@ class ProductCardVartical extends StatelessWidget {
     return GestureDetector(
       onTap: () => Get.to(
         () => ProductDetail(product: product),
-        preventDuplicates: false, 
+        preventDuplicates: false,
         transition: Transition.fadeIn,
         duration: const Duration(milliseconds: 300),
       ),
@@ -40,95 +40,77 @@ class ProductCardVartical extends StatelessWidget {
           borderRadius: BorderRadius.circular(TSizes.productImageRadius),
           color: dark ? TColors.darkerGrey : TColors.white,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
+          // ← đổi Column thành Stack
           children: [
-            Stack(
+            Column(
+              // ← Column vẫn giữ nguyên bên trong
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Ảnh chính
-                ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(TSizes.productImageRadius),
-                    topRight: Radius.circular(TSizes.productImageRadius),
-                  ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 180,
-                    child: Image.network(
-                      fixedImageUrl,
-                      fit: BoxFit.cover,
-                      alignment: Alignment.center,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Center(child: Icon(Icons.error_outline, size: 40)),
+                // ảnh + badge + tim (giữ nguyên)
+                Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(TSizes.productImageRadius),
+                        topRight: Radius.circular(TSizes.productImageRadius),
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 180,
+                        child: Image.network(
+                          fixedImageUrl,
+                          fit: BoxFit.cover,
+                          alignment: Alignment.center,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Center(child: Icon(Icons.error_outline, size: 40)),
+                        ),
+                      ),
                     ),
-                  ),
+                    if (salePercentage != null)
+                      Positioned(
+                        top: 12,
+                        left: 12,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.yellowAccent.withOpacity(0.95),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '$salePercentage%',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelLarge!.apply(color: Colors.black, fontWeightDelta: 2),
+                          ),
+                        ),
+                      ),
+                    Positioned(top: 8, right: 8, child: CFavouriteIcon(productId: product.id)),
+                  ],
                 ),
 
-                // Giảm giá (nếu có)
-                if (salePercentage != null)
-                  Positioned(
-                    top: 12,
-                    left: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.yellowAccent.withOpacity(0.95),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        '$salePercentage%',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.labelLarge!.apply(color: Colors.black, fontWeightDelta: 2),
-                      ),
-                    ),
+                // Thông tin
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ProductTitleText(text: product.title),
+                      const SizedBox(height: 6),
+                      BrandTitleWithVerifiedIcon(title: product.brand?.name ?? ''),
+                      const SizedBox(height: 8),
+                      if (product.productType == ProductType.single.toString() &&
+                          product.salePrice > 0)
+                        ProductPriceText(price: product.price, isLarge: false, lineThrough: true),
+                      ProductPriceText(price: controller.getProductPrice(product), isLarge: true),
+                    ],
                   ),
-
-                // Icon trái tim
-                Positioned(top: 8, right: 8, child: CFavouriteIcon(productId: product.id)),
+                ),
               ],
             ),
 
-            // ==================== PHẦN THÔNG TIN ====================
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ProductTitleText(text: product.title),
-                  const SizedBox(height: 6),
-                  BrandTitleWithVerifiedIcon(title: product.brand?.name ?? ''),
-                  const SizedBox(height: 8),
-
-                  // Giá + Add to cart
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Flexible(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (product.productType == ProductType.single.toString() &&
-                                product.salePrice > 0)
-                              ProductPriceText(
-                                price: product.price,
-                                isLarge: false,
-                                lineThrough: true,
-                              ),
-                            ProductPriceText(
-                              price: controller.getProductPrice(product),
-                              isLarge: true,
-                            ),
-                          ],
-                        ),
-                      ),
-                      AddToCartButton(product: product),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            // Nút ghim góc phải dưới cùng của card
+            Positioned(bottom: 0, right: 0, child: AddToCartButton(product: product)),
           ],
         ),
       ),

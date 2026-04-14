@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -120,16 +121,49 @@ class CartController extends GetxController {
   /// Hiển thị dialog xác nhận xóa sản phẩm (khi số lượng còn 1)
   void removeFromCartDialog(int index) {
     Get.defaultDialog(
+      backgroundColor: Colors.white,
       title: 'Xóa sản phẩm',
       middleText: 'Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng không?',
-      onConfirm: () {
-        // Remove the item from the cart
-        cartItems.removeAt(index);
-        updateCart();
-        CLoaders.customToast(message: 'Sản phẩm đã được xóa khỏi giỏ hàng.');
-        Get.back();
-      },
-      onCancel: () => Get.back(),
+
+      // Custom nút Huỷ
+      cancel: SizedBox(
+        height: 40,
+        width: 80,
+        child: OutlinedButton(
+          onPressed: () => Get.back(),
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: EdgeInsets.zero, 
+            minimumSize: Size.zero, 
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap, 
+          ),
+          child: const Text('Huỷ'),
+        ),
+      ),
+
+      // Custom nút Xoá
+      confirm: SizedBox(
+        height: 40,
+        width: 80,
+        child: ElevatedButton(
+      
+          onPressed: () {
+            cartItems.removeAt(index);
+            updateCart();
+            CLoaders.customToast(message: 'Sản phẩm đã được xóa khỏi giỏ hàng.');
+            Get.back();
+          },
+          style: ElevatedButton.styleFrom(
+            side: BorderSide(color:Colors.red),
+            backgroundColor: Colors.red,
+            padding: EdgeInsets.zero,
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          child: const Text('Xoá'),
+        ),
+      ),
     );
   }
 

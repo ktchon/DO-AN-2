@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shop_app/data/repositories/authentication/authentication_repository.dart';
 import 'package:shop_app/firebase_options.dart';
 import 'package:shop_app/utils/app.dart';
-import 'package:shop_app/utils/services/notification_service.dart';
+import 'package:shop_app/services/notification_service.dart';
 
 import 'package:shop_app/utils/storage/storage_utility.dart';
 

@@ -239,6 +239,7 @@ class OrderController extends GetxController {
     final TextEditingController otherReasonController = TextEditingController();
 
     Get.defaultDialog(
+      backgroundColor: Colors.white,
       title: "Huỷ đơn hàng",
       content: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
@@ -277,7 +278,6 @@ class OrderController extends GetxController {
 
       textCancel: "Không",
       textConfirm: "Huỷ đơn",
-      confirmTextColor: Colors.white,
       buttonColor: Colors.red,
 
       onConfirm: () {
