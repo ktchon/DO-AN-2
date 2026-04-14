@@ -7,47 +7,47 @@ import 'package:shop_app/utils/helpers/emulator_helper.dart';
 import 'package:shop_app/utils/constants/colors.dart';
 
 class ProductImageSilder extends StatelessWidget {
-  const ProductImageSilder({super.key, required this.product});
+  const ProductImageSilder({super.key, required this.product, required this.controllerTag});
   final ProductModel product;
+  final String controllerTag;
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<ImagesController>(); 
+    // Tìm đúng controller theo tag
+    final controller = Get.find<ImagesController>(tag: controllerTag);
+
+    // Reset + Load ảnh mới mỗi khi vào trang
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.loadProductImages(product);
+    });
+
     final images = controller.getAllProductImages(product);
 
     return Stack(
       children: [
-        // ==================== ẢNH CHÍNH ====================
+        // Ảnh chính
         Container(
           width: double.infinity,
-          height: 420, 
+          height: 420,
           color: Colors.white,
-          child: Center(
-            child: Obx(() {
-              final imageUrl = controller.selectedProductImage.value;
-              // final fixedImageUrl = fixEmulatorImageUrl(imageUrl);
+          child: Obx(() {
+            final imageUrl = controller.selectedProductImage.value.isNotEmpty
+                ? controller.selectedProductImage.value
+                : (product.thumbnail ?? '');
 
-              return GestureDetector(
-                onTap: () => controller.showEnlargedImage(imageUrl),
-                child: Container(
-                  width: double.infinity,
-                  height: 420,
-                  margin: const EdgeInsets.symmetric(horizontal: 0),
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    fit: BoxFit.cover, 
-                    alignment: Alignment.center,
-                    placeholder: (_, __) =>
-                        const Center(child: CircularProgressIndicator(color: TColors.primary)),
-                    errorWidget: (_, __, ___) => const Icon(Icons.error_outline, size: 60),
-                  ),
-                ),
-              );
-            }),
-          ),
+            return GestureDetector(
+              onTap: () => controller.showEnlargedImage(imageUrl),
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+                placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
+                errorWidget: (_, __, ___) => const Icon(Icons.error_outline, size: 60),
+              ),
+            );
+          }),
         ),
 
-        // ==================== THUMBNAIL ====================
+        // Thumbnails
         Positioned(
           bottom: 20,
           left: 0,
@@ -66,7 +66,7 @@ class ProductImageSilder extends StatelessWidget {
                 return GestureDetector(
                   onTap: () => controller.selectedProductImage.value = images[index],
                   child: Container(
-                    width: 68, 
+                    width: 68,
                     height: 68,
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -75,13 +75,6 @@ class ProductImageSilder extends StatelessWidget {
                         color: isSelected ? TColors.primary : Colors.grey.shade300,
                         width: isSelected ? 3 : 1.5,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),

@@ -35,16 +35,22 @@ class ProductDetail extends StatelessWidget {
   final ProductModel product;
   @override
   Widget build(BuildContext context) {
-    Get.put(ImagesController(), permanent: false); 
+    // Dùng product.id làm tag để mỗi sản phẩm có controller riêng
+    final imagesController = Get.put(ImagesController(), tag: product.id, permanent: false);
     final controller = CartController.instance;
     final reviewController = ReviewController.instance;
     reviewController.fetchReviews(product.id);
     // Khởi tạo RecommendationController và load dữ liệu
-    final recommendationController = Get.put(RecommendationController());
+    final recommendationController = Get.put(
+      RecommendationController(),
+      tag: product.id,
+      permanent: false,
+    );
 
     // Gọi load ngay khi build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      recommendationController.loadRecommendationsForProduct(this.product);
+      imagesController.reset();
+      recommendationController.loadRecommendationsForProduct(product);
     });
     return Scaffold(
       appBar: AppBar(
@@ -144,7 +150,7 @@ class ProductDetail extends StatelessWidget {
         child: Column(
           children: [
             // Ảnh chính và ảnh phụ
-            ProductImageSilder(product: product),
+            ProductImageSilder(product: product, controllerTag: product.id),
             Padding(
               padding: EdgeInsets.only(right: 20, left: 20, bottom: 20),
               child: Column(
@@ -239,13 +245,17 @@ class ProductDetail extends StatelessWidget {
                   // ==================== GỢI Ý SẢN PHẨM ====================
 
                   // SẢN PHẨM TƯƠNG TỰ
-                  SimilarProductsSection(products: recommendationController.similarProducts),
+                  SimilarProductsSection(
+                    products: recommendationController.similarProducts,
+                    controllerTag: product.id,
+                  ),
 
                   const SizedBox(height: 24),
 
                   // SẢN PHẨM THƯỜNG MUA KÈM
                   ComplementaryProductsSection(
                     products: recommendationController.complementaryProducts,
+                    controllerTag: product.id,
                   ),
 
                   const SizedBox(height: 40),

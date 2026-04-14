@@ -6,13 +6,18 @@ import 'package:shop_app/features/shop/controllers/products/recommendation_contr
 import 'package:shop_app/features/shop/models/product_model.dart';
 
 class ComplementaryProductsSection extends StatelessWidget {
-  const ComplementaryProductsSection({super.key, required this.products});
+  const ComplementaryProductsSection({
+    super.key,
+    required this.products,
+    required this.controllerTag,
+  });
   final List<ProductModel> products;
+  final String controllerTag;
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final list = RecommendationController.instance.complementaryProducts;
-
+      final controller = Get.find<RecommendationController>(tag: controllerTag);
+      final list = controller.complementaryProducts;
       if (list.isEmpty) {
         return const SizedBox.shrink();
       }

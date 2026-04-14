@@ -28,7 +28,7 @@ class FavouriteScrenn extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
         ),
         actions: [
-          CartCounterIcon(onPressed: () => Get.to(() => CartItemScreen())),
+          CartCounterIcon(colorCart: true,onPressed: () => Get.to(() => CartItemScreen())),
           CircularIcon(
             backgroundColor: TColors.primary,
             icon: Icons.add,
@@ -46,7 +46,7 @@ class FavouriteScrenn extends StatelessWidget {
                 /// Widget hiển thị khi không tìm thấy dữ liệu (Nothing Found Widget)
                 final emptyWidget = CAnimationLoaderWidget(
                   text: 'Danh sách yêu thích đang trống...',
-                  animation: 'assets/logo/Loading.json',
+                  animation: 'assets/logo/shopping-cart.json',
                   showAction: true,
                   actionText: 'Hãy thêm một vài sản phẩm',
                   onActionPressed: () => Get.offAll(() => const NavigationMenu()),

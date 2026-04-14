@@ -14,6 +14,8 @@ import 'package:shop_app/data/repositories/user/user_repository.dart';
 import 'package:shop_app/features/authentication/screens/login/login.dart';
 import 'package:shop_app/features/authentication/screens/onboarding/onboarding.dart';
 import 'package:shop_app/features/authentication/screens/signup/verify_email.dart';
+import 'package:shop_app/features/shop/controllers/products/image_controller.dart';
+import 'package:shop_app/features/shop/controllers/products/recommendation_controller.dart';
 import 'package:shop_app/navigation_menu.dart';
 import 'package:shop_app/utils/exceptions/firebase_auth_exceptions.dart';
 import 'package:shop_app/utils/exceptions/firebase_exceptions.dart';
@@ -36,6 +38,14 @@ class AuthenticationRepository extends GetxController {
     FlutterNativeSplash.remove();
     screenRedirect();
   }
+  // void dispose() {
+  //   // Dùng Future.microtask để tránh xóa controller trong lúc build
+  //   Future.microtask(() {
+  //     Get.delete<ImagesController>(tag: '');
+  //     Get.delete<RecommendationController>(tag: '');
+  //   });
+  //   super.dispose();
+  // }
 
   Future<void> screenRedirect() async {
     await _auth.currentUser?.reload();
@@ -47,10 +57,10 @@ class AuthenticationRepository extends GetxController {
         await CLocalStorage.init(user.uid);
         await _saveFCMToken(user.uid);
         // Chuyển hướng đến trang chủ
-        Get.offAll(NavigationMenu());
+        Get.offAll(() => NavigationMenu());
       } else {
         await _saveFCMToken(user.uid);
-        Get.offAll(NavigationMenu()); // VeryfyEmaillScreen
+        Get.offAll(() => NavigationMenu()); // VeryfyEmaillScreen
       }
     } else {
       deviceStorage.writeIfNull('isFirstTime', true);

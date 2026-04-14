@@ -24,46 +24,61 @@ class NavigationMenu extends StatelessWidget {
         final unread = Get.find<NotificationController>().unreadCount.value;
         final selectedIndex = controller.selectedIndex.value;
 
-        return NavigationBar(
-          height: 70,
-          elevation: 0,
-          selectedIndex: selectedIndex,
-          onDestinationSelected: (index) =>
-              controller.selectedIndex.value = index,
-          destinations: [
-            const NavigationDestination(
-              selectedIcon: Icon(Iconsax.home_copy, color: Colors.green),
-              icon: Icon(Iconsax.home_copy),
-              label: 'Trang chủ',
-            ),
-            const NavigationDestination(
-              selectedIcon: Icon(Iconsax.shop_copy, color: Colors.green),
-              icon: Icon(Iconsax.shop_copy),
-              label: 'Cửa hàng',
-            ),
-            const NavigationDestination(
-              selectedIcon: Icon(Iconsax.heart_copy, color: Colors.red),
-              icon: Icon(Iconsax.heart_copy),
-              label: 'Yêu thích',
-            ),
-            NavigationDestination(
-              selectedIcon: _BadgeIcon(
-                icon: Iconsax.notification_copy,
-                color: Colors.green,
-                count: unread,
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: const Border(
+              top: BorderSide(
+                color: Color(0xFFE0E0E0), 
+                width: 1.0,
               ),
-              icon: _BadgeIcon(
-                icon: Iconsax.notification_copy,
-                count: unread,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, -3),
               ),
-              label: 'Thông báo',
-            ),
-            const NavigationDestination(
-              selectedIcon: Icon(Iconsax.user_copy, color: Colors.green),
-              icon: Icon(Iconsax.user_copy),
-              label: 'Hồ sơ',
-            ),
-          ],
+            ],
+          ),
+          child: NavigationBar(
+            backgroundColor: Colors.white,
+            height: 70,
+            elevation: 0,
+            selectedIndex: selectedIndex,
+            onDestinationSelected: (index) => controller.selectedIndex.value = index,
+            destinations: [
+              const NavigationDestination(
+                selectedIcon: Icon(Iconsax.home_copy, color: Colors.green),
+                icon: Icon(Iconsax.home_copy),
+                label: 'Trang chủ',
+              ),
+              const NavigationDestination(
+                selectedIcon: Icon(Iconsax.shop_copy, color: Colors.green),
+                icon: Icon(Iconsax.shop_copy),
+                label: 'Cửa hàng',
+              ),
+              const NavigationDestination(
+                selectedIcon: Icon(Iconsax.heart_copy, color: Colors.red),
+                icon: Icon(Iconsax.heart_copy),
+                label: 'Yêu thích',
+              ),
+              NavigationDestination(
+                selectedIcon: _BadgeIcon(
+                  icon: Iconsax.notification_copy,
+                  color: Colors.green,
+                  count: unread,
+                ),
+                icon: _BadgeIcon(icon: Iconsax.notification_copy, count: unread),
+                label: 'Thông báo',
+              ),
+              const NavigationDestination(
+                selectedIcon: Icon(Iconsax.user_copy, color: Colors.green),
+                icon: Icon(Iconsax.user_copy),
+                label: 'Hồ sơ',
+              ),
+            ],
+          ),
         );
       }),
       body: Obx(() => controller.screens[controller.selectedIndex.value]),
@@ -77,11 +92,7 @@ class _BadgeIcon extends StatelessWidget {
   final Color? color;
   final int count;
 
-  const _BadgeIcon({
-    required this.icon,
-    required this.count,
-    this.color,
-  });
+  const _BadgeIcon({required this.icon, required this.count, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -95,12 +106,8 @@ class _BadgeIcon extends StatelessWidget {
             right: -4,
             child: Container(
               padding: const EdgeInsets.all(3),
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
-              ),
-              constraints:
-                  const BoxConstraints(minWidth: 16, minHeight: 16),
+              decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(
                 count > 99 ? '99+' : '$count',
                 style: const TextStyle(
