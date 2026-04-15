@@ -8,7 +8,7 @@ class SearchContainer extends StatelessWidget {
     super.key,
     required this.text,
     this.icon = Iconsax.search_normal,
-    this.isReadOnly = true, // Mặc định là chỉ đọc (dùng ở Home)
+    this.isReadOnly = true, 
     this.onTap,
     this.onChanged,
     this.controller,

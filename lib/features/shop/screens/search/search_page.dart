@@ -6,12 +6,47 @@ import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/helpers/helper_functions.dart';
 import '../../controllers/search/search_controller.dart';
 
-class SearchPage extends StatelessWidget {
+class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
 
   @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  late final CSearchController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Đảm bảo controller chỉ được tạo 1 lần
+    if (!Get.isRegistered<CSearchController>()) {
+      controller = Get.put(CSearchController());
+    } else {
+      controller = Get.find<CSearchController>();
+    }
+
+    // Reset khi vào trang
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.searchTextController.clear();
+      controller.suggestions.clear();
+      controller.searchTextController.addListener(_onTextChanged);
+    });
+  }
+
+  void _onTextChanged() {
+    controller.onSearchChanged(controller.searchTextController.text);
+  }
+
+  @override
+  void dispose() {
+    controller.searchTextController.removeListener(_onTextChanged);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.put(CSearchController());
     final dark = THelperFunctions.isDarkMode(context);
 
     return Scaffold(
@@ -23,7 +58,7 @@ class SearchPage extends StatelessWidget {
             Expanded(
               child: TextFormField(
                 controller: controller.searchTextController,
-                onChanged: controller.onSearchChanged,
+                // onChanged đã chuyển sang listener ở initState
                 onFieldSubmitted: controller.searchKeyword,
                 autofocus: true,
                 textInputAction: TextInputAction.search,
@@ -50,19 +85,19 @@ class SearchPage extends StatelessWidget {
         ),
       ),
       body: Obx(() {
-        // HIỂN THỊ SUGGESTIONS KHI GÕ
-        if (controller.searchTextController.text.isNotEmpty) {
-          return _buildSuggestionsList(controller);
+        final query = controller.searchTextController.text.trim();
+
+        if (query.isNotEmpty) {
+          return _buildSuggestionsList();
         }
 
-        // HIỂN THỊ RECENT & TRENDING KHI TRỐNG
         return SingleChildScrollView(
           padding: const EdgeInsets.all(TSizes.defaultSpace),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (controller.recentSearches.isNotEmpty) ...[
-                _buildHeader("Tìm kiếm gần đây", onClear: () => controller.clearRecent()),
+                _buildHeader("Tìm kiếm gần đây", onClear: controller.clearRecent),
                 Wrap(
                   spacing: 8,
                   children: controller.recentSearches
@@ -93,7 +128,6 @@ class SearchPage extends StatelessWidget {
                   ),
                   title: Text(controller.trendingSearches[index]),
                   onTap: () => controller.searchKeyword(controller.trendingSearches[index]),
-                  contentPadding: EdgeInsets.zero,
                   dense: true,
                 ),
               ),
@@ -109,7 +143,7 @@ class SearchPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        if (showClear)
+        if (showClear && onClear != null)
           TextButton(
             onPressed: onClear,
             child: const Text("Xóa", style: TextStyle(fontSize: 12)),
@@ -118,43 +152,68 @@ class SearchPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSuggestionsList(CSearchController controller) {
-    return ListView.builder(
-      itemCount: controller.suggestions.length,
-      itemBuilder: (_, index) {
-        final product = controller.suggestions[index];
-        final query = controller.searchTextController.text;
+  Widget _buildSuggestionsList() {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator.adaptive());
+      }
 
-        return ListTile(
-          leading: const Icon(Iconsax.search_status),
-          title: RichText(
-            text: TextSpan(
-              style: const TextStyle(color: Colors.black), // Màu mặc định
-              children: _highlightText(product.title, query),
+      if (controller.suggestions.isEmpty) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.all(40),
+            child: Text(
+              "Không tìm thấy sản phẩm phù hợp",
+              style: TextStyle(color: Colors.grey, fontSize: 16),
             ),
           ),
-          onTap: () => controller.navigateToProductDetail(product),
         );
-      },
-    );
+      }
+
+      return ListView.builder(
+        itemCount: controller.suggestions.length,
+        itemBuilder: (_, index) {
+          final product = controller.suggestions[index];
+          return ListTile(
+            dense: true,
+            leading: const Icon(Iconsax.search_status, size: 22),
+            title: RichText(
+              text: TextSpan(
+                style: const TextStyle(color: Colors.black87, fontSize: 15),
+                children: _highlightText(product.title, controller.searchTextController.text),
+              ),
+            ),
+            onTap: () => controller.navigateToProductDetail(product),
+          );
+        },
+      );
+    });
   }
 
-  // Hàm bổ trợ bôi đậm từ khóa
   List<TextSpan> _highlightText(String fullText, String query) {
-    List<TextSpan> spans = [];
-    if (query.isEmpty || !fullText.toLowerCase().contains(query.toLowerCase())) {
-      spans.add(TextSpan(text: fullText));
-      return spans;
-    }
+    if (query.isEmpty) return [TextSpan(text: fullText)];
 
-    // Logic đơn giản để tách và bôi đậm phần khớp
-    // Bạn có thể dùng Regex để làm chuyên sâu hơn
-    spans.add(
-      TextSpan(
-        text: fullText,
-        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-      ),
-    );
+    final lowerFull = THelperFunctions.removeDiacritics(fullText.toLowerCase());
+    final lowerQuery = THelperFunctions.removeDiacritics(query.toLowerCase());
+
+    List<TextSpan> spans = [];
+    int start = 0;
+
+    while (true) {
+      final idx = lowerFull.indexOf(lowerQuery, start);
+      if (idx == -1) {
+        spans.add(TextSpan(text: fullText.substring(start)));
+        break;
+      }
+      if (idx > start) spans.add(TextSpan(text: fullText.substring(start, idx)));
+      spans.add(
+        TextSpan(
+          text: fullText.substring(idx, idx + query.length),
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+        ),
+      );
+      start = idx + query.length;
+    }
     return spans;
   }
 }

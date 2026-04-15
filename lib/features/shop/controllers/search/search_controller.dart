@@ -6,6 +6,7 @@ import 'package:shop_app/data/repositories/authentication/authentication_reposit
 import 'package:shop_app/data/search/search_repository.dart';
 import 'package:shop_app/features/shop/screens/all_products/all_products.dart';
 import 'package:shop_app/features/shop/screens/product-details/product_detail.dart';
+import 'package:shop_app/utils/helpers/helper_functions.dart';
 import '../../models/product_model.dart';
 
 class CSearchController extends GetxController {
@@ -34,15 +35,27 @@ class CSearchController extends GetxController {
   }
 
   // Autocomplete realtime
+  // Trong CSearchController.dart
   void onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 300), () async {
-      if (query.trim().isNotEmpty) {
-        isLoading.value = true;
-        suggestions.value = await searchRepo.getAutocompleteSuggestions(query.trim());
-        isLoading.value = false;
-      } else {
+
+    _debounce = Timer(const Duration(milliseconds: 180), () async {
+      // giảm từ 300 → 180ms
+      final cleanQuery = query.trim();
+      if (cleanQuery.isEmpty) {
         suggestions.clear();
+        return;
+      }
+
+      isLoading.value = true;
+      try {
+        suggestions.value = await searchRepo.getAutocompleteSuggestions(cleanQuery);
+        print('✅ Tìm thấy ${suggestions.length} gợi ý cho: "$cleanQuery"');
+      } catch (e) {
+        print('❌ Lỗi tìm kiếm: $e');
+        suggestions.clear();
+      } finally {
+        isLoading.value = false;
       }
     });
   }
@@ -52,18 +65,18 @@ class CSearchController extends GetxController {
     if (keyword.isEmpty) return;
 
     searchTextController.text = keyword;
-    await searchRepo.saveSearchHistory(userId, keyword);
-
-    // Cập nhật lại list Recent local để UI thay đổi ngay
-    recentSearches.remove(keyword);
-    recentSearches.insert(0, keyword);
+    await _saveSearchHistory(keyword);
 
     Get.to(
       () => AllProductsScreen(
         title: keyword,
         query: FirebaseFirestore.instance
             .collection('Products')
-            .where('Title', isGreaterThanOrEqualTo: keyword),
+            .where('SearchName', isGreaterThanOrEqualTo: THelperFunctions.removeDiacritics(keyword))
+            .where(
+              'SearchName',
+              isLessThanOrEqualTo: '${THelperFunctions.removeDiacritics(keyword)}\uf8ff',
+            ),
       ),
     );
   }
@@ -73,8 +86,16 @@ class CSearchController extends GetxController {
     // Logic xóa trên Firebase nếu cần
   }
 
-  void navigateToProductDetail(ProductModel product) {
-    searchKeyword(product.title);
+  void navigateToProductDetail(ProductModel product) async {
+    await _saveSearchHistory(product.title);
     Get.to(() => ProductDetail(product: product));
+  }
+
+  Future<void> _saveSearchHistory(String keyword) async {
+    if (keyword.isEmpty) return;
+    await searchRepo.saveSearchHistory(userId, keyword);
+
+    recentSearches.remove(keyword);
+    recentSearches.insert(0, keyword);
   }
 }

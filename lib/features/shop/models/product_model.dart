@@ -21,6 +21,7 @@ class ProductModel {
   List<ProductAttributeModel>? productAttributes;
   List<ProductVariationModel>? productVariations;
   final List<String> complementaryProductIds;
+  final String searchName;
 
   ProductModel({
     required this.id,
@@ -38,7 +39,9 @@ class ProductModel {
     this.images = const [],
     this.productAttributes,
     this.productVariations,
-    this.date, this.complementaryProductIds = const [],
+    this.date,
+    this.complementaryProductIds = const [],
+    this.searchName = '',
   });
 
   /// Json Format
@@ -64,6 +67,7 @@ class ProductModel {
           ? productVariations!.map((e) => e.toJson()).toList()
           : [],
       'complementaryProductIds': complementaryProductIds,
+      'SearchName': searchName,
     };
   }
 
@@ -102,6 +106,7 @@ class ProductModel {
                 .toList()
           : null,
       complementaryProductIds: List<String>.from(data['complementaryProductIds'] ?? []),
+      searchName: data['SearchName'] ?? '',
     );
   }
 
@@ -134,6 +139,7 @@ class ProductModel {
                 .toList()
           : null,
       complementaryProductIds: List<String>.from(data['complementaryProductIds'] ?? []),
+      searchName: data['SearchName'] ?? '',
     );
   }
 }

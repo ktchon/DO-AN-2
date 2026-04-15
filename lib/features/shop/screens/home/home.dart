@@ -10,6 +10,7 @@ import 'package:shop_app/common/widgets/products/product_card_vartical.dart';
 import 'package:shop_app/common/widgets/shimmer/vertical_product_shimmer.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
 import 'package:shop_app/features/shop/controllers/products/product_controller.dart';
+import 'package:shop_app/features/shop/controllers/search/search_controller.dart';
 import 'package:shop_app/features/shop/screens/all_products/all_products.dart';
 import 'package:shop_app/features/shop/screens/home/widgets/home_appbar.dart';
 import 'package:shop_app/features/shop/screens/home/widgets/home_categories.dart';
@@ -34,7 +35,9 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(height: 16),
                   // Thanh tìm kiếm
                   GestureDetector(
-                    onTap: () => Get.to(() => SearchPage()),
+                    onTap: () {
+                      Get.to(() => const SearchPage());
+                    },
                     child: SearchContainer(text: 'Tìm kiếm sản phẩm...'),
                   ),
                   SizedBox(height: 16),

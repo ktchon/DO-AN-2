@@ -8,23 +8,27 @@ class SearchRepository extends GetxController {
   final _db = FirebaseFirestore.instance;
 
   Future<List<ProductModel>> getAutocompleteSuggestions(String query) async {
-    if (query.isEmpty) return [];
+    if (query.trim().isEmpty) return [];
 
-    // 1. Chuyển query người dùng về chữ thường và bỏ dấu
-    String searchKey = THelperFunctions.removeDiacritics(query);
+    String searchKey = THelperFunctions.removeDiacritics(query.trim().toLowerCase());
+
+    print('🔍 Đang query với key: "$searchKey"');
 
     try {
       final snapshot = await _db
           .collection('Products')
           .where('SearchName', isGreaterThanOrEqualTo: searchKey)
           .where('SearchName', isLessThanOrEqualTo: '$searchKey\uf8ff')
-          /* \uf8ff là ký tự đặc biệt giúp Firestore hiểu là "bắt đầu bằng" */
+          .orderBy('Sold', descending: true) 
           .limit(10)
           .get();
 
-      return snapshot.docs.map((doc) => ProductModel.fromSnapshot(doc)).toList();
+      final results = snapshot.docs.map((doc) => ProductModel.fromSnapshot(doc)).toList();
+
+      print('✅ Tìm thấy ${results.length} gợi ý cho: "$query"');
+      return results;
     } catch (e) {
-      print(e.toString());
+      print('❌ Firestore error: $e');
       return [];
     }
   }
