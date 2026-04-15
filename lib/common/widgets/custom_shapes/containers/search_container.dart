@@ -7,7 +7,7 @@ class SearchContainer extends StatelessWidget {
   const SearchContainer({
     super.key,
     required this.text,
-    this.icon = Iconsax.search_normal,
+    this.icon = Iconsax.search_status_1_copy,
     this.isReadOnly = true, 
     this.onTap,
     this.onChanged,
@@ -34,9 +34,9 @@ class SearchContainer extends StatelessWidget {
           padding: const EdgeInsets.symmetric(
             vertical: 4,
             horizontal: 12,
-          ), // Giảm padding dọc để TextField cân đối
+          ),
           decoration: BoxDecoration(
-            color: dark ? TColors.dark : TColors.lightGrey,
+            color: dark ? TColors.dark : TColors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: TColors.grey),
           ),

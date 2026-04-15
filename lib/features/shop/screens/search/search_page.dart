@@ -36,11 +36,14 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _onTextChanged() {
-    controller.onSearchChanged(controller.searchTextController.text);
+    final text = controller.searchTextController.text;
+    controller.searchQuery.value = text;
+    controller.onSearchChanged(text);
   }
 
   @override
   void dispose() {
+    controller.searchQuery.value = '';
     controller.searchTextController.removeListener(_onTextChanged);
     super.dispose();
   }
@@ -54,16 +57,16 @@ class _SearchPageState extends State<SearchPage> {
         automaticallyImplyLeading: false,
         title: Row(
           children: [
-            IconButton(onPressed: () => Get.back(), icon: const Icon(Iconsax.arrow_left_2)),
+            IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.arrow_back)),
             Expanded(
               child: TextFormField(
                 controller: controller.searchTextController,
-                // onChanged đã chuyển sang listener ở initState
                 onFieldSubmitted: controller.searchKeyword,
                 autofocus: true,
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Iconsax.search_normal),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  prefixIcon: const Icon(Iconsax.search_status_1_copy),
                   hintText: "Tìm quần áo, điện thoại...",
                   suffixIcon: IconButton(
                     onPressed: () {
@@ -72,11 +75,11 @@ class _SearchPageState extends State<SearchPage> {
                     },
                     icon: const Icon(Icons.cancel_rounded),
                   ),
-                  fillColor: dark ? TColors.dark : TColors.lightGrey,
+                  fillColor: dark ? TColors.grey : TColors.lightGrey,
                   filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(color: Colors.green),
                   ),
                 ),
               ),
@@ -85,9 +88,17 @@ class _SearchPageState extends State<SearchPage> {
         ),
       ),
       body: Obx(() {
-        final query = controller.searchTextController.text.trim();
+        final query = controller.searchQuery.value.trim();
 
         if (query.isNotEmpty) {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (controller.suggestions.isEmpty) {
+            return const Center(child: Text("Không tìm thấy sản phẩm"));
+          }
+
           return _buildSuggestionsList();
         }
 

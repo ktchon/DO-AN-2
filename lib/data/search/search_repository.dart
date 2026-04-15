@@ -8,24 +8,26 @@ class SearchRepository extends GetxController {
   final _db = FirebaseFirestore.instance;
 
   Future<List<ProductModel>> getAutocompleteSuggestions(String query) async {
-    if (query.trim().isEmpty) return [];
+    final cleanQuery = query.trim();
+    if (cleanQuery.isEmpty) return [];
 
-    String searchKey = THelperFunctions.removeDiacritics(query.trim().toLowerCase());
+    final String searchKey = THelperFunctions.removeDiacritics(cleanQuery.toLowerCase());
 
-    print('🔍 Đang query với key: "$searchKey"');
+    print('🔍 Query key: "$searchKey"');
 
     try {
       final snapshot = await _db
           .collection('Products')
+          .orderBy('SearchName') 
           .where('SearchName', isGreaterThanOrEqualTo: searchKey)
           .where('SearchName', isLessThanOrEqualTo: '$searchKey\uf8ff')
-          .orderBy('Sold', descending: true) 
           .limit(10)
           .get();
 
       final results = snapshot.docs.map((doc) => ProductModel.fromSnapshot(doc)).toList();
 
-      print('✅ Tìm thấy ${results.length} gợi ý cho: "$query"');
+      print('✅ Found ${results.length} results for "$searchKey"');
+
       return results;
     } catch (e) {
       print('❌ Firestore error: $e');
@@ -70,6 +72,6 @@ class SearchRepository extends GetxController {
         .orderBy('Sold', descending: true)
         .limit(6)
         .get();
-    return snapshot.docs.map((doc) => doc['Title'] as String).toList();
+    return snapshot.docs.map((doc) => doc['SearchName'] as String).toList();
   }
 }

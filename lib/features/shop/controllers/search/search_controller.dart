@@ -19,6 +19,7 @@ class CSearchController extends GetxController {
   RxList<ProductModel> suggestions = <ProductModel>[].obs;
   RxList<String> recentSearches = <String>[].obs;
   RxList<String> trendingSearches = <String>[].obs;
+  RxString searchQuery = ''.obs;
 
   Timer? _debounce;
   String userId = AuthenticationRepository.instance.authUser!.uid;
@@ -35,12 +36,10 @@ class CSearchController extends GetxController {
   }
 
   // Autocomplete realtime
-  // Trong CSearchController.dart
   void onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
     _debounce = Timer(const Duration(milliseconds: 180), () async {
-      // giảm từ 300 → 180ms
       final cleanQuery = query.trim();
       if (cleanQuery.isEmpty) {
         suggestions.clear();
@@ -64,7 +63,11 @@ class CSearchController extends GetxController {
   void searchKeyword(String keyword) async {
     if (keyword.isEmpty) return;
 
+    final cleanKeyword = THelperFunctions.removeDiacritics(keyword.toLowerCase());
+
     searchTextController.text = keyword;
+    searchQuery.value = keyword;
+
     await _saveSearchHistory(keyword);
 
     Get.to(
@@ -72,18 +75,14 @@ class CSearchController extends GetxController {
         title: keyword,
         query: FirebaseFirestore.instance
             .collection('Products')
-            .where('SearchName', isGreaterThanOrEqualTo: THelperFunctions.removeDiacritics(keyword))
-            .where(
-              'SearchName',
-              isLessThanOrEqualTo: '${THelperFunctions.removeDiacritics(keyword)}\uf8ff',
-            ),
+            .where('SearchName', isGreaterThanOrEqualTo: cleanKeyword)
+            .where('SearchName', isLessThanOrEqualTo: '$cleanKeyword\uf8ff'),
       ),
     );
   }
 
   void clearRecent() async {
     recentSearches.clear();
-    // Logic xóa trên Firebase nếu cần
   }
 
   void navigateToProductDetail(ProductModel product) async {
