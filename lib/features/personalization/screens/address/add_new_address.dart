@@ -87,9 +87,9 @@ class AddNewAddress extends StatelessWidget {
                     Expanded(
                       child: TextFormField(
                         controller: controller.state,
-                        validator: (value) => CValidator.validateEmptyText('State', value),
+                        validator: (value) => CValidator.validateEmptyText('Phường/Xã', value),
                         decoration: InputDecoration(
-                          labelText: 'State',
+                          labelText: 'Phường/Xã',
                           prefixIcon: Icon(Iconsax.activity),
                         ),
                       ),

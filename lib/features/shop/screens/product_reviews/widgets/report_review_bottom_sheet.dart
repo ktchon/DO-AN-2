@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class ReportReviewBottomSheet {
   static void show(BuildContext context, Function(String reason) onSubmit) {
     showModalBottomSheet(
+      backgroundColor: Colors.white,
       context: context,
       isScrollControlled: true,
       builder: (_) {
@@ -48,16 +49,19 @@ class ReportReviewBottomSheet {
 
                   const SizedBox(height: 10),
 
-                  ElevatedButton(
-                    onPressed: () {
-                      final finalReason = selectedReason == "Khác"
-                          ? otherController.text
-                          : selectedReason;
-
-                      onSubmit(finalReason);
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Gửi báo cáo"),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final finalReason = selectedReason == "Khác"
+                            ? otherController.text
+                            : selectedReason;
+                    
+                        onSubmit(finalReason);
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Gửi báo cáo"),
+                    ),
                   ),
                 ],
               ),

@@ -9,7 +9,9 @@ import 'package:shop_app/common/widgets/layouts/grid_layout.dart';
 import 'package:shop_app/common/widgets/products/product_card_vartical.dart';
 import 'package:shop_app/common/widgets/shimmer/vertical_product_shimmer.dart';
 import 'package:shop_app/common/widgets/text/section_heading.dart';
+import 'package:shop_app/features/shop/controllers/home_controller.dart';
 import 'package:shop_app/features/shop/controllers/products/product_controller.dart';
+import 'package:shop_app/features/shop/controllers/search/search_controller.dart';
 import 'package:shop_app/features/shop/screens/all_products/all_products.dart';
 import 'package:shop_app/features/shop/screens/home/widgets/home_appbar.dart';
 import 'package:shop_app/features/shop/screens/home/widgets/home_categories.dart';
@@ -22,6 +24,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(ProductController());
+    final cSearch = Get.put(CSearchController());
+    final searchController = Get.put(HomeController());
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -34,10 +38,28 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(height: 16),
                   // Thanh tìm kiếm
                   GestureDetector(
-                    onTap: () {
-                      Get.to(() => const SearchPage());
-                    },
-                    child: SearchContainer(text: 'Tìm kiếm sản phẩm...'),
+                    onTap: () => Get.to(() => const SearchPage()),
+                    child: Obx(() {
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 400),
+                        transitionBuilder: (Widget child, Animation<double> animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0.0, 0.3),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: SearchContainer(
+                          key: ValueKey(searchController.hintText.value),
+                          text: searchController.hintText.value,
+                        ),
+                      );
+                    }),
                   ),
                   SizedBox(height: 16),
                   // Danh mục

@@ -4,6 +4,7 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:shop_app/data/cart/cart_item_repository.dart';
 import 'package:shop_app/features/shop/controllers/coupon/coupon_controller.dart';
 import 'package:shop_app/features/shop/controllers/products/variation_controller.dart';
 import 'package:shop_app/features/shop/models/cart_item_model.dart';
@@ -14,7 +15,7 @@ import 'package:shop_app/utils/storage/storage_utility.dart';
 
 class CartController extends GetxController {
   static CartController get instance => Get.find();
-
+  final cartRepository = Get.put(CartRepository());
   // Các biến observable (reactive) để UI tự động cập nhật
   final RxInt noOfCartItems = 0.obs; // Tổng số sản phẩm trong giỏ (tổng quantity)
   final RxDouble totalCartPrice = 0.0.obs; // Tổng tiền giỏ hàng
@@ -30,6 +31,43 @@ class CartController extends GetxController {
 
   CartController() {
     loadCartItems();
+  }
+  @override
+  void onInit() {
+    super.onInit();
+    syncFromFirebase();
+  }
+  // ==================== SYNC FIREBASE ====================
+
+  /// Đồng bộ giỏ hàng từ Firebase xuống local (merge)
+  Future<void> syncFromFirebase() async {
+    try {
+      final cloudItems = await cartRepository.fetchAll();
+
+      for (var cloudItem in cloudItems) {
+        final index = cartItems.indexWhere(
+          (local) =>
+              local.productId == cloudItem.productId && local.variationId == cloudItem.variationId,
+        );
+
+        if (index >= 0) {
+          // Đã có local → giữ quantity local (ưu tiên UI)
+        } else {
+          cartItems.add(cloudItem);
+        }
+      }
+      updateCart();
+      saveCartItems();
+    } catch (e) {
+      CLoaders.errorSnackBar(title: 'Lỗi đồng bộ', message: e.toString());
+    }
+  }
+
+  /// Đồng bộ toàn bộ giỏ hàng lên Firebase (dùng sau khi thay đổi lớn)
+  Future<void> syncToFirebase() async {
+    for (var item in cartItems) {
+      await cartRepository.addOrUpdateItem(item);
+    }
   }
 
   /// Thêm sản phẩm vào giỏ hàng
@@ -79,6 +117,9 @@ class CartController extends GetxController {
 
     updateCart(); // Cập nhật tổng tiền, số lượng, lưu trữ...
 
+    // Đồng bộ ngay lên Firebase
+    cartRepository.addOrUpdateItem(selectedCartItem);
+
     CLoaders.customToast(message: 'Sản phẩm đã được thêm vào giỏ hàng.');
   }
 
@@ -93,6 +134,8 @@ class CartController extends GetxController {
       cartItems[index].quantity += 1;
       cartItems.refresh();
       updateCart();
+      // Đồng bộ Firebase
+      cartRepository.addOrUpdateItem(item);
     } else {
       cartItems.add(item);
       updateCart();
@@ -111,6 +154,7 @@ class CartController extends GetxController {
         cartItems[index].quantity -= 1;
         cartItems.refresh();
         updateCart();
+        cartRepository.addOrUpdateItem(cartItems[index]);
       } else {
         // Show dialog before completely removing
         cartItems[index].quantity == 1 ? removeFromCartDialog(index) : cartItems.removeAt(index);
@@ -133,9 +177,9 @@ class CartController extends GetxController {
           onPressed: () => Get.back(),
           style: OutlinedButton.styleFrom(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            padding: EdgeInsets.zero, 
-            minimumSize: Size.zero, 
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap, 
+            padding: EdgeInsets.zero,
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: const Text('Huỷ'),
         ),
@@ -146,15 +190,17 @@ class CartController extends GetxController {
         height: 40,
         width: 80,
         child: ElevatedButton(
-      
           onPressed: () {
+            final itemToRemove = cartItems[index];
             cartItems.removeAt(index);
+            // XÓA TRÊN FIREBASE NGAY LẬP TỨC
+            cartRepository.removeItem(itemToRemove);
             updateCart();
             CLoaders.customToast(message: 'Sản phẩm đã được xóa khỏi giỏ hàng.');
             Get.back();
           },
           style: ElevatedButton.styleFrom(
-            side: BorderSide(color:Colors.red),
+            side: BorderSide(color: Colors.red),
             backgroundColor: Colors.red,
             padding: EdgeInsets.zero,
             minimumSize: Size.zero,
@@ -201,6 +247,7 @@ class CartController extends GetxController {
     cartItems.refresh();
 
     couponController.revalidateCoupon(currentTotalPrice);
+    syncToFirebase();
   }
 
   /// Tính toán lại tổng tiền và tổng số lượng sản phẩm
@@ -258,6 +305,7 @@ class CartController extends GetxController {
     productQuantityInCart.value = 0;
     cartItems.clear();
     updateCart();
+    cartRepository.clearAll();
   }
 
   /// Cập nhật số lượng sản phẩm đã được thêm vào giỏ hàng.

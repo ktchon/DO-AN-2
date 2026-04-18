@@ -174,6 +174,7 @@ class AddressController extends GetxController {
   /// Hiển thị BottomSheet chọn địa chỉ mới tại màn hình Checkout
   Future<dynamic> selectNewAddressPopup(BuildContext context) {
     return showModalBottomSheet(
+      backgroundColor: Colors.white,
       context: context,
       isScrollControlled: true,
       builder: (_) => DraggableScrollableSheet(

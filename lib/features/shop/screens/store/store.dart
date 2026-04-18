@@ -12,9 +12,12 @@ import 'package:shop_app/common/widgets/text/section_heading.dart';
 import 'package:shop_app/common/widgets/brands/brand_card.dart';
 import 'package:shop_app/features/shop/controllers/brand_controller.dart';
 import 'package:shop_app/features/shop/controllers/category_controller.dart';
+import 'package:shop_app/features/shop/controllers/home_controller.dart';
+import 'package:shop_app/features/shop/controllers/search/search_controller.dart';
 import 'package:shop_app/features/shop/screens/brands/all_brands.dart';
 import 'package:shop_app/features/shop/screens/brands/product_brand.dart';
 import 'package:shop_app/features/shop/screens/cart/cart.dart';
+import 'package:shop_app/features/shop/screens/search/search_page.dart';
 import 'package:shop_app/features/shop/screens/store/widgets/category_tab.dart';
 import 'package:shop_app/utils/helpers/helper_functions.dart';
 import 'package:shop_app/utils/constants/colors.dart';
@@ -26,6 +29,8 @@ class StoreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final category = CategoryController.instance.featuredCategories;
     final brandController = Get.put(BrandController());
+    final cSearch = CSearchController.instance;
+    final searchController = HomeController.instance;
     return DefaultTabController(
       length: category.length,
       child: Scaffold(
@@ -39,7 +44,10 @@ class StoreScreen extends StatelessWidget {
           actions: [
             Padding(
               padding: EdgeInsetsGeometry.only(right: 10),
-              child: CartCounterIcon(colorCart: true,onPressed: () => Get.to(() => CartItemScreen())),
+              child: CartCounterIcon(
+                colorCart: true,
+                onPressed: () => Get.to(() => CartItemScreen()),
+              ),
             ),
           ],
         ),
@@ -61,7 +69,31 @@ class StoreScreen extends StatelessWidget {
                     physics: NeverScrollableScrollPhysics(),
                     children: [
                       SizedBox(height: 12),
-                      SearchContainer(text: 'Tìm kiếm danh mục...'),
+                      // Thanh tìm kiếm
+                      GestureDetector(
+                        onTap: () => Get.to(() => const SearchPage()),
+                        child: Obx(() {
+                          return AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 400),
+                            transitionBuilder: (Widget child, Animation<double> animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(0.0, 0.3),
+                                    end: Offset.zero,
+                                  ).animate(animation),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: SearchContainer(
+                              key: ValueKey(searchController.hintText.value),
+                              text: searchController.hintText.value,
+                            ),
+                          );
+                        }),
+                      ),
                       SizedBox(height: 32),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16),

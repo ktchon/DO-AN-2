@@ -8,18 +8,12 @@ class SearchContainer extends StatelessWidget {
     super.key,
     required this.text,
     this.icon = Iconsax.search_status_1_copy,
-    this.isReadOnly = true, 
     this.onTap,
-    this.onChanged,
-    this.controller,
   });
 
   final String text;
   final IconData icon;
-  final bool isReadOnly;
   final VoidCallback? onTap;
-  final Function(String)? onChanged;
-  final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +25,7 @@ class SearchContainer extends StatelessWidget {
         onTap: onTap,
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            vertical: 4,
-            horizontal: 12,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
           decoration: BoxDecoration(
             color: dark ? TColors.dark : TColors.white,
             borderRadius: BorderRadius.circular(12),
@@ -45,20 +36,12 @@ class SearchContainer extends StatelessWidget {
               Icon(icon, color: TColors.darkerGrey),
               const SizedBox(width: 8),
               Expanded(
-                child: isReadOnly
-                    ? Text(text, style: Theme.of(context).textTheme.bodySmall)
-                    : TextFormField(
-                        controller: controller,
-                        onChanged: onChanged,
-                        autofocus: true,
-                        decoration: InputDecoration(
-                          hintText: text,
-                          hintStyle: Theme.of(context).textTheme.bodySmall,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                        ),
-                      ),
+                child: Text(
+                  text,
+                  style: Theme.of(context).textTheme.bodySmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),

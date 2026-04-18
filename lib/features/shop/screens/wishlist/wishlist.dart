@@ -24,7 +24,7 @@ class FavouriteScrenn extends StatelessWidget {
         actionsIconTheme: IconThemeData(color: Colors.white),
         backgroundColor: TColors.primary,
         title: Text(
-          'Wishlist',
+          'Yêu thích',
           style: Theme.of(context).textTheme.headlineMedium!.apply(color: Colors.white),
         ),
         actions: [
