@@ -36,80 +36,70 @@ class OrderRepository extends GetxController {
     }
 
     await _db.runTransaction((transaction) async {
-      for (final item in order.items) {
-        final productRef = _db.collection('Products').doc(item.productId);
-        final productSnap = await transaction.get(productRef);
+      final productRefs = order.items
+          .map((item) => _db.collection('Products').doc(item.productId))
+          .toList();
+
+      // ✅ 1. READ ALL FIRST
+      final productSnapshots = <DocumentSnapshot>[];
+      for (final ref in productRefs) {
+        final snap = await transaction.get(ref);
+        productSnapshots.add(snap);
+      }
+
+      // ✅ 2. THEN WRITE
+      for (int i = 0; i < order.items.length; i++) {
+        final item = order.items[i];
+        final productSnap = productSnapshots[i];
 
         if (!productSnap.exists) {
           throw Exception('Sản phẩm không tồn tại: ${item.productId}');
         }
 
-        final productData = productSnap.data();
-        if (productData == null) {
-          throw Exception('Dữ liệu sản phẩm bị lỗi: ${item.productId}');
-        }
-
+        final productData = productSnap.data() as Map<String, dynamic>;
         final productType = productData['ProductType'] ?? 'ProductType.single';
 
-        // =====================================
-        // 🧠 CASE 1: PRODUCT SINGLE
-        // =====================================
         if (productType == 'ProductType.single') {
           final currentStock = (productData['Stock'] as num?)?.toInt() ?? 0;
 
           if (currentStock < item.quantity) {
-            throw Exception(
-              'Sản phẩm hết hàng: ${item.productId} (còn $currentStock, cần ${item.quantity})',
-            );
+            throw Exception('Hết hàng');
           }
 
-          transaction.update(productRef, {
+          transaction.update(productSnap.reference, {
             'Stock': FieldValue.increment(-item.quantity),
             'Sold': FieldValue.increment(item.quantity),
           });
         } else {
-          // =====================================
-          // 🧠 CASE 2: PRODUCT VARIATION
-          // =====================================
-          if (item.variationId == null || item.variationId!.isEmpty) {
-            throw Exception('Thiếu variationId cho sản phẩm: ${item.productId}');
-          }
-
           final variations = List<Map<String, dynamic>>.from(
             productData['ProductVariations'] ?? [],
           );
 
           final index = variations.indexWhere((v) => v['Id'] == item.variationId);
 
-          if (index == -1) {
-            throw Exception('Biến thể không tồn tại: ${item.variationId}');
-          }
+          if (index == -1) throw Exception('Không tìm thấy biến thể');
 
           final variation = variations[index];
-          final currentStock = (variation['Stock'] as num?)?.toInt() ?? 0;
+          final currentStock = (variation['Stock'] ?? 0);
 
           if (currentStock < item.quantity) {
-            throw Exception(
-              'Biến thể hết hàng: ${item.variationId} (còn $currentStock, cần ${item.quantity})',
-            );
+            throw Exception('Hết hàng');
           }
 
           variations[index] = {
             ...variation,
             'Stock': currentStock - item.quantity,
-            'Sold': (variation['Sold'] as num? ?? 0).toInt() + item.quantity,
+            'Sold': (variation['Sold'] ?? 0) + item.quantity,
           };
 
-          transaction.update(productRef, {
+          transaction.update(productSnap.reference, {
             'ProductVariations': variations,
             'Sold': FieldValue.increment(item.quantity),
           });
         }
       }
 
-      // ================================
-      // 🧾 SAVE ORDER
-      // ================================
+      // ✅ SAVE ORDER (WRITE cuối cùng)
       final orderRef = _db.collection('Users').doc(userId).collection('Orders').doc(order.id);
 
       transaction.set(orderRef, {
