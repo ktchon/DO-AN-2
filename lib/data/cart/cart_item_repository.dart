@@ -11,7 +11,7 @@ class CartRepository {
   late final String _userId;
 
   CartRepository() {
-    _userId = FirebaseAuth.instance.currentUser!.uid; // vì app bắt buộc login
+    _userId =  FirebaseAuth.instance.currentUser?.uid ?? '';
   }
 
   CollectionReference<Map<String, dynamic>> get _cartCollection =>
